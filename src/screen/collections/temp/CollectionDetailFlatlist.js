@@ -1,12 +1,11 @@
-import React, { useState, useEffect, useCallback }  from 'react'
-import { Button, View, StyleSheet, ScrollView, TouchableHighlight, InteractionManager } from 'react-native'
+import React, { useCallback, useState, useEffect }  from 'react'
+import { Button, View, StyleSheet, ScrollView, TouchableHighlight, InteractionManager, FlatList } from 'react-native'
 import { useForm, Controller } from 'react-hook-form';
 
 import Text from './../../components/Text';
 import Input from '../../components/Input';
 import SelectPicker from './../../components/SelectPicker';
 import { List, Card, Title, Paragraph, TextInput, IconButton } from 'react-native-paper';
-
 
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
@@ -20,6 +19,7 @@ import { theme } from '../../redux/constants/theme';
 import {getUuid, setUuid} from './../../redux/utils/actionUtil';
 import { useNavigation } from '@react-navigation/core';
 
+
 const CollectionDetail = ( props ) => {
   const {collectiondetail} = props;
   const navigation = useNavigation();
@@ -27,6 +27,7 @@ const CollectionDetail = ( props ) => {
   const { handleSubmit, control, errors, setValue } = useForm(); // initialize the hook
   const [error, setError] = useState('');
 
+  
   const loadData = async () => {
       try {
           const datasubmit = {
@@ -58,13 +59,8 @@ const CollectionDetail = ( props ) => {
   const listar = collectiondetail ? collectiondetail.list_ar : [];
   console.log(detaildata);
 
-  return (
-    <View style={{flex:1}}>
-    <ScrollView
-        style={{flex:1}}
-        showsVerticalScrollIndicator={false}
-        horizontal={false}
-    >
+  const renderTopItem = ({}) => {
+    return (      
       <View style={{ paddingHorizontal: 10, paddingTop: 10 }}>
         <View style={{marginTop: 10, paddingBottom: 10}} flexDirection="row">
                 <TouchableHighlight
@@ -90,131 +86,151 @@ const CollectionDetail = ( props ) => {
             <Title 
               style={{color: '#000000', fontWeight: 'bold'}}
             >
-            {detaildata.cust_name}
-          </Title>
-          <View style={{ marginTop: 10 }} />
-          <Paragraph>{detaildata.bill_to_address}</Paragraph>
+              {detaildata.cust_name}
+            </Title>
+            <Paragraph>{detaildata.bill_to_address}</Paragraph>
           </Card.Content>
         </Card>
       </View>
+      // <View style={{ paddingHorizontal: 10, paddingTop: 10 }}>     
+      //   <Card>
+      //     <Card.Content>
+      //       <Text
+      //         title="List Tagihan" 
+      //         h5 bold style={{color: '#000000'}} 
+      //       /> 
+    )
+  }
+  const renderCategory = ({item, index}) => {
+    return (
       <View style={{ paddingHorizontal: 10, paddingTop: 10 }}>     
-        <Card>
+        {/* <Card>
           <Card.Content>
             <Text
               title="List Tagihan" 
-              h5 bold style={{color: '#000000'}} 
-            />                
-            { listar != undefined && listar?.map((item, index) => {
-              return (
-                <List.Item
-                  title={`No. AR ${item.trx_number}`}
-                  key={index}
-                  description={`Nominal Rp. ${item.amount_due_remaining}`}
-                  left={props => <List.Icon {...props} icon="chevron-double-right" />}
-                  onPress={() => navigation.push('CollectionPayment', {data: item})}
-                />    
-              )
-            })}
-          </Card.Content>
-        </Card>         
+              h5 bold style={{color: '#000000'}}  
+            />    
+            <View flexDirection="row" style={{marginVertical: 5}}>                
+                <View style={[styles.viewLine, { paddingTop: 0 }]} />
+                <View style={[styles.divider, { Color: 'black'}]} /> */}
+                  <List.Item
+                    title={item.trx_number}
+                    description="Nominal Rp. 179.811,-"
+                    left={props => <List.Icon {...props} icon="chevron-double-right" />}
+                    onPress={() => navigation.navigate('CollectionPayment')}
+                  />    
+            {/* </View> */}
+          {/* </Card.Content>
+        </Card>          */}
       </View>
-      <View style={{ paddingTop: 10 }} />
-      <View style={{ paddingHorizontal: 10, paddingTop: 10 }}>
+    )
+  }
+
+  const renderBottomItem = ({}) => {
+    return (      
+      <>
+        <View style={{ paddingTop: 10 }} />
+        <View style={{ paddingHorizontal: 10, paddingTop: 10 }}>
+          <Card>
+            <Card.Content>             
+              <Text
+                title="Status Tagihan" 
+                h5 bold style={{color: '#000000'}} 
+              />            
+              <View style={{marginTop: 15}}>
+              <SelectPicker
+                  items = {[
+                              { label: 'Toko Tutup', value: 'toko_tutup' },
+                              { label: 'Tidak Ada Faktur', value: 'tidak_ada_faktur' },
+                              { label: 'Tidak Tertagih', value: 'tidak_tertagih' },
+                              { label: 'Tertagih', value: 'tertagih' },
+                          ]}
+                  onDataChange={(value) => console.log(value)}
+                  placeholder="STATUS TAGIHAN"
+              />            
+              <Input
+                  // error={errors.visit_catatan}
+                  // errorText={errors?.visit_catatan?.message}
+                  onChangeText={(text) => {onChange(text)}}
+                  // value={value}
+                  placeholder="CATATAN"
+              />
+            </View>
+            </Card.Content>
+          </Card>
+        </View>
+        <View style={{ paddingTop: 10 }} /><View style={{ paddingHorizontal: 10, paddingTop: 10 }}>
         <Card>
-          <Card.Content>             
+          <Card.Content>
             <Text
-              title="Status Tagihan" 
-              h5 bold style={{color: '#000000'}} 
-            />            
-            <View style={{marginTop: 15}}>
-            <SelectPicker
-                items = {[
-                            { label: 'Toko Tutup', value: 'toko_tutup' },
-                            { label: 'Tidak Ada Faktur', value: 'tidak_ada_faktur' },
-                            { label: 'Tidak Tertagih', value: 'tidak_tertagih' },
-                            { label: 'Tertagih', value: 'tertagih' },
-                        ]}
+              title="Metode Pembayaran"
+              h5 bold style={{ color: '#000000' }} />
+            <View style={{ marginTop: 15 }}>
+              <SelectPicker
+                items={[
+                  { label: 'Giro Bank', value: 'giro_bank' },
+                  { label: 'Transfer', value: 'transfer' },
+                  { label: 'Tunai', value: 'tunai' },
+                ]}
                 onDataChange={(value) => console.log(value)}
-                placeholder="STATUS TAGIHAN"
-            />            
-            <Input
+                placeholder="METODE PEMBAYARAN" />
+              <Input
                 // error={errors.visit_catatan}
                 // errorText={errors?.visit_catatan?.message}
-                onChangeText={(text) => {onChange(text)}}
+                onChangeText={(text) => { onChange(text); } }
                 // value={value}
-                placeholder="CATATAN"
-            />
-          </View>
+                placeholder="NO GIRO/NOMINAL" />
+            </View>
           </Card.Content>
         </Card>
-      </View>
-      <View style={{ paddingTop: 10 }} />
-      <View style={{ paddingHorizontal: 10, paddingTop: 10 }}>
-        <Card>
-          <Card.Content>             
-            <Text
-              title="Metode Pembayaran" 
-              h5 bold style={{color: '#000000'}} 
-            />            
-            <View style={{marginTop: 15}}>
-            <SelectPicker
-                items = {[
-                            { label: 'Giro Bank', value: 'giro_bank' },
-                            { label: 'Transfer', value: 'transfer' },
-                            { label: 'Tunai', value: 'tunai' },
-                        ]}
-                onDataChange={(value) => console.log(value)}
-                placeholder="METODE PEMBAYARAN"
-            />            
-            <Input
+      </View><View style={{ paddingTop: 10 }} /><View style={{ paddingHorizontal: 10, paddingTop: 10 }}>
+          <Card>
+            <Card.Content>
+              <Text
+                title="Catatan"
+                h5 bold style={{ color: '#000000' }} />
+              {/* <Controller
+        defaultValue=""
+        name="visit_catatan"
+        control={control}
+        rules={{ required: { value: true, message: 'Catatan kunjungan harus diisi' } }}
+        render={({ onChange, value }) => ( */}
+              <Input
                 // error={errors.visit_catatan}
                 // errorText={errors?.visit_catatan?.message}
-                onChangeText={(text) => {onChange(text)}}
+                onChangeText={(text) => { onChange(text); } }
                 // value={value}
-                placeholder="NO GIRO/NOMINAL"
-            />
-          </View>
-          </Card.Content>
-        </Card>
-      </View>
-      <View style={{ paddingTop: 10 }} />
-      <View style={{ paddingHorizontal: 10, paddingTop: 10 }}>
-        <Card>
-          <Card.Content>             
-            <Text
-              title="Catatan" 
-              h5 bold style={{color: '#000000'}} 
-            />        
-            {/* <Controller
-                defaultValue=""
-                name="visit_catatan"
-                control={control}
-                rules={{ required: { value: true, message: 'Catatan kunjungan harus diisi' } }}
-                render={({ onChange, value }) => ( */}
-                    <Input
-                        // error={errors.visit_catatan}
-                        // errorText={errors?.visit_catatan?.message}
-                        onChangeText={(text) => {onChange(text)}}
-                        // value={value}
-                        multiline={true}
-                        placeholder="CATATAN PENGIRIMAN"
-                    />
-                {/* )}
-            /> */}    
-          <View style={{width: '100%', paddingTop: '2%'}}>
-            <Button
-              title = "Submit"
-              contentStyle={{height: 500}}
-              onPress={() =>
-                navigation.navigate('Beranda')
-              }
-            />
-          </View>  
-          </Card.Content>  
-        </Card>        
-        <View style={{width: '100%', paddingBottom: '10%'}} />
-      </View>
-    </ScrollView>
+                multiline={true}
+                placeholder="CATATAN PENGIRIMAN" />
+              {/* )}
+/> */}
+              <View style={{ width: '100%', paddingTop: '2%' }}>
+                <Button
+                  title="Submit"
+                  contentStyle={{ height: 500 }}
+                  onPress={() => navigation.navigate('Beranda')} />
+              </View>
+            </Card.Content>
+          </Card>
+          <View style={{ width: '100%', paddingBottom: '10%' }} />
+        </View>
+      </>
+    )
+  }
+
+  return (
+    
+    <View>        
+        <FlatList style={styles.list}
+            showsVerticalScrollIndicator={false}
+            horizontal={false}
+            initialNumToRender={3}
+            data={listar}
+            ListHeaderComponent={renderTopItem}
+            keyExtractor={keyExtractor}
+            renderItem={renderCategory}
+            ListFooterComponent={renderBottomItem}
+        />
     </View>
   )
 }
@@ -250,6 +266,7 @@ const styles = StyleSheet.create({
       padding: 10
   }
 })
+
 
 function mapStateToProps(state) {
   return {

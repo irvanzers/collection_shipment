@@ -1,5 +1,5 @@
-import React, { useState, useEffect }  from 'react'
-import { Button, View, StyleSheet, ScrollView } from 'react-native'
+import React, { useState, useEffect, useCallback }  from 'react'
+import { Button, View, StyleSheet, ScrollView, InteractionManager } from 'react-native'
 import { useForm, Controller } from 'react-hook-form';
 
 import Text from '../../components/Text';
@@ -11,11 +11,26 @@ import DatePicker from '../../components/DatePicker';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import { theme } from '../../constants/theme';
 
+import { connect } from 'react-redux';
+import { bindActionCreators } from 'redux';
+import _, { reduce } from 'lodash';
+import * as apiAction from './../../redux/actions/apiAction';
+import * as crudAction from '../../redux/actions/crudAction';
+import * as flashMessage from '../../redux/actions/flashMessage';
+import * as authService from './../../redux/services/authService';
+import Common from './../../redux/constants/common';
+import {getUuid, setUuid} from './../../redux/utils/actionUtil';
+import { useNavigation } from '@react-navigation/core';
 
-const CollectionPayment = ( {navigation} ) => {
+const CollectionPayment = ( props ) => {
+  const detailar = props.route.params.data;
+  const navigation = useNavigation();
   const [text, setText] = React.useState("");
   const { handleSubmit, control, errors, setValue } = useForm(); // initialize the hook
   const [error, setError] = useState('');
+
+  const keyExtractor = useCallback((item, index) => index.toString(), []);
+  // console.log(detailar);
 
   return (
     <View style={{flex:1}}>
@@ -36,9 +51,12 @@ const CollectionPayment = ( {navigation} ) => {
             <Title 
               style={{color: '#000000', fontWeight: 'bold'}}
             >
-              PT. Sangkuriang - 2213000036
-            </Title>
-            <Paragraph>Jl. Kembang Kenangan No. 124, Malang, Kab. Malang</Paragraph>
+            {detailar.cust_name}
+          </Title>
+          <View style={{ marginTop:10 }} />
+          <Paragraph>{detailar.bill_to_address}</Paragraph>
+          <Paragraph>{`Nominal Tagihan : Rp ${detailar.amount_due_remaining}`}</Paragraph>
+          <Paragraph>{`No. Tagihan : ${detailar.trx_number}`}</Paragraph>
           </Card.Content>
         </Card>
       </View>
@@ -209,4 +227,18 @@ const styles = StyleSheet.create({
   }
 })
 
-export default CollectionPayment;
+function mapStateToProps(state) {
+  return {
+    isAuthenticated: state.auth.isAuthenticated,
+    apiState: state.api,
+    message: state.flash.message,
+    collectiondetail: state.crud.collectiondetails,
+  }
+}
+
+function mapDispatchToProps(dispatch) {
+  return {
+      actions: bindActionCreators(_.assign({}, crudAction, apiAction, flashMessage, authService), dispatch)
+  }
+}
+export default connect(mapStateToProps, mapDispatchToProps)(CollectionPayment);
