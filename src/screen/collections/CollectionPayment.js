@@ -1,57 +1,30 @@
 import React, { useState, useEffect }  from 'react'
-import { View, StyleSheet, ScrollView } from 'react-native'
+import { Button, View, StyleSheet, ScrollView } from 'react-native'
+import { useForm, Controller } from 'react-hook-form';
 
-import MenuHome from './../../components/Menu/MenuHome';
-import Text from './../../components/Text';
-import List from './../../components/MenuList/List';
-import { Card, Title, Paragraph, TextInput, IconButton } from 'react-native-paper';
+import Text from '../../components/Text';
+import Input from '../../components/Input';
+import { List, Card, Title, Paragraph, TextInput, IconButton } from 'react-native-paper';
+import SelectPicker from './../../components/SelectPicker';
+import moment from 'moment';
+import DatePicker from '../../components/DatePicker';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import { theme } from '../../constants/theme';
 
 
-const CollectionPayment = ( props ) => {
+const CollectionPayment = ( {navigation} ) => {
+  const [text, setText] = React.useState("");
+  const { handleSubmit, control, errors, setValue } = useForm(); // initialize the hook
+  const [error, setError] = useState('');
 
   return (
-    <View style={{flex:1, width: '100%'}}>
+    <View style={{flex:1}}>
     <ScrollView
         style={{flex:1}}
         showsVerticalScrollIndicator={false}
         horizontal={false}
     >
-            
-      <View style={styles.viewLine, { paddingTop: 10 }} />
-        <View style={styles.divider} />
-        <List
-          nav="CollectionDetail"
-          iconList="post-outline"
-          title="Tukar Faktur"
-          fontSize={23}
-          sizeIcon={80}
-          height={150}
-        />            
-        <View style={styles.viewLine, { paddingTop: 10 }} />
-          <View style={styles.divider} />
-          <List
-            nav="CollectionDetail"
-            iconList="briefcase-check-outline"
-            title="Giro Bank"
-            fontSize={23}
-            sizeIcon={80}
-            height={150}
-          />
-            
-        <View style={styles.viewLine, { paddingTop: 10 }} />
-          <View style={styles.divider} />
-          <List
-            nav="CollectionDetail"
-            iconList="cash"
-          //   color={}
-            title="Pembayaran Tunai"
-            fontSize={23}
-            sizeIcon={80}
-            height={150}
-          />
-      {/* <View style={{ paddingHorizontal: 10, paddingTop: 10, justifyContent: 'center'}}>
+      <View style={{ paddingHorizontal: 10, paddingTop: 10 }}>
         <Card style={{ alignItems: 'center' }}>
           <Card.Content
             style={{boxShadow: '0px 3px 5px -1px rgba(80,80,80, 0.2),0px 5px 8px 0px rgba(80,80,80, 0.14),0px 1px 14px 0px rgba(80,80,80, 0.12)', shadowColor: '#easade',
@@ -59,48 +32,156 @@ const CollectionPayment = ( props ) => {
             shadowOpacity: 0.2,
             elevation: 1
             }}
-          >      
-            <View flexDirection="row" style={{justifyContent: 'space-around', marginTop: 10,}}>
-                <MenuHome item={{
-                    text: 'Tukar Faktur',
-                    image: require(`./../../assets/icon-shipment.png`),
-                    onNavigation: () => props.navigation.navigate('ShipmentList')
-                }} />
-                <MenuHome item={{
-                    text: 'Giro',
-                    image: require(`./../../assets/icon-collection.png`),
-                    onNavigation: () => props.navigation.navigate('CollectionList')
-                }} />
-          </View>
-            <View flexDirection="row" style={{justifyContent: 'space-around', marginTop: 10,}}>
-                <MenuHome item={{
-                    text: 'Tunai',
-                    image: require(`./../../assets/icon-shipment.png`),
-                    onNavigation: () => props.navigation.navigate('ShipmentList')
-                }} />
-          </View>
+          >
+            <Title 
+              style={{color: '#000000', fontWeight: 'bold'}}
+            >
+              PT. Sangkuriang - 2213000036
+            </Title>
+            <Paragraph>Jl. Kembang Kenangan No. 124, Malang, Kab. Malang</Paragraph>
           </Card.Content>
         </Card>
-      </View> */}
+      </View>
+      <View style={{ paddingHorizontal: 10, paddingTop: 10 }}>     
+        <Card>
+          <Card.Content>
+            <Text
+              title="Rincian Produk" 
+              h5 bold style={{color: '#000000'}} 
+            />    
+            <List.Item
+              title="Skintex"
+              description="Qty: 2"
+              left={props => <List.Icon {...props} icon="chevron-double-right" />}
+            />    
+            <List.Item
+              title="Oilum Brightening Bottle Refill 210ml"
+              description="Qty: 5"
+              left={props => <List.Icon {...props} icon="chevron-double-right" />}
+            />    
+            <List.Item
+              title="JF Handsanitizer Spray 100ml"
+              description="Qty: 4"
+              left={props => <List.Icon {...props} icon="chevron-double-right" />}
+            />
+          </Card.Content>
+        </Card>         
+      </View>
+      <View style={{ paddingTop: 10 }} />
+      <View style={{ paddingHorizontal: 10, paddingTop: 10 }}>
+        <Card>
+          <Card.Content>             
+            <Text
+              title="Metode Pembayaran" 
+              h5 bold style={{color: '#000000'}} 
+            />            
+            <View style={{marginTop: 15}}>
+            <SelectPicker
+                items = {[
+                            { label: 'Giro Bank', value: 'giro_bank' },
+                            { label: 'Transfer', value: 'transfer' },
+                            { label: 'Tunai', value: 'tunai' },
+                        ]}
+                onDataChange={(value) => console.log(value)}
+                placeholder="METODE PEMBAYARAN"
+            />           
+            </View>
+          </Card.Content>
+        </Card>
+      </View>      
+      
+      <View style={{ paddingTop: 10 }} />
+      <View style={{ paddingHorizontal: 10, paddingTop: 10, paddingBottom: 20 }}>
+        <Card>
+          <Card.Content>             
+            <Text
+              title="No. Giro" 
+              h5 bold style={{color: '#000000'}} 
+            />            
+            <View style={{marginTop: 15}}>  
+            <Input
+                // error={errors.visit_catatan}
+                // errorText={errors?.visit_catatan?.message}
+                onChangeText={(text) => {onChange(text)}}
+                // value={value}
+                placeholder="NO. GIRO"
+            />
+            </View>     
+            <View style={{marginTop: 15}}></View>
+            <View style={{marginTop: 10, marginBottom: 0}}>
+                <View style={{flexDirection: 'row'}}>
+                    <Text title="TANGGAL JATUH TEMPO" h6 bold/>
+                    <Text title=" *" h6 bold style={{color: 'red'}}/>
+                </View>
+                <Controller
+                    defaultValue={moment(new Date()).format('YYYY-MM-DD')}
+                    name="visit_date"
+                    control={control}
+                    rules={{ required: { value: true, message: 'Tanggal kunjungan harus diisi' } }}
+                    render={({ onChange, value }) => (
+                        <DatePicker
+                            style={styles.datePickerStyle}
+                            date={value} // Initial date from state
+                            mode="date" // The enum of date, datetime and time
+                            format="YYYY-MM-DD"
+                            // value={value}
+                            // error={errors.visit_date}
+                            // errorText={errors?.visit_date?.message}
+                            onDateChange={(data) => { onChange(data) }}
+                        />
+                    )}
+                />
+            </View>
+            <View style={{marginTop: 15}}></View>
+            <Text
+              title="Nama Bank" 
+              h5 bold style={{color: '#000000'}} 
+            />            
+            <View style={{marginTop: 15}}>  
+            <Input
+                // error={errors.visit_catatan}
+                // errorText={errors?.visit_catatan?.message}
+                onChangeText={(text) => {onChange(text)}}
+                // value={value}
+                placeholder="NAMA BANK"
+            />
+            </View>
+            <View style={{marginTop: 15}}></View>
+            <Text
+              title="Nominal Pembayaran" 
+              h5 bold style={{color: '#000000'}} 
+            />            
+            <View style={{marginTop: 15}}>  
+            <Input
+                // error={errors.visit_catatan}
+                // errorText={errors?.visit_catatan?.message}
+                onChangeText={(text) => {onChange(text)}}
+                // value={value}
+                placeholder="NOMINAL PEMBAYARAN"
+            />
+            </View>
+            <View style={{width: '100%', paddingTop: '2%'}}>
+              <Button
+                title = "Submit"
+                contentStyle={{height: 500}}
+                onPress={() =>
+                  navigation.navigate('Beranda')
+                }
+              />
+            </View> 
+          </Card.Content>
+        </Card>
+      </View>  
     </ScrollView>
     </View>
   )
 }
 
 const styles = StyleSheet.create({
-  divider: {
-    height: 0.5,
-    width: '100%',
-    backgroundColor: '#C8C8C8',
-  },
-  listMenu: {
-      flexDirection: 'row',
-      padding: 10,
-      width: '100%',
-      height: 150,
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      backgroundColor: 'white'
+  buttonCart: {
+      display: 'flex', 
+      alignSelf: 'center',
+      width: '100%'
   },
   textOri: {
       height: '90%', 
@@ -109,6 +190,15 @@ const styles = StyleSheet.create({
       display: 'flex', 
       // justifyContent: 'center', 
       paddingLeft: 20,
+      fontSize: 14,
+      fontWeight: 'bold',
+  },
+  textCamera: {
+      height: '90%', 
+      backgroundColor: 'black', 
+      // display: 'flex', 
+      justifyContent: 'center', 
+      paddingLeft: 10,
       fontSize: 14,
       fontWeight: 'bold',
   },

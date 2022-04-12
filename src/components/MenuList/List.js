@@ -3,6 +3,7 @@ import { View, StyleSheet, TouchableHighlight } from 'react-native';
 import MaterialComunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/core';
+import { connect } from 'react-redux';
 
 import { theme } from './../../constants/theme';
 import Text from './../Text/';
@@ -11,6 +12,7 @@ const List = props => {
     const navigation = useNavigation();
     const {
         nav,
+        item,
         title,
         iconList,
         componentOther,
@@ -20,9 +22,11 @@ const List = props => {
         fontSize,
          ...rest
     } = props;
+    // console.log(item.cust_id);
     return (
         <TouchableHighlight
-            onPress={() => navigation.navigate(nav)}
+            // onPress={() => navigation.push(nav, {data: item.cust_id})}
+            onPress={() => navigation.navigate(nav, item ? item : {})}
             style={{ backgroundColor: 'white' }}
             activeOpacity={0.8}
             underlayColor="#bbbcbd"
@@ -31,7 +35,7 @@ const List = props => {
             <>
                 <View style={styles.listSubMenu}>
                     <MaterialComunityIcons color={theme.colors.primary} name={iconList} size={sizeIcon} />
-                    <Text style={styles.textMenu, fontSize && {fontSize: fontSize}} title={title} p />
+                    <Text style={[styles.textMenu, fontSize && {fontSize: fontSize}]} title={title} p />
                 </View>
                 <View flexDirection="row" style={{ alignItems: 'center' }}>
                     {componentOther && componentOther()}

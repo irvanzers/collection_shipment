@@ -1,6 +1,5 @@
 const appConstant = {
     API_URL: 'https://egis.galenium.com/v1/',
-    // API_URL: 'https://27.111.36.150/v1/',
     ROOT_URL: 'https://egis.galenium.com/',
     AUTHORIZATION: 'Authorization',
     BEARER: 'Bearer',

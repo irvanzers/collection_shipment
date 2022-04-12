@@ -21,7 +21,7 @@ const CollectionHeaderList = ( props ) => {
       setDate(currentDate);
       dispatch(fetchGetVisitHistory({
           visit_date: Moment(currentDate).format('YYYY-MM-DD'),
-          user_id: selectKowil
+          user_id: selectCourier
       }))
   };
   const showMode = (currentMode) => {
@@ -75,18 +75,10 @@ const CollectionHeaderList = ( props ) => {
                     <Text title={`${selectCode}`} p style={{color: 'grey', textTransform: 'uppercase'}}/>
                 </View> */}
             </View>
-            <View flexDirection="row" style={{ justifyContent: 'space-between',  }}>
-                <View style={{ justifyContent: 'center' }}>
-                    <Text title={`TOTAL OUTLET: `} p style={{ textTransform: 'uppercase', color: 'grey' }} />
-                </View>
-                <View style={{ justifyContent: 'center', marginRight: 10}}>
-                    <Text title={`2`} p style={{color: 'grey', textTransform: 'uppercase'}}/>
-                </View>
-            </View>
         </View>
         {/* { visithistory.visit_history == '' &&
             <View style={{alignItems: 'center', marginTop: 10}}>
-                <Text title={'DATA KUNJUNGAN TIDAK DITEMUKAN'} p style={{color: 'grey'}} />
+                <Text title={'DATA TAGIHAN TIDAK DITEMUKAN'} p style={{color: 'grey'}} />
             </View>
         } */}
     
@@ -115,7 +107,7 @@ const CollectionHeaderList = ( props ) => {
         <List
           nav="CollectionList"
           iconList="book"
-        //   color={}
+          color={[]}
           title="29 Maret 2022"
           sizeIcon={28}
         />

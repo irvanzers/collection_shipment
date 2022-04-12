@@ -11,10 +11,10 @@ import ShipmentHeaderList from '../screen/shipment/ShipmentHeaderList';
 import ShipmentList from '../screen/shipment/ShipmentList';
 import CollectionHeaderList from '../screen/collections/CollectionHeaderList';
 import CollectionList from '../screen/collections/CollectionList';
-import CollectionPayment from '../screen/collections/CollectionPayment';
+import CollectionPickPayment from '../screen/collections/CollectionPickPayment';
 import CollectionDetail from '../screen/collections/CollectionDetail';
 import CollectionDetail2 from '../screen/collections/CollectionDetail2';
-import CollectionTunai from '../screen/collections/CollectionTunai';
+import CollectionPayment from '../screen/collections/CollectionPayment';
 import OthersIndex from '../screen/others/OthersIndex';
 import OthersProfile from '../screen/others/OthersProfile';
 import AbsenMobil from '../screen/shipment/AbsenMobil';
@@ -141,7 +141,7 @@ const RootNavigator = () => {
         name="CollectionPayment"
         component={CollectionPayment}
         options={{
-          title: 'PAYMENT LIST',
+          title: 'PAYMENT COLLECTION',
           headerStyle: {
             backgroundColor: '#4077c4',
           },
@@ -153,8 +153,8 @@ const RootNavigator = () => {
         }}
       /> 
       <Stack.Screen
-        name="CollectionTunai"
-        component={CollectionTunai}
+        name="CollectionPickPayment"
+        component={CollectionPickPayment}
         options={{
           title: 'PAYMENT LIST',
           headerStyle: {

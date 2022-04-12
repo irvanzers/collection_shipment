@@ -1,14 +1,23 @@
-import React, { useState, useEffect }  from 'react'
-import { Button, View, StyleSheet, FlatList } from 'react-native'
+import React, { useCallback, useState, useEffect }  from 'react'
+import { Button, View, StyleSheet, FlatList, InteractionManager } from 'react-native'
 
 import DateTimePicker from '@react-native-community/datetimepicker';
 import Text from './../../components/Text';
 import { Card, Title, Colors, Appbar } from 'react-native-paper';
 import Moment from 'moment';
 import List from './../../components/MenuList/List';
+import { connect } from 'react-redux';
+import { bindActionCreators } from 'redux';
+import _ from 'lodash';
+import * as apiAction from './../../redux/actions/apiAction';
+import * as crudAction from '../../redux/actions/crudAction';
+import * as flashMessage from '../../redux/actions/flashMessage';
+import * as authService from './../../redux/services/authService';
+import Common from './../../redux/constants/common';
+import { theme } from '../../redux/constants/theme';
+import {getUuid, setUuid} from './../../redux/utils/actionUtil';
 
-
-const ShipmentHeaderList = ( props ) => {
+const CollectionList = ( props ) => {
   const [date, setDate] = useState(new Date());
   const [mode, setMode] = useState('date');
   const [show, setShow] = useState(false);
@@ -31,13 +40,32 @@ const ShipmentHeaderList = ( props ) => {
   const showDatepicker = () => {
       showMode('date');
   };
+  
+  const loadData = async() => {
+    try {
+        await props.actions.fetchAll(Common.COLLECTION_DATA);        
+    } catch (error) {
+        alert(error)
+    } finally {
+        
+    }
+}
+useEffect(() => {
+    const interactionPromise = InteractionManager.runAfterInteractions(() => {
+        loadData()
+    });
+    return () => interactionPromise.cancel();
+},[])
 
   return (
     <View>      
       <Appbar.Header>
           <Appbar.BackAction onPress={() => props.navigation.goBack()} />
-          <Appbar.Content title={'HEADER LIST PENGIRIMAN'} />
-          <Appbar.Action icon={'calendar'} onPress={showDatepicker} />
+          <Appbar.Content title={'LIST TAGIHAN'} />
+          <Appbar.Action
+                icon={'barcode-scan'} 
+                onPress={() => props.navigation.navigate('ScannerScreen')}
+          />
           {/* <Menu
               visible={visible}
               onDismiss={closeMenu}
@@ -75,14 +103,29 @@ const ShipmentHeaderList = ( props ) => {
                     <Text title={`${selectCode}`} p style={{color: 'grey', textTransform: 'uppercase'}}/>
                 </View> */}
             </View>
-            {/* <View flexDirection="row" style={{ justifyContent: 'space-between',  }}>
+            <View flexDirection="row" style={{ justifyContent: 'space-between',  }}>
                 <View style={{ justifyContent: 'center' }}>
                     <Text title={`TOTAL OUTLET: `} p style={{ textTransform: 'uppercase', color: 'grey' }} />
                 </View>
                 <View style={{ justifyContent: 'center', marginRight: 10}}>
                     <Text title={`2`} p style={{color: 'grey', textTransform: 'uppercase'}}/>
                 </View>
-            </View> */}
+            </View>
+        </View>
+        <View flexDirection="row" style={{height: 40, justifyContent: 'space-between',paddingBottom: 15,  paddingLeft: 10,  backgroundColor: 'white', borderBottomColor: 'grey', borderBottomWidth: .5}}>
+            <View flexDirection="row" style={{ justifyContent: 'space-between',  }}>
+                <View style={{ justifyContent: 'center' }}>
+                    <Text title={`STATUS : OPEN`} p style={{ textTransform: 'uppercase', color: 'grey' }} />
+                </View>
+            </View>
+            <View flexDirection="row" style={{ justifyContent: 'space-between',  }}>
+                <View style={{ justifyContent: 'center' }}>
+                    <Text title={`TOTAL TAGIHAN(AR): `} p style={{ textTransform: 'uppercase', color: 'grey' }} />
+                </View>
+                <View style={{ justifyContent: 'center', marginRight: 10}}>
+                    <Text title={`8`} p style={{color: 'grey', textTransform: 'uppercase'}}/>
+                </View>
+            </View>
         </View>
         {/* { visithistory.visit_history == '' &&
             <View style={{alignItems: 'center', marginTop: 10}}>
@@ -93,9 +136,9 @@ const ShipmentHeaderList = ( props ) => {
     <View style={[styles.viewLine, { paddingTop: 10 }]} />
         <View style={styles.divider} />
         <List
-          nav="ShipmentList"
-          iconList="book"
-          title="30 Maret 2022"
+          nav="CollectionDetail"
+          iconList="package-variant-closed"
+          title="PT. Sangkuriang - 80142"
           sizeIcon={28}
         />
         
@@ -113,10 +156,10 @@ const ShipmentHeaderList = ( props ) => {
     <View style={[styles.viewLine, { paddingTop: 10 }]} />
         <View style={styles.divider} />
         <List
-          nav="ShipmentList"
-          iconList="book"
+          nav="CollectionDetail2"
+          iconList="package-variant-closed"
         //   color={}
-          title="29 Maret 2022"
+          title="PT. Guardian - 80141"
           sizeIcon={28}
         />
     </View>
@@ -156,4 +199,21 @@ const styles = StyleSheet.create({
   }
 })
 
-export default ShipmentHeaderList;
+
+function mapStateToProps(state) {
+    console.log(state);
+    return {
+        isAuthenticated: state.auth.isAuthenticated,
+        apiState: state.api,
+        message: state.flash.message,
+        collectiondata: state.crud.collectiondatas,
+    }
+}
+
+function mapDispatchToProps(dispatch) {
+    return {
+        actions: bindActionCreators(_.assign({}, authService, crudAction, apiAction, flashMessage), dispatch)
+    }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(CollectionList)

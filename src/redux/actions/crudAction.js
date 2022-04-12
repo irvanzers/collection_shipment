@@ -74,7 +74,6 @@ export const fetchAll = (entity, data) => (dispatch, getState) =>  {
             resolve(response.data);
         })
         .catch((error) => {
-            // console.log(fetch('https://egis.galenium.com').then(val => val))
             errorHandler(dispatch, error.message, ActionType.FAILURE);
             resolve(error.response);
         });

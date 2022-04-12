@@ -8,7 +8,7 @@ import Moment from 'moment';
 import List from './../../components/MenuList/List';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
-import _ from 'lodash';
+import _, { reduce } from 'lodash';
 import * as apiAction from './../../redux/actions/apiAction';
 import * as crudAction from '../../redux/actions/crudAction';
 import * as flashMessage from '../../redux/actions/flashMessage';
@@ -18,6 +18,7 @@ import { theme } from '../../redux/constants/theme';
 import {getUuid, setUuid} from './../../redux/utils/actionUtil';
 
 const CollectionList = ( props ) => {
+  const { collectiondata, collectionsdraft }=props; 
   const [date, setDate] = useState(new Date());
   const [mode, setMode] = useState('date');
   const [show, setShow] = useState(false);
@@ -43,7 +44,8 @@ const CollectionList = ( props ) => {
   
   const loadData = async() => {
     try {
-        await props.actions.fetchAll(Common.COLLECTION_DATA);        
+        // await props.actions.fetchAll(Common.COLLECTION_DATA);   
+        await props.actions.fetchAll(Common.COLLECTION_DRAFT);        
     } catch (error) {
         alert(error)
     } finally {
@@ -56,6 +58,82 @@ useEffect(() => {
     });
     return () => interactionPromise.cancel();
 },[])
+const keyExtractor = useCallback((item, index) => index.toString(), []);
+// const listcollection = collectiondata ? collectiondata.data : [];
+const listcollection = collectionsdraft ? collectionsdraft.assigned_data : [];
+const assignedarcount = collectionsdraft ? collectionsdraft.assigned_ar_count : [];
+const assignedcount = collectionsdraft ? collectionsdraft.assigned_count : [];
+// console.log(listcollection);
+
+    const renderTopItem = ({}) => {
+        return(
+            <View style={{flex:1}}>
+            {show && (
+                <DateTimePicker
+                    testID="dateTimePicker"
+                    value={date}
+                    mode={mode}
+                    is24Hour={true}
+                    display="default"
+                    onChange={onChange}
+                />
+            )}
+            <View flexDirection="row" style={{height: 40, justifyContent: 'space-between',  paddingLeft: 10,  backgroundColor: 'white'}}>
+                <View flexDirection="row" style={{ justifyContent: 'space-between',  }}>
+                    <View style={{ justifyContent: 'center' }}>
+                        <Text title={`TANGGAL : ${Moment(date).format('YYYY-MM-DD')}`} p style={{ textTransform: 'uppercase', color: 'grey' }} />
+                    </View>
+                </View>
+                <View flexDirection="row" style={{ justifyContent: 'space-between',  }}>
+                    <View style={{ justifyContent: 'center' }}>
+                        <Text title={`TOTAL OUTLET: `} p style={{ textTransform: 'uppercase', color: 'grey' }} />
+                    </View>
+                    <View style={{ justifyContent: 'center', marginRight: 10}}>
+                        <Text title={assignedcount} p style={{color: 'grey', textTransform: 'uppercase'}}/>
+                    </View>
+                </View>
+            </View>
+            <View flexDirection="row" style={{height: 40, justifyContent: 'space-between',paddingBottom: 15,  paddingLeft: 10,  backgroundColor: 'white', borderBottomColor: 'grey', borderBottomWidth: .5}}>
+                <View flexDirection="row" style={{ justifyContent: 'space-between',  }}>
+                    <View style={{ justifyContent: 'center' }}>
+                        <Text title={`STATUS : OPEN`} p style={{ textTransform: 'uppercase', color: 'grey' }} />
+                    </View>
+                </View>
+                <View flexDirection="row" style={{ justifyContent: 'space-between',  }}>
+                    <View style={{ justifyContent: 'center' }}>
+                        <Text title={`TOTAL TAGIHAN(AR): `} p style={{ textTransform: 'uppercase', color: 'grey' }} />
+                    </View>
+                    <View style={{ justifyContent: 'center', marginRight: 10}}>
+                        <Text title={assignedarcount} p style={{color: 'grey', textTransform: 'uppercase'}}/>
+                    </View>
+                </View>
+            </View>
+            {/* { collectiondraft.id == '' &&
+                <View style={{alignItems: 'center', marginTop: 10}}>
+                    <Text title={'DATA TAGIHAN TIDAK DITEMUKAN'} p style={{color: 'grey'}} />
+                </View>
+            } */}   
+        </View>
+        )
+    }
+
+    const renderCategory = ({item, index}) => {
+        // console.log(item);
+        return (
+            <View flexDirection="row" style={{marginVertical: 5}}>                
+                <View style={[styles.viewLine, { paddingTop: 0 }]} />
+                <View style={styles.divider} />
+                <List
+                    nav="CollectionDetail"
+                    item={item}
+                    iconList="package-variant-closed"
+                    color={[]}
+                    title={item.cust_name}
+                    sizeIcon={28}
+                />
+            </View>
+        )
+    }
 
   return (
     <View>      
@@ -66,103 +144,17 @@ useEffect(() => {
                 icon={'barcode-scan'} 
                 onPress={() => props.navigation.navigate('ScannerScreen')}
           />
-          {/* <Menu
-              visible={visible}
-              onDismiss={closeMenu}
-              anchor={<Appbar.Action icon={'dots-vertical'} onPress={openMenu} color={'white'} />}>
-                  {visithistory != '' && visithistory.kowil.map((item, index) => {
-                      return(
-                          <Menu.Item 
-                              key={index.toString()} 
-                              onPress={() => onSelect(item)} 
-                              title={`${item.kowil_code}`} 
-                              subtitle={`${item.name}`} 
-                          />
-                      )
-                  })}
-          </Menu> */}
-      </Appbar.Header>
-      
-      <View style={{flex:1}}>
-        {show && (
-            <DateTimePicker
-                testID="dateTimePicker"
-                value={date}
-                mode={mode}
-                is24Hour={true}
-                display="default"
-                onChange={onChange}
-            />
-        )}
-        <View flexDirection="row" style={{height: 40, justifyContent: 'space-between',  paddingLeft: 10,  backgroundColor: 'white'}}>
-            <View flexDirection="row" style={{ justifyContent: 'space-between',  }}>
-                <View style={{ justifyContent: 'center' }}>
-                    <Text title={`TANGGAL : ${Moment(date).format('YYYY-MM-DD')}`} p style={{ textTransform: 'uppercase', color: 'grey' }} />
-                </View>
-                {/* <View style={{ justifyContent: 'center', marginRight: 10}}>
-                    <Text title={`${selectCode}`} p style={{color: 'grey', textTransform: 'uppercase'}}/>
-                </View> */}
-            </View>
-            <View flexDirection="row" style={{ justifyContent: 'space-between',  }}>
-                <View style={{ justifyContent: 'center' }}>
-                    <Text title={`TOTAL OUTLET: `} p style={{ textTransform: 'uppercase', color: 'grey' }} />
-                </View>
-                <View style={{ justifyContent: 'center', marginRight: 10}}>
-                    <Text title={`2`} p style={{color: 'grey', textTransform: 'uppercase'}}/>
-                </View>
-            </View>
-        </View>
-        <View flexDirection="row" style={{height: 40, justifyContent: 'space-between',paddingBottom: 15,  paddingLeft: 10,  backgroundColor: 'white', borderBottomColor: 'grey', borderBottomWidth: .5}}>
-            <View flexDirection="row" style={{ justifyContent: 'space-between',  }}>
-                <View style={{ justifyContent: 'center' }}>
-                    <Text title={`STATUS : OPEN`} p style={{ textTransform: 'uppercase', color: 'grey' }} />
-                </View>
-            </View>
-            <View flexDirection="row" style={{ justifyContent: 'space-between',  }}>
-                <View style={{ justifyContent: 'center' }}>
-                    <Text title={`TOTAL TAGIHAN(AR): `} p style={{ textTransform: 'uppercase', color: 'grey' }} />
-                </View>
-                <View style={{ justifyContent: 'center', marginRight: 10}}>
-                    <Text title={`8`} p style={{color: 'grey', textTransform: 'uppercase'}}/>
-                </View>
-            </View>
-        </View>
-        {/* { visithistory.visit_history == '' &&
-            <View style={{alignItems: 'center', marginTop: 10}}>
-                <Text title={'DATA KUNJUNGAN TIDAK DITEMUKAN'} p style={{color: 'grey'}} />
-            </View>
-        } */}
+      </Appbar.Header>      
     
-    <View style={[styles.viewLine, { paddingTop: 10 }]} />
-        <View style={styles.divider} />
-        <List
-          nav="CollectionDetail"
-          iconList="package-variant-closed"
-          title="PT. Sangkuriang - 80142"
-          sizeIcon={28}
+        <FlatList style={styles.list}
+            showsVerticalScrollIndicator={false}
+            horizontal={false}
+            initialNumToRender={3}
+            data={listcollection}
+            ListHeaderComponent={renderTopItem}
+            keyExtractor={keyExtractor}
+            renderItem={renderCategory}
         />
-        
-        {/* <List.Section title="Accordions">
-        <List.Accordion
-            title="Controlled Accordion"
-            left={props => <List.Icon {...props} icon="folder" />}
-            expanded={expanded}
-            onPress={handlePress}>
-            <List.Item title="First item" />
-            <List.Item title="Second item" />
-        </List.Accordion>
-        </List.Section> */}
-
-    <View style={[styles.viewLine, { paddingTop: 10 }]} />
-        <View style={styles.divider} />
-        <List
-          nav="CollectionDetail2"
-          iconList="package-variant-closed"
-        //   color={}
-          title="PT. Guardian - 80141"
-          sizeIcon={28}
-        />
-    </View>
     </View>
   )
 }
@@ -201,12 +193,13 @@ const styles = StyleSheet.create({
 
 
 function mapStateToProps(state) {
-    console.log(state);
+    // console.log(state.crud.collectiondatas)
     return {
         isAuthenticated: state.auth.isAuthenticated,
         apiState: state.api,
         message: state.flash.message,
         collectiondata: state.crud.collectiondatas,
+        collectionsdraft: state.crud.collectionsdrafts,
     }
 }
 
