@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useCallback }  from 'react'
-import { Button, View, StyleSheet, ScrollView, TouchableHighlight, InteractionManager } from 'react-native'
+import { View, StyleSheet, ScrollView, TouchableHighlight, InteractionManager } from 'react-native'
 import { useForm, Controller } from 'react-hook-form';
 
 import Text from './../../components/Text';
 import Input from '../../components/Input';
 import SelectPicker from './../../components/SelectPicker';
-import { List, Card, Title, Paragraph, TextInput, IconButton } from 'react-native-paper';
-
+import { List, Card, Title, Paragraph, TextInput, IconButton, Button } from 'react-native-paper';
+import ImagePicker from 'react-native-image-crop-picker';
 
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
@@ -26,6 +26,7 @@ const CollectionDetail = ( props ) => {
   const [text, setText] = React.useState("");
   const { handleSubmit, control, errors, setValue } = useForm(); // initialize the hook
   const [error, setError] = useState('');
+  const [visitSelfie, setVisitSelfie] = useState(null);
 
   const loadData = async () => {
       try {
@@ -47,6 +48,38 @@ const CollectionDetail = ( props ) => {
       }
   }
 
+  //GETTING PHOTO
+  const renderAsset = (visitSelfie) => {
+      return (
+          <Card style={{ width: '100%' }}>
+              <Card.Cover source={{uri: visitSelfie}} style={{ height: 300 }} />
+              <Card.Actions style={{justifyContent: 'center'}}>
+                  <Button mode="contained" onPress={()=> cleanupImages()}>REMOVE</Button>
+              </Card.Actions>
+          </Card>
+      );
+  }
+  
+  const cleanupImages = () => {
+      ImagePicker.clean().then(() => {
+          setVisitSelfie(null)
+      }).catch(e => {
+          alert(e);
+      });
+  }
+  const launchCamera = () => {
+      ImagePicker.openCamera({
+          compressImageQuality: 0.1,
+          cropping: false,
+          includeBase64: true
+      }).then(response => {
+          if (!response.didCancel && !response.error) {
+              const source = 'data:image/jpeg;base64,' + response.data;
+              setVisitSelfie(source)
+          }
+      }).catch(e => alert('ANDA BELUM MENGAMBIL GAMBAR'));
+  }
+
   useEffect(() => {
       const interactionPromise = InteractionManager.runAfterInteractions(() => {
           loadData()
@@ -56,7 +89,7 @@ const CollectionDetail = ( props ) => {
   const keyExtractor = useCallback((item, index) => index.toString(), []);
   const detaildata = collectiondetail ? collectiondetail.cust_detail : [];
   const listar = collectiondetail ? collectiondetail.list_ar : [];
-  console.log(detaildata);
+  // console.log(detaildata);
 
   return (
     <View style={{flex:1}}>
@@ -67,8 +100,12 @@ const CollectionDetail = ( props ) => {
     >
       <View style={{ paddingHorizontal: 10, paddingTop: 10 }}>
         <View style={{marginTop: 10, paddingBottom: 10}} flexDirection="row">
+            { visitSelfie != null ?
+                renderAsset(visitSelfie)
+                :
+                (
                 <TouchableHighlight
-                    // onPress={() => handlePresentModalPress()}
+                    onPress={launchCamera}
                     style={{ backgroundColor: 'white', width: '100%', borderRadius: 10}} 
                     activeOpacity={0.8} 
                     underlayColor="#bbbcbd"  
@@ -78,6 +115,8 @@ const CollectionDetail = ( props ) => {
                         <Text title="SELFIE" style={{color: '#FFFF'}} bold h2 />
                     </View>
                 </TouchableHighlight>
+                )
+            }
         </View>
         <Card style={{ alignItems: 'center' }}>
           <Card.Content

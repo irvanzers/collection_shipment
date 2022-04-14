@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useCallback }  from 'react'
-import { Button, View, StyleSheet, ScrollView, InteractionManager } from 'react-native'
+import { View, StyleSheet, ScrollView, InteractionManager } from 'react-native'
 import { useForm, Controller } from 'react-hook-form';
 
 import Text from '../../components/Text';
 import Input from '../../components/Input';
-import { List, Card, Title, Paragraph, TextInput, IconButton } from 'react-native-paper';
+import { List, Card, Title, Paragraph, TextInput, IconButton, Button } from 'react-native-paper';
 import SelectPicker from './../../components/SelectPicker';
 import moment from 'moment';
 import DatePicker from '../../components/DatePicker';
@@ -26,11 +26,32 @@ const CollectionPayment = ( props ) => {
   const detailar = props.route.params.data;
   const navigation = useNavigation();
   const [text, setText] = React.useState("");
-  const { handleSubmit, control, errors, setValue } = useForm(); // initialize the hook
+  const { handleSubmit, control, formState: {errors}, setValue } = useForm(); // initialize the hook
   const [error, setError] = useState('');
+  const [jenisPayment, setJenisPayment] = useState('');
+
 
   const keyExtractor = useCallback((item, index) => index.toString(), []);
   // console.log(detailar);
+
+  const onSubmit = async(data) => {
+    try {
+      console.log(data)
+      console.log(errors)
+      // data['biodata'] = true;
+      // data['bod'] = bod ? date : userprofile?.born_date;
+      // data['gender'] = gender ? checked : userprofile?.gender;
+      // const updateBio = await props.actions.storeItem(Common.UPDATE_USER_PROFILE, data);
+      // console.log(updateBio.success);
+      // if(updateBio.success){
+      //     await props.actions.fetchAll(Common.USER_PROFILE);
+      //     Toast.show('Biodata berhasil disimpan');
+      //     props.navigation.goBack();
+      // }
+    } catch (error) {
+      alert(error)
+    }
+  }
 
   return (
     <View style={{flex:1}}>
@@ -100,15 +121,16 @@ const CollectionPayment = ( props ) => {
                             { label: 'Transfer', value: 'transfer' },
                             { label: 'Tunai', value: 'tunai' },
                         ]}
-                onDataChange={(value) => console.log(value)}
+                onDataChange={(value) => setJenisPayment(value)}
                 placeholder="METODE PEMBAYARAN"
             />           
             </View>
           </Card.Content>
         </Card>
-      </View>      
-      
-      <View style={{ paddingTop: 10 }} />
+      </View>        
+      <View style={{ paddingTop: 10 }} />      
+      {
+        jenisPayment == 'giro_bank' &&
       <View style={{ paddingHorizontal: 10, paddingTop: 10, paddingBottom: 20 }}>
         <Card>
           <Card.Content>             
@@ -117,13 +139,21 @@ const CollectionPayment = ( props ) => {
               h5 bold style={{color: '#000000'}} 
             />            
             <View style={{marginTop: 15}}>  
-            <Input
-                // error={errors.visit_catatan}
-                // errorText={errors?.visit_catatan?.message}
-                onChangeText={(text) => {onChange(text)}}
-                // value={value}
-                placeholder="NO. GIRO"
-            />
+              <Controller
+                  defaultValue=""
+                  name="no_giro"
+                  control={control}
+                  rules={{ required: { value: true, message: 'Nomor Giro Harus Di isi' } }}
+                  render={({ onChange, value }) => (
+                  <Input
+                      onChangeText={(text) => {onChange(text)}}
+                      value={value}
+                      placeholder="NO. GIRO"
+                      error={errors?.no_giro}
+                      errorText={errors?.no_giro?.message}
+                  />
+                )}
+              />
             </View>     
             <View style={{marginTop: 15}}></View>
             <View style={{marginTop: 10, marginBottom: 0}}>
@@ -133,7 +163,7 @@ const CollectionPayment = ( props ) => {
                 </View>
                 <Controller
                     defaultValue={moment(new Date()).format('YYYY-MM-DD')}
-                    name="visit_date"
+                    name="giro_date"
                     control={control}
                     rules={{ required: { value: true, message: 'Tanggal kunjungan harus diisi' } }}
                     render={({ onChange, value }) => (
@@ -155,14 +185,22 @@ const CollectionPayment = ( props ) => {
               title="Nama Bank" 
               h5 bold style={{color: '#000000'}} 
             />            
-            <View style={{marginTop: 15}}>  
-            <Input
-                // error={errors.visit_catatan}
-                // errorText={errors?.visit_catatan?.message}
-                onChangeText={(text) => {onChange(text)}}
-                // value={value}
-                placeholder="NAMA BANK"
-            />
+            <View style={{marginTop: 15}}>    
+              <Controller
+                  defaultValue=""
+                  name="nama_bank"
+                  control={control}
+                  rules={{ required: { value: true, message: 'Nama Bank Harus Di isi' } }}
+                  render={({ onChange, value }) => (
+                    <Input
+                        onChangeText={(text) => {onChange(text)}}
+                        value={value}
+                        placeholder="NAMA BANK"
+                        error={errors?.nama_bank}
+                        errorText={errors?.nama_bank?.message}
+                    />
+                  )}
+              />
             </View>
             <View style={{marginTop: 15}}></View>
             <Text
@@ -170,26 +208,136 @@ const CollectionPayment = ( props ) => {
               h5 bold style={{color: '#000000'}} 
             />            
             <View style={{marginTop: 15}}>  
-            <Input
-                // error={errors.visit_catatan}
-                // errorText={errors?.visit_catatan?.message}
-                onChangeText={(text) => {onChange(text)}}
-                // value={value}
-                placeholder="NOMINAL PEMBAYARAN"
-            />
-            </View>
-            <View style={{width: '100%', paddingTop: '2%'}}>
-              <Button
-                title = "Submit"
-                contentStyle={{height: 500}}
-                onPress={() =>
-                  navigation.navigate('Beranda')
-                }
+              <Controller
+                  defaultValue=""
+                  name="nominal_payment"
+                  control={control}
+                  rules={{ required: { value: true, message: 'Nominal Pembayaran Harus Di isi' } }}
+                  render={({ onChange, value }) => (
+                    <Input
+                        onChangeText={(text) => {onChange(text)}}
+                        value={value}
+                        placeholder="NOMINAL PEMBAYARAN"
+                        error={errors?.nominal_payment}
+                        errorText={errors?.nominal_payment?.message}
+                    />
+                  )}
               />
-            </View> 
+            </View>
           </Card.Content>
         </Card>
       </View>  
+    }
+    {
+      jenisPayment == 'transfer' &&
+      <View style={{ paddingHorizontal: 10, paddingTop: 10, paddingBottom: 20 }}>
+        <Card>
+          <Card.Content>             
+            <Text
+              title="No. Rekening" 
+              h5 bold style={{color: '#000000'}} 
+            />            
+            <View style={{marginTop: 15}}> 
+              <Controller
+                  defaultValue=""
+                  name="nomor_rekening"
+                  control={control}
+                  rules={{ required: { value: true, message: 'Nominal Pembayaran Harus Di isi' } }}
+                  render={({ onChange, value }) => ( 
+                    <Input
+                        error={errors?.nomor_rekening}
+                        errorText={errors?.nomor_rekening?.message}
+                        onChangeText={(text) => {onChange(text)}}
+                        value={value}
+                        placeholder="NO. REKENING"
+                    />
+                  )}
+              />
+            </View>     
+            <View style={{marginTop: 15}}></View>
+            <Text
+              title="Nama Bank" 
+              h5 bold style={{color: '#000000'}} 
+            />            
+            <View style={{marginTop: 15}}>  
+              <Controller
+                  defaultValue=""
+                  name="nama_bank"
+                  control={control}
+                  rules={{ required: { value: true, message: 'Nominal Pembayaran Harus Di isi' } }}
+                  render={({ onChange, value }) => ( 
+                      <Input
+                          error={errors?.nama_bank}
+                          errorText={errors?.nama_bank?.message}
+                          onChangeText={(text) => {onChange(text)}}
+                          value={value}
+                          placeholder="NAMA BANK"
+                      /> 
+                  )}
+              />
+            </View>
+            <View style={{marginTop: 15}}></View>
+            <Text
+              title="Nominal Pembayaran" 
+              h5 bold style={{color: '#000000'}} 
+            />            
+            <View style={{marginTop: 15}}>  
+              <Controller
+                  defaultValue=""
+                  name="nominal_payment"
+                  control={control}
+                  rules={{ required: { value: true, message: 'Nominal Pembayaran Harus Di isi' } }}
+                  render={({ onChange, value }) => ( 
+                    <Input
+                        error={errors?.nominal_payment}
+                        errorText={errors?.nominal_payment?.message}
+                        onChangeText={(text) => {onChange(text)}}
+                        value={value}
+                        placeholder="NOMINAL PEMBAYARAN"
+                    />
+                  )}
+              />
+            </View>
+          </Card.Content>
+        </Card>
+      </View>  
+    }
+    {
+      jenisPayment == 'tunai' &&
+      <View style={{ paddingHorizontal: 10, paddingTop: 10, paddingBottom: 20 }}>
+        <Card>
+          <Card.Content>     
+            <Text
+              title="Nominal Pembayaran" 
+              h5 bold style={{color: '#000000'}} 
+            />            
+            <View style={{marginTop: 15}}>  
+              <Controller
+                  defaultValue=""
+                  name="nominal_payment"
+                  control={control}
+                  rules={{ required: { value: true, message: 'Nominal Pembayaran Harus Di isi' } }}
+                  render={({ onChange, value }) => ( 
+                    <Input
+                        error={errors?.nominal_payment}
+                        errorText={errors?.nominal_payment?.message}
+                        onChangeText={(text) => {onChange(text)}}
+                        value={value}
+                        placeholder="NOMINAL PEMBAYARAN"
+                    />
+                  )}
+              />
+            </View>
+          </Card.Content>
+        </Card>
+      </View>  
+    }
+    <View style={{width: '100%', paddingTop: '2%'}}>
+      <Button
+        onPress={handleSubmit(onSubmit)}  
+      >SUBMIT
+      </Button>
+    </View> 
     </ScrollView>
     </View>
   )
