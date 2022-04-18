@@ -10,6 +10,7 @@ import moment from 'moment';
 import DatePicker from '../../components/DatePicker';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import { theme } from '../../constants/theme';
+import Toast from 'react-native-simple-toast';
 
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
@@ -28,6 +29,7 @@ const CollectionPayment = ( props ) => {
   const [text, setText] = React.useState("");
   const { handleSubmit, control, formState: {errors}, setValue } = useForm(); // initialize the hook
   const [error, setError] = useState('');
+  // const [girodate, setGiroDate] = useState(false);
   const [jenisPayment, setJenisPayment] = useState('');
 
 
@@ -36,18 +38,16 @@ const CollectionPayment = ( props ) => {
 
   const onSubmit = async(data) => {
     try {
-      console.log(data)
-      console.log(errors)
-      data['biodata'] = true;
-      // data['bod'] = bod ? date : userprofile?.born_date;
-      // data['gender'] = gender ? checked : userprofile?.gender;
-      // const updateBio = await props.actions.storeItem(Common.UPDATE_USER_PROFILE, data);
-      // console.log(updateBio.success);
-      // if(updateBio.success){
-      //     await props.actions.fetchAll(Common.USER_PROFILE);
-      //     Toast.show('Biodata berhasil disimpan');
-      //     props.navigation.goBack();
-      // }
+      data['payment_ar'] = true;
+      data['trx_number'] = detailar.trx_number;
+      const updatePay = await props.actions.storeItem(Common.UPDATE_COLLECTION_PAYMENT, data);
+      console.log(updatePay.success);
+      if(updatePay.success){
+          // await props.actions.fetchAll(Common.USER_PROFILE);
+          Toast.show('Pembayaran berhasil disimpan');
+          props.navigation.goBack();
+      }
+      // console.log(data)
     } catch (error) {
       alert(error)
     }
@@ -115,15 +115,29 @@ const CollectionPayment = ( props ) => {
               h5 bold style={{color: '#000000'}} 
             />            
             <View style={{marginTop: 15}}>
-            <SelectPicker
-                items = {[
-                            { label: 'Giro Bank', value: 'giro_bank' },
-                            { label: 'Transfer', value: 'transfer' },
-                            { label: 'Tunai', value: 'tunai' },
-                        ]}
-                onDataChange={(value) => setJenisPayment(value)}
-                placeholder="METODE PEMBAYARAN"
-            />           
+              <Controller
+                  defaultValue=""
+                  name="payment_type"
+                  control={control}
+                  rules={{ required: { value: true, message: 'Payment type harus di pilih' } }}
+                  render={({field: { onChange, value, onBlur }}) => (
+                    <SelectPicker
+                        items = {[
+                                    { label: 'Giro Bank', value: 'giro_bank' },
+                                    { label: 'Transfer', value: 'transfer' },
+                                    { label: 'Tunai', value: 'tunai' },
+                                ]}
+                        onDataChange={(value ) => {
+                                                    setJenisPayment(value)
+                                                    onChange(value)
+                                                  }}
+                        placeholder="METODE PEMBAYARAN"
+                        value={value}
+                        error={errors?.payment_type}
+                        errorText={errors?.payment_type?.message}
+                    />     
+                  )}
+              />      
             </View>
           </Card.Content>
         </Card>
@@ -144,7 +158,7 @@ const CollectionPayment = ( props ) => {
                   name="no_giro"
                   control={control}
                   rules={{ required: { value: true, message: 'Nomor Giro Harus Di isi' } }}
-                  render={({ onChange, value }) => (
+                  render={({field: { onChange, value, onBlur }}) => (
                   <Input
                       onChangeText={(text) => {onChange(text)}}
                       value={value}
@@ -163,7 +177,7 @@ const CollectionPayment = ( props ) => {
                 </View>
                 <Controller
                     defaultValue={moment(new Date()).format('YYYY-MM-DD')}
-                    name="giro_date"
+                    name="girodate"
                     control={control}
                     rules={{ required: { value: true, message: 'Tanggal kunjungan harus diisi' } }}
                     render={({ onChange, value }) => (
@@ -172,9 +186,9 @@ const CollectionPayment = ( props ) => {
                             date={value} // Initial date from state
                             mode="date" // The enum of date, datetime and time
                             format="YYYY-MM-DD"
-                            // value={value}
-                            // error={errors.visit_date}
-                            // errorText={errors?.visit_date?.message}
+                            value={value}
+                            error={errors.visit_date}
+                            errorText={errors?.giro_date?.message}
                             onDateChange={(data) => { onChange(data) }}
                         />
                     )}
@@ -191,7 +205,7 @@ const CollectionPayment = ( props ) => {
                   name="nama_bank"
                   control={control}
                   rules={{ required: { value: true, message: 'Nama Bank Harus Di isi' } }}
-                  render={({ onChange, value }) => (
+                  render={({field: { onChange, value, onBlur }}) => (
                     <Input
                         onChangeText={(text) => {onChange(text)}}
                         value={value}
@@ -213,7 +227,7 @@ const CollectionPayment = ( props ) => {
                   name="nominal_payment"
                   control={control}
                   rules={{ required: { value: true, message: 'Nominal Pembayaran Harus Di isi' } }}
-                  render={({ onChange, value }) => (
+                  render={({field: { onChange, value }}) => (
                     <Input
                         onChangeText={(text) => {onChange(text)}}
                         value={value}
@@ -243,7 +257,7 @@ const CollectionPayment = ( props ) => {
                   name="nomor_rekening"
                   control={control}
                   rules={{ required: { value: true, message: 'Nominal Pembayaran Harus Di isi' } }}
-                  render={({ onChange, value }) => ( 
+                  render={({field: { onChange, value }}) => ( 
                     <Input
                         error={errors?.nomor_rekening}
                         errorText={errors?.nomor_rekening?.message}
@@ -265,7 +279,7 @@ const CollectionPayment = ( props ) => {
                   name="nama_bank"
                   control={control}
                   rules={{ required: { value: true, message: 'Nominal Pembayaran Harus Di isi' } }}
-                  render={({ onChange, value }) => ( 
+                  render={({field: { onChange, value }}) => ( 
                       <Input
                           error={errors?.nama_bank}
                           errorText={errors?.nama_bank?.message}
@@ -287,7 +301,7 @@ const CollectionPayment = ( props ) => {
                   name="nominal_payment"
                   control={control}
                   rules={{ required: { value: true, message: 'Nominal Pembayaran Harus Di isi' } }}
-                  render={({ onChange, value }) => ( 
+                  render={({field: { onChange, value }}) => ( 
                     <Input
                         error={errors?.nominal_payment}
                         errorText={errors?.nominal_payment?.message}
@@ -317,7 +331,7 @@ const CollectionPayment = ( props ) => {
                   name="nominal_payment"
                   control={control}
                   rules={{ required: { value: true, message: 'Nominal Pembayaran Harus Di isi' } }}
-                  render={({ onChange, value }) => ( 
+                  render={({field: { onChange, value }}) => ( 
                     <Input
                         error={errors?.nominal_payment}
                         errorText={errors?.nominal_payment?.message}

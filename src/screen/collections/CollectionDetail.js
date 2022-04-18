@@ -7,6 +7,7 @@ import Input from '../../components/Input';
 import SelectPicker from './../../components/SelectPicker';
 import { List, Card, Title, Paragraph, TextInput, IconButton } from 'react-native-paper';
 import ImagePicker from 'react-native-image-crop-picker';
+import NumberFormat from 'react-number-format';
 
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
@@ -148,7 +149,21 @@ const CollectionDetail = ( props ) => {
                 <List.Item
                   title={`No. AR ${item.trx_number}`}
                   key={index}
-                  description={`Nominal Rp. ${item.amount_due_remaining}`}
+                  // description={`Nominal Rp. ${item.amount_due_remaining}`}
+                  description={props => 
+                    <NumberFormat 
+                        value={item.amount_due_remaining} 
+                        displayType={'text'} 
+                        prefix={`Nominal Rp. `} 
+                        thousandSeparator={true}
+                        renderText={(value) =>  {
+                            return (
+                                <View style={{flexDirection:'row', flexWrap:'wrap', alignItems: 'flex-end'}}>
+                                    <Text title={value} italic />
+                                </View>
+                            )
+                        }}
+                    />}
                   left={props => <List.Icon {...props} icon="chevron-double-right" />}
                   onPress={() => navigation.push('CollectionPayment', {data: item})}
                 />    
