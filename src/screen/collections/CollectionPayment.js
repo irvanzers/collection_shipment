@@ -38,7 +38,7 @@ const CollectionPayment = ( props ) => {
     try {
       console.log(data)
       console.log(errors)
-      // data['biodata'] = true;
+      data['biodata'] = true;
       // data['bod'] = bod ? date : userprofile?.born_date;
       // data['gender'] = gender ? checked : userprofile?.gender;
       // const updateBio = await props.actions.storeItem(Common.UPDATE_USER_PROFILE, data);
@@ -332,8 +332,9 @@ const CollectionPayment = ( props ) => {
         </Card>
       </View>  
     }
-    <View style={{width: '100%', paddingTop: '2%'}}>
+    <View style={{ paddingHorizontal: 10, paddingTop: 10, paddingBottom: 20, width: '100%',  paddingTop: '2%'}}>
       <Button
+        mode="contained"
         onPress={handleSubmit(onSubmit)}  
       >SUBMIT
       </Button>

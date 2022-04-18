@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useCallback }  from 'react'
-import { View, StyleSheet, ScrollView, TouchableHighlight, InteractionManager } from 'react-native'
+import { View, StyleSheet, ScrollView, TouchableHighlight, InteractionManager, Button } from 'react-native'
 import { useForm, Controller } from 'react-hook-form';
 
 import Text from './../../components/Text';
 import Input from '../../components/Input';
 import SelectPicker from './../../components/SelectPicker';
-import { List, Card, Title, Paragraph, TextInput, IconButton, Button } from 'react-native-paper';
+import { List, Card, Title, Paragraph, TextInput, IconButton } from 'react-native-paper';
 import ImagePicker from 'react-native-image-crop-picker';
 
 import { connect } from 'react-redux';
@@ -211,6 +211,46 @@ const CollectionDetail = ( props ) => {
                 onChangeText={(text) => {onChange(text)}}
                 // value={value}
                 placeholder="NO GIRO/NOMINAL"
+            />
+          </View>
+          </Card.Content>
+        </Card>
+      </View>
+      <View style={{ paddingTop: 10 }} />
+      <View style={{ paddingHorizontal: 10, paddingTop: 10 }}>
+        <Card>
+          <Card.Content>             
+            <Text
+              title="Total Pembayaran" 
+              h5 bold style={{color: '#000000'}} 
+            />            
+            <View style={{marginTop: 15}}>
+            <Input
+                // error={errors.visit_catatan}
+                // errorText={errors?.visit_catatan?.message}
+                onChangeText={(text) => {onChange(text)}}
+                // value={value}
+                placeholder="TOTAL PEMBAYARAN"
+            />
+          </View>
+          </Card.Content>
+        </Card>
+      </View>
+      <View style={{ paddingTop: 10 }} />
+      <View style={{ paddingHorizontal: 10, paddingTop: 10 }}>
+        <Card>
+          <Card.Content>             
+            <Text
+              title="Sisa Pembayaran" 
+              h5 bold style={{color: '#000000'}} 
+            />            
+            <View style={{marginTop: 15}}>
+            <Input
+                // error={errors.visit_catatan}
+                // errorText={errors?.visit_catatan?.message}
+                onChangeText={(text) => {onChange(text)}}
+                // value={value}
+                placeholder="SISA PEMBAYARAN"
             />
           </View>
           </Card.Content>

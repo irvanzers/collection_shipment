@@ -18,7 +18,7 @@ import { theme } from '../../redux/constants/theme';
 import {getUuid, setUuid} from './../../redux/utils/actionUtil';
 
 const CollectionList = ( props ) => {
-  const { collectiondata, collectionsdraft }=props; 
+  const { collectiondata, collectionlistdetail }=props; 
   const [date, setDate] = useState(new Date());
   const [mode, setMode] = useState('date');
   const [show, setShow] = useState(false);
@@ -44,8 +44,11 @@ const CollectionList = ( props ) => {
   
   const loadData = async() => {
     try {
+        const datasubmit = {
+            header_id: props.route.params.data
+        }
         // await props.actions.fetchAll(Common.COLLECTION_DATA);   
-        await props.actions.fetchAll(Common.COLLECTION_DRAFT);        
+        await props.actions.fetchAll(Common.COLLECTION_LIST_DETAIL, datasubmit);        
     } catch (error) {
         alert(error)
     } finally {
@@ -60,10 +63,10 @@ useEffect(() => {
 },[])
 const keyExtractor = useCallback((item, index) => index.toString(), []);
 // const listcollection = collectiondata ? collectiondata.data : [];
-const listcollection = collectionsdraft ? collectionsdraft.assigned_data : [];
-const assignedarcount = collectionsdraft ? collectionsdraft.assigned_ar_count : [];
-const assignedcount = collectionsdraft ? collectionsdraft.assigned_count : [];
-// console.log(listcollection);
+const listcollection = collectionlistdetail ? collectionlistdetail.assigned_data : [];
+const assignedarcount = collectionlistdetail ? collectionlistdetail.assigned_ar_count : [];
+const assignedcount = collectionlistdetail ? collectionlistdetail.assigned_count : [];
+console.log(assignedcount);
 
     const renderTopItem = ({}) => {
         return(
@@ -96,7 +99,7 @@ const assignedcount = collectionsdraft ? collectionsdraft.assigned_count : [];
             <View flexDirection="row" style={{height: 40, justifyContent: 'space-between',paddingBottom: 15,  paddingLeft: 10,  backgroundColor: 'white', borderBottomColor: 'grey', borderBottomWidth: .5}}>
                 <View flexDirection="row" style={{ justifyContent: 'space-between',  }}>
                     <View style={{ justifyContent: 'center' }}>
-                        <Text title={`STATUS : OPEN`} p style={{ textTransform: 'uppercase', color: 'grey' }} />
+                        <Text title={`STATUS : OPEN`} p style={{ textTransform: 'uppercase', color: 'green' }} />
                     </View>
                 </View>
                 <View flexDirection="row" style={{ justifyContent: 'space-between',  }}>
@@ -199,7 +202,7 @@ function mapStateToProps(state) {
         apiState: state.api,
         message: state.flash.message,
         collectiondata: state.crud.collectiondatas,
-        collectionsdraft: state.crud.collectionsdrafts,
+        collectionlistdetail: state.crud.collectionlistdetails,
     }
 }
 
