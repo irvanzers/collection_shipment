@@ -117,10 +117,10 @@ const CollectionHeaderList = ( props ) => {
                     </View>
                     <View style={{ paddingLeft: 10, width: '60%' }}>
                         <View style={{ paddingTop: 5, paddingBottom: 5 }}>
-                            <ProgressBar progress={`20`} color='black' style={{ height: 20 }} />
-                            <Text title="PROGRESS 20%" style={{ color: 'grey', paddingTop: 0, marginTop: 0, alignItems: 'center' }} p italic />
+                            <ProgressBar progress={item.job_progress} color={item.prog_color} style={{ height: 20 }} />
+                            <Text title={`PROGRESS ${(item.job_progress * 100).toFixed(2)}%`} style={{ color: 'grey', paddingTop: 0, marginTop: 0, alignItems: 'center' }} p italic />
                         </View>
-                        <Text title={`ON PROGRESS`} style={[styles.approve, {backgroundColor: `#279D1B`, color: `white`}]} p bold />
+                        <Text title={item.job_status} style={[styles.approve, {backgroundColor: `${item.job_color}`, color: `${item.job_text}`}]} p bold />
                     </View>
                 </View>
             </Card.Content>
@@ -145,10 +145,8 @@ const CollectionHeaderList = ( props ) => {
                 data={listcollectionheader}
                 keyExtractor={keyExtractor}
                 // ItemSeparatorComponent={renderSeparator}
-                // enableEmptySections={true}
                 ListHeaderComponent={renderTopItem}
                 renderItem={itemView}
-                // ListEmptyComponent={_listEmptyComponent}
                 initialNumToRender={10}
             />
         </View>

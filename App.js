@@ -13,7 +13,7 @@ LogBox.ignoreLogs([
   "[react-native-gesture-handler] Seems like you\'re using an old API with gesture components, check out new Gestures system!",
 ]);
 
-// store.dispatch(verifyToken());
+store.dispatch(verifyToken());
 
 export const theme = {
   ...DefaultTheme,

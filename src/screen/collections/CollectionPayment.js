@@ -11,6 +11,8 @@ import DatePicker from '../../components/DatePicker';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import { theme } from '../../constants/theme';
 import Toast from 'react-native-simple-toast';
+import Loading from './../../components/Loading';
+import NumberFormat from 'react-number-format';
 
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
@@ -25,23 +27,53 @@ import { useNavigation } from '@react-navigation/core';
 
 const CollectionPayment = ( props ) => {
   const detailar = props.route.params.data;
+  const {collectionproduct} = props;
   const navigation = useNavigation();
   const [text, setText] = React.useState("");
   const { handleSubmit, control, formState: {errors}, setValue } = useForm(); // initialize the hook
-  const [error, setError] = useState('');
-  // const [girodate, setGiroDate] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [jenisPayment, setJenisPayment] = useState('');
+  const [expanded, setExpanded] = useState(1);
 
-
-  const keyExtractor = useCallback((item, index) => index.toString(), []);
-  // console.log(detailar);
+  const loadData = async () => {
+      try {
+          const datasubmit = {
+              trx_number: props.route.params.data.trx_number
+          }
+          await props.actions.fetchAll(Common.COLLECTION_DETAIL_PRODUCT, datasubmit); 
+          setIsLoading(false);     
+      } catch (error) {
+          alert(error)
+      } finally {
+        setIsLoading(false);  
+      }
+  }
 
   const onSubmit = async(data) => {
     try {
       data['payment_ar'] = true;
       data['trx_number'] = detailar.trx_number;
+      data['job_status'] = '2';
       const updatePay = await props.actions.storeItem(Common.UPDATE_COLLECTION_PAYMENT, data);
-      console.log(updatePay.success);
+      // console.log(updatePay.success);
+      if(updatePay.success){
+          // await props.actions.fetchAll(Common.USER_PROFILE);
+          props.route.params.onBack();
+          Toast.show('Pembayaran berhasil disimpan');
+          props.navigation.goBack();
+      }
+    } catch (error) {
+      alert(error)
+    }
+  }
+
+  const onSaveDraft = async(data) => {
+    try {
+      data['payment_ar'] = true;
+      data['trx_number'] = detailar.trx_number;
+      data['job_status'] = '1';
+      const updatePay = await props.actions.storeItem(Common.UPDATE_COLLECTION_PAYMENT, data);
+      // console.log(updatePay.success);
       if(updatePay.success){
           // await props.actions.fetchAll(Common.USER_PROFILE);
           Toast.show('Pembayaran berhasil disimpan');
@@ -52,6 +84,17 @@ const CollectionPayment = ( props ) => {
       alert(error)
     }
   }
+  
+  useEffect(() => {
+      const interactionPromise = InteractionManager.runAfterInteractions(() => {
+          loadData()
+      });
+      return () => interactionPromise.cancel();
+  },[])
+
+  const keyExtractor = useCallback((item, index) => index.toString(), []);
+  const detailproduct = collectionproduct ? collectionproduct : [];
+  console.log(props.route.params);
 
   return (
     <View style={{flex:1}}>
@@ -60,6 +103,7 @@ const CollectionPayment = ( props ) => {
         showsVerticalScrollIndicator={false}
         horizontal={false}
     >
+    <Loading loading={isLoading} /> 
       <View style={{ paddingHorizontal: 10, paddingTop: 10 }}>
         <Card style={{ alignItems: 'center' }}>
           <Card.Content
@@ -76,36 +120,53 @@ const CollectionPayment = ( props ) => {
           </Title>
           <View style={{ marginTop:10 }} />
           <Paragraph>{detailar.bill_to_address}</Paragraph>
-          <Paragraph>{`Nominal Tagihan : Rp ${detailar.amount_due_remaining}`}</Paragraph>
-          <Paragraph>{`No. Tagihan : ${detailar.trx_number}`}</Paragraph>
+          <View style={{ marginTop:20 }}>       
+              <Text title= {`No. Tagihan : ${detailar.trx_number}`} />
+              <NumberFormat 
+                  value={detailar.amount_due_remaining} 
+                  displayType={'text'} 
+                  prefix={`Nominal Tagihan : Rp. `} 
+                  thousandSeparator={true}
+                  renderText={(value) =>  {
+                      return (
+                          <View style={{flexDirection:'row', flexWrap:'wrap', alignItems: 'flex-end'}}>
+                              <Text title={value} />
+                          </View>
+                      )
+                  }}
+              />              
+          </View>
+          <View style={{marginTop: 20}}>
+            <Button icon={expanded != 0 ? 'arrow-down-thick' : 'arrow-up-thick'} mode='text' onPress={ () => setExpanded(!expanded) }>
+              { expanded != 0 ? 'More Detail' : 'Less More'}
+            </Button> 
+          </View>
           </Card.Content>
         </Card>
       </View>
-      <View style={{ paddingHorizontal: 10, paddingTop: 10 }}>     
-        <Card>
-          <Card.Content>
-            <Text
-              title="Rincian Produk" 
-              h5 bold style={{color: '#000000'}} 
-            />    
-            <List.Item
-              title="Skintex"
-              description="Qty: 2"
-              left={props => <List.Icon {...props} icon="chevron-double-right" />}
-            />    
-            <List.Item
-              title="Oilum Brightening Bottle Refill 210ml"
-              description="Qty: 5"
-              left={props => <List.Icon {...props} icon="chevron-double-right" />}
-            />    
-            <List.Item
-              title="JF Handsanitizer Spray 100ml"
-              description="Qty: 4"
-              left={props => <List.Icon {...props} icon="chevron-double-right" />}
-            />
-          </Card.Content>
-        </Card>         
-      </View>
+      { expanded == 0 &&
+        <View style={{ paddingHorizontal: 10, paddingTop: 10 }}>     
+          <Card>
+            <Card.Content>
+              <Text
+                title="Rincian Produk" 
+                h5 bold style={{color: '#000000'}} 
+              />         
+              { detailproduct != undefined && detailproduct?.map((item, index) => {
+                return (
+                  <React.Fragment>
+                    <List.Item
+                      title={item.description}
+                      description={`Qty: ${item.quantity}`}
+                      left={props => <List.Icon {...props} icon="chevron-double-right" />}
+                    />  
+                  </React.Fragment>
+                )
+              })}  
+            </Card.Content>
+          </Card>         
+        </View>
+      }
       <View style={{ paddingTop: 10 }} />
       <View style={{ paddingHorizontal: 10, paddingTop: 10 }}>
         <Card>
@@ -349,6 +410,12 @@ const CollectionPayment = ( props ) => {
     <View style={{ paddingHorizontal: 10, paddingTop: 10, paddingBottom: 20, width: '100%',  paddingTop: '2%'}}>
       <Button
         mode="contained"
+        onPress={handleSubmit(onSaveDraft)}  
+      >SAVE DRAFT
+      </Button>
+      <View style={{paddingTop: 10}} />
+      <Button
+        mode="contained"
         onPress={handleSubmit(onSubmit)}  
       >SUBMIT
       </Button>
@@ -396,6 +463,7 @@ function mapStateToProps(state) {
     apiState: state.api,
     message: state.flash.message,
     collectiondetail: state.crud.collectiondetails,
+    collectionproduct: state.crud.collectionproducts,
   }
 }
 

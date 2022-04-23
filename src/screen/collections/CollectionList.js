@@ -2,6 +2,7 @@ import React, { useCallback, useState, useEffect }  from 'react'
 import { Button, View, StyleSheet, FlatList, InteractionManager } from 'react-native'
 
 import DateTimePicker from '@react-native-community/datetimepicker';
+import Loading from './../../components/Loading';
 import Text from './../../components/Text';
 import { Card, Title, Colors, Appbar } from 'react-native-paper';
 import Moment from 'moment';
@@ -23,36 +24,22 @@ const CollectionList = ( props ) => {
   const [mode, setMode] = useState('date');
   const [show, setShow] = useState(false);
   const [expanded, setExpanded] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
 
   const handlePress = () => setExpanded(!expanded);
-  const onChange = (event, selectedDate) => {
-      const currentDate = selectedDate || date;
-      setShow(Platform.OS === 'ios');
-      setDate(currentDate);
-      dispatch(fetchGetVisitHistory({
-          visit_date: Moment(currentDate).format('YYYY-MM-DD'),
-          user_id: selectKowil
-      }))
-  };
-  const showMode = (currentMode) => {
-      setShow(true);
-      setMode(currentMode);
-  };
-  const showDatepicker = () => {
-      showMode('date');
-  };
   
-  const loadData = async() => {
+  const loadData = async() => {  
     try {
         const datasubmit = {
             header_id: props.route.params.data
         }
-        // await props.actions.fetchAll(Common.COLLECTION_DATA);   
-        await props.actions.fetchAll(Common.COLLECTION_LIST_DETAIL, datasubmit);        
+        // await props.actions.fetchAll(Common.COLLECTION_DATA);    
+        await props.actions.fetchAll(Common.COLLECTION_LIST_DETAIL, datasubmit);
+        setIsLoading(false);  
     } catch (error) {
         alert(error)
     } finally {
-        
+        setIsLoading(false);        
     }
 }
 useEffect(() => {
@@ -62,29 +49,19 @@ useEffect(() => {
     return () => interactionPromise.cancel();
 },[])
 const keyExtractor = useCallback((item, index) => index.toString(), []);
-// const listcollection = collectiondata ? collectiondata.data : [];
 const listcollection = collectionlistdetail ? collectionlistdetail.assigned_data : [];
 const assignedarcount = collectionlistdetail ? collectionlistdetail.assigned_ar_count : [];
 const assignedcount = collectionlistdetail ? collectionlistdetail.assigned_count : [];
-console.log(assignedcount);
+const statusheader = collectionlistdetail ? collectionlistdetail.header_status : [];
+// console.log(statusheader);
 
     const renderTopItem = ({}) => {
         return(
             <View style={{flex:1}}>
-            {show && (
-                <DateTimePicker
-                    testID="dateTimePicker"
-                    value={date}
-                    mode={mode}
-                    is24Hour={true}
-                    display="default"
-                    onChange={onChange}
-                />
-            )}
             <View flexDirection="row" style={{height: 40, justifyContent: 'space-between',  paddingLeft: 10,  backgroundColor: 'white'}}>
                 <View flexDirection="row" style={{ justifyContent: 'space-between',  }}>
                     <View style={{ justifyContent: 'center' }}>
-                        <Text title={`TANGGAL : ${Moment(date).format('YYYY-MM-DD')}`} p style={{ textTransform: 'uppercase', color: 'grey' }} />
+                        <Text title={`TANGGAL : ${statusheader.header_date}`} p style={{ textTransform: 'uppercase', color: 'grey' }} />
                     </View>
                 </View>
                 <View flexDirection="row" style={{ justifyContent: 'space-between',  }}>
@@ -99,7 +76,7 @@ console.log(assignedcount);
             <View flexDirection="row" style={{height: 40, justifyContent: 'space-between',paddingBottom: 15,  paddingLeft: 10,  backgroundColor: 'white', borderBottomColor: 'grey', borderBottomWidth: .5}}>
                 <View flexDirection="row" style={{ justifyContent: 'space-between',  }}>
                     <View style={{ justifyContent: 'center' }}>
-                        <Text title={`STATUS : OPEN`} p style={{ textTransform: 'uppercase', color: 'green' }} />
+                        <Text title={`STATUS : ${statusheader?.status}`} p style={{ textTransform: 'uppercase', color: `${statusheader ? statusheader.color : 'grey'}` }} />
                     </View>
                 </View>
                 <View flexDirection="row" style={{ justifyContent: 'space-between',  }}>
@@ -121,20 +98,37 @@ console.log(assignedcount);
     }
 
     const renderCategory = ({item, index}) => {
-        // console.log(item);
         return (
-            <View flexDirection="row" style={{marginVertical: 5}}>                
-                <View style={[styles.viewLine, { paddingTop: 0 }]} />
-                <View style={styles.divider} />
-                <List
-                    nav="CollectionDetail"
-                    item={item}
-                    iconList="package-variant-closed"
-                    color={[]}
-                    title={item.cust_name}
-                    sizeIcon={28}
-                />
-            </View>
+            <>
+                { item.job_status <= 1 ?
+                    <View flexDirection="row" style={{marginVertical: 5}}>                
+                        <View style={[styles.viewLine, { paddingTop: 0 }]} />
+                        <View style={styles.divider} />
+                        <List
+                            nav="CollectionDetail"  
+                            item={item}
+                            iconList="briefcase-check"
+                            color={'grey'}
+                            title={item.cust_name}
+                            sizeIcon={28}
+                        />
+                    </View>
+                    : (
+                    <View flexDirection="row" style={{marginVertical: 5}}>                
+                        <View style={[styles.viewLine, { paddingTop: 0 }]} />
+                        <View style={styles.divider} />
+                        <List
+                            style={{backgroundColor: '#C8C8C8'}}
+                            nav="CollectionDetail"
+                            item={item}
+                            iconList={"briefcase-check"}
+                            color={'green'}
+                            title={item.cust_name}
+                            sizeIcon={30}
+                        />
+                    </View>
+                    )}
+            </>
         )
     }
 
@@ -147,7 +141,8 @@ console.log(assignedcount);
                 icon={'barcode-scan'} 
                 onPress={() => props.navigation.navigate('ScannerScreen')}
           />
-      </Appbar.Header>      
+      </Appbar.Header>     
+      <Loading loading={isLoading} /> 
     
         <FlatList style={styles.list}
             showsVerticalScrollIndicator={false}
@@ -196,7 +191,6 @@ const styles = StyleSheet.create({
 
 
 function mapStateToProps(state) {
-    // console.log(state.crud.collectiondatas)
     return {
         isAuthenticated: state.auth.isAuthenticated,
         apiState: state.api,

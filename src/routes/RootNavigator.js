@@ -1,5 +1,7 @@
 import * as React from 'react';
 import { createStackNavigator, CardStyleInterpolators } from '@react-navigation/stack';
+import { useSelector } from "react-redux";
+import { getToken } from '../redux/utils/actionUtil';
 
 const Stack = createStackNavigator();
 
@@ -19,9 +21,16 @@ import OthersIndex from '../screen/others/OthersIndex';
 import OthersProfile from '../screen/others/OthersProfile';
 import AbsenMobil from '../screen/shipment/AbsenMobil';
 
-const RootNavigator = () => {
+const RootNavigator = (props) => {
+  const auth = useSelector((state) => {
+    const stateAuth = state.auth
+    return stateAuth
+  });
+  getToken().then(rest => console.log(rest))
+  console.log(auth)
   return (
     <Stack.Navigator>  
+    { !auth.isAuthenticated ? (
       <Stack.Screen
         name="LoginScreen"
         component={LoginScreen}
@@ -30,6 +39,8 @@ const RootNavigator = () => {
           cardStyleInterpolator: CardStyleInterpolators.forFadeFromBottomAndroid,
         }}
       />   
+    ) : (
+      <>
       <Stack.Screen
         name="Beranda"
         component={HomeScreen}
@@ -212,6 +223,8 @@ const RootNavigator = () => {
           cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
         }}
       /> 
+      </>
+    )}
     </Stack.Navigator>
   );
 }

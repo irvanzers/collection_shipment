@@ -13,8 +13,9 @@ let headers = {
 export const login = (data) => (dispatch) => {
     return new Promise(async(resolve, reject) => {
         dispatch(apiAction.apiRequest());
-        axios.post(AppConstant.API_URL + 'login', data, headers)
+        axios.post('https://egis.galenium.com/v1/api/logincollection', data, headers)
         .then((response) => {
+            console.log(response.data)
             dispatch({
                 type: ActionType.LOG_IN_SUCCESS,
                 payload: response.data.data.token
@@ -24,9 +25,10 @@ export const login = (data) => (dispatch) => {
             resolve(response.data);
         })
         .catch((error) => {
-            authErrorHandler(dispatch, error.response.data, ActionType.LOG_IN_FAILURE);
+            // console.log(error)
+            authErrorHandler(dispatch, error.response, ActionType.LOG_IN_FAILURE);
             dispatch(FlashMessage.addFlashMessage('error', 'Email address atau kata sandi anda salah.'));
-            resolve(error.response.data)
+            resolve(error.response)
         });
     })
 }
@@ -54,25 +56,29 @@ export const logingoogle = (data) => (dispatch) => {
 export const verifyToken = (token) => (dispatch) => {
     return new Promise(async(resolve, reject) => {
         const token = await getToken();
-        let header = {
-            headers: {
-                "Accept": "application/json",
-                "Content-Type": "application/json",
-                "Authorization" : "Bearer "+token
-            }
-        }
-        axios.get(AppConstant.API_URL + 'verifytoken', header)
-        .then((response) => {
+        if(token){            
             dispatch({type: ActionType.LOG_IN_SUCCESS, payload: token});
-        })
-        .catch((error) => {
-            if(error.response.data?.status == 401) {
-                dispatch({
-                    type: ActionType.LOG_OUT
-                });
-                clearToken();
-            }
-        });
+        }
+        
+        // let header = {
+        //     headers: {
+        //         "Accept": "application/json",
+        //         "Content-Type": "application/json",
+        //         "Authorization" : "Bearer "+token
+        //     }
+        // }
+        // axios.get(AppConstant.API_URL + 'verifytoken', header)
+        // .then((response) => {
+            // dispatch({type: ActionType.LOG_IN_SUCCESS, payload: token});
+        // })
+        // .catch((error) => {
+        //     if(error.response.data?.status == 401) {
+                // dispatch({
+                //     type: ActionType.LOG_OUT
+                // });
+        //         clearToken();
+        //     // }
+        // });
     })
 }
 
@@ -107,12 +113,12 @@ export const logout = (data) => (dispatch) => {
 }
 
 export function authErrorHandler(dispatch, error, type) {
-    let errorMessage = (error.data.message) ? error.data.message : error.data;
+    let errorMessage = (error?.data.message) ? error?.data.message : error?.data;
     // NOT AUTHENTICATED ERROR
-    if (error.status === 401) {
+    if (error?.status === 401) {
         errorMessage = 'You are not authorized to do this. Please login and try again.';
     }
-    if(error.status === 201){
+    if(error?.status === 201){
         errorMessage = error
     }
     dispatch({

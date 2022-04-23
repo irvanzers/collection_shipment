@@ -18,6 +18,7 @@ const List = props => {
         componentOther,
         rightComponent,
         height,
+        color,
         sizeIcon,
         fontSize,
          ...rest
@@ -34,7 +35,7 @@ const List = props => {
         >
             <>
                 <View style={styles.listSubMenu}>
-                    <MaterialComunityIcons color={theme.colors.primary} name={iconList} size={sizeIcon} />
+                    <MaterialComunityIcons color={color} name={iconList} size={sizeIcon} />
                     <Text style={[styles.textMenu, fontSize && {fontSize: fontSize}]} title={title} p />
                 </View>
                 <View flexDirection="row" style={{ alignItems: 'center' }}>

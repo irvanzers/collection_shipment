@@ -1,7 +1,7 @@
 import React from 'react'
 import { View, StyleSheet } from 'react-native'
 import { TextInput as Input } from 'react-native-paper'
-// import Text from '../Text'
+import Text from '../Text'
 export default function TextInput({ errorText, description, right, ...props }) {
   return (
     <View style={styles.container}>
