@@ -12,6 +12,8 @@ import Collapsible from 'react-native-collapsible';
 import Loading from './../../components/Loading';
 import moment from 'moment';
 import DatePicker from '../../components/DatePicker';
+import Toast from 'react-native-simple-toast';
+import Geolocation from 'react-native-geolocation-service';
 
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
@@ -24,16 +26,23 @@ import Common from './../../redux/constants/common';
 import { theme } from '../../redux/constants/theme';
 import {getUuid, setUuid} from './../../redux/utils/actionUtil';
 import { useNavigation } from '@react-navigation/core';
+import { API_URL, URL } from './../../config/constants';
+
 
 const CollectionDetail = ( props ) => {
   const {collectiondetail} = props;
   const navigation = useNavigation();
   const [text, setText] = React.useState("");
-  const { handleSubmit, control, formState: {errors}, setValue } = useForm(); // initialize the hook
+  const { handleSubmit, control, formState: {errors}, setValue, getValues } = useForm(); // initialize the hook
   const [error, setError] = useState('');
   const [visitSelfie, setVisitSelfie] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [jenisPayment, setJenisPayment] = useState('');
+  const [position, setPosition] = useState({
+      latitude: '',
+      longitude: ''
+  });
+  let jobstatus = false;
   let total_tagihan = 0;
 
   const loadData = async () => {
@@ -52,11 +61,19 @@ const CollectionDetail = ( props ) => {
 
   const onSubmit = async(data) => {
     try {
+      if(visitSelfie == null){
+          checkSelfie()
+          return true;
+      }
+      setIsLoading(true)
+      data['visit_selfie'] = visitSelfie;
       data['payment_all_ar'] = true;
-      data['header_id'] = detaildata.collection_header_id;
+      data['cust_id'] = detaildata.cust_id;
+      data['visit_lat'] = position.latitude;
+      data['visit_long'] = position.longitude;
       data['job_status'] = '2';
       const updatePay = await props.actions.storeItem(Common.UPDATE_COLLECTION_PAYMENT, data);
-      console.log(updatePay.success);
+      // console.log(updatePay.success);
       if(updatePay.success){
           // await props.actions.fetchAll(Common.USER_PROFILE);
           Toast.show('Pembayaran berhasil disimpan');
@@ -70,16 +87,23 @@ const CollectionDetail = ( props ) => {
   
   const onSaveDraft = async(data) => {
     try {
+      if(visitSelfie == null){
+          checkSelfie()
+          return true;
+      }
+      setIsLoading(true)
+      data['visit_selfie'] = visitSelfie;
       data['payment_all_ar'] = true;
-      data['header_id'] = detaildata.collection_header_id;
+      data['cust_id'] = detaildata.cust_id;
+      data['visit_lat'] = position.latitude;
+      data['visit_long'] = position.longitude;
       data['job_status'] = '1';
-      // const updatePay = await props.actions.storeItem(Common.UPDATE_COLLECTION_PAYMENT, data);
-      // console.log(updatePay.success);
-      // if(updatePay.success){
-      //     // await props.actions.fetchAll(Common.USER_PROFILE);
-      //     Toast.show('Pembayaran berhasil disimpan');
-      //     props.navigation.goBack();
-      // }
+      const updatePay = await props.actions.storeItem(Common.UPDATE_COLLECTION_PAYMENT, data);
+      if(updatePay.success){
+          // await props.actions.fetchAll(Common.USER_PROFILE);
+          Toast.show('Pembayaran berhasil disimpan');
+          props.navigation.goBack();
+      }
       console.log(data)
     } catch (error) {
       alert(error)
@@ -88,16 +112,18 @@ const CollectionDetail = ( props ) => {
 
   //GETTING PHOTO
   const renderAsset = (visitSelfie) => {
+    // console.log(URL.visitSelfie)
       return (
           <Card style={{ width: '100%' }}>
               <Card.Cover source={{uri: visitSelfie}} style={{ height: 300 }} />
+              {/* <Card.Cover source={{ uri: `${URL}${visitSelfie}` }} style={{ height: 300 }} /> */}
               <Card.Actions style={{justifyContent: 'center'}}>
                   <Button mode="contained" onPress={()=> cleanupImages()}>REMOVE</Button>
               </Card.Actions>
           </Card>
       );
   }
-  
+
   const cleanupImages = () => {
       ImagePicker.clean().then(() => {
           setVisitSelfie(null)
@@ -121,17 +147,33 @@ const CollectionDetail = ( props ) => {
   const onGoBack = () => {
     loadData();
   }
+  
+  //GETTING POSITION LAT/LONG
+  const getPosition = () => {
+      Geolocation.getCurrentPosition(
+      pos => {
+          setPosition({
+              latitude: pos.coords.latitude,
+              longitude: pos.coords.longitude
+          });
+      },
+          e => setError(e.message)
+      );
+  };
 
   useEffect(() => {
       const interactionPromise = InteractionManager.runAfterInteractions(() => {
           loadData()
+          getPosition()
       });
       return () => interactionPromise.cancel();
   },[])
   const keyExtractor = useCallback((item, index) => index.toString(), []);
   const detaildata = collectiondetail ? collectiondetail.cust_detail : [];
   const listar = collectiondetail ? collectiondetail.list_ar : [];
-  // console.log(detaildata.job_status)
+  const statusar = collectiondetail ? collectiondetail.status_ar : [];
+  // console.log(detaildata.image_visit)
+  console.log(position.latitude)
 
   return (
     <View style={{flex:1}}>
@@ -176,6 +218,12 @@ const CollectionDetail = ( props ) => {
           </Title>
           <View style={{ marginTop: 10 }} />
           <Paragraph>{detaildata.bill_to_address}</Paragraph>
+          { detaildata.collection_status != null && 
+            <View style={{ marginTop: 15 }}>
+              <Text title={`Status Tagihan : ${detaildata.collection_status == 'tertagih' && 'TERTAGIH'}`} />
+              <Text title={`Catatan : ${detaildata.catatan_collection}`} />
+            </View>
+          }
           </Card.Content>
         </Card>
       </View>
@@ -188,7 +236,8 @@ const CollectionDetail = ( props ) => {
             />                
             { listar != undefined && listar?.map((item, index) => {
               total_tagihan += item.amount_due_remaining
-              console.log(total_tagihan)
+              !jobstatus ? (jobstatus = item.job_status == 2 && true ) : false
+              // console.log(total_tagihan)
               return (
                 <React.Fragment
                   key={index.toString()}
@@ -246,6 +295,8 @@ const CollectionDetail = ( props ) => {
           </Card.Content>
         </Card>         
       </View>
+      { detaildata.collection_status == null && 
+      <React.Fragment>
       <View style={{ paddingHorizontal: 10, paddingTop: 10 }}>
         <Card>
           <Card.Content>             
@@ -255,7 +306,7 @@ const CollectionDetail = ( props ) => {
             />            
             <View style={{marginTop: 15}}>
               <Controller
-                  defaultValue=""
+                  defaultValue={detaildata?.collection_status}
                   name="status_tagihan"
                   control={control}
                   rules={{ required: { value: true, message: 'Payment type harus di pilih' } }}
@@ -270,6 +321,7 @@ const CollectionDetail = ( props ) => {
                           onDataChange={(value) => onChange(value)}
                           placeholder="STATUS TAGIHAN"
                           value={value}
+                          onBlur={onBlur}
                           error={errors?.status_tagihan}
                           errorText={errors?.status_tagihan?.message}
                       />         
@@ -279,18 +331,18 @@ const CollectionDetail = ( props ) => {
           </Card.Content>
         </Card>
       </View>
-      { detaildata.job_status <= '0'  &&
+      { !jobstatus &&
       <View style={{ paddingHorizontal: 10, paddingTop: 10 }}>
         <Card>
           <Card.Content>             
             <Text
-              title="Payment All Collection" 
+              title="Pembayaran Semua Tagihan" 
               h5 bold style={{color: '#000000'}} 
             />            
             <View style={{marginTop: 15}}>
             <Text title="Metode Pambayaran" />
               <Controller
-                  defaultValue=""
+                  defaultValue={listar?.payment_type}
                   name="payment_type"
                   control={control}
                   rules={{ required: { value: true, message: 'Status tagihan harus di pilih' } }}
@@ -317,7 +369,7 @@ const CollectionDetail = ( props ) => {
               <View style={{marginTop: 15}} />
               <Text title="No. Giro" />
                 <Controller
-                    defaultValue=""
+                    defaultValue={listar?.giro_number}
                     name="no_giro"
                     control={control}
                     rules={{ required: { value: true, message: 'Nomor Giro Harus Di isi' } }}
@@ -354,7 +406,7 @@ const CollectionDetail = ( props ) => {
               <View style={{marginTop: 15}} />
               <Text title="Nama Bank" />
                   <Controller
-                      defaultValue=""
+                      defaultValue={listar?.bank_account}
                       name="nama_bank"
                       control={control}
                       rules={{ required: { value: true, message: 'Nama Bank Harus Di isi' } }}
@@ -371,7 +423,7 @@ const CollectionDetail = ( props ) => {
               <View style={{marginTop: 15}} />
               <Text title="Nominal Payment" />
                   <Controller
-                      defaultValue=""
+                      defaultValue={listar?.amount_payment}
                       name="nominal_payment"
                       control={control}
                       rules={{ required: { value: true, message: 'Nominal Pembayaran Harus Di isi' } }}
@@ -392,7 +444,7 @@ const CollectionDetail = ( props ) => {
                 <View style={{marginTop: 15}} /> 
                 <Text title="No. Rekening" />
                   <Controller
-                      defaultValue=""
+                      defaultValue={listar?.nomor_rekening}
                       name="nomor_rekening"
                       control={control}
                       rules={{ required: { value: true, message: 'Nominal Pembayaran Harus Di isi' } }}
@@ -409,7 +461,7 @@ const CollectionDetail = ( props ) => {
                 <View style={{marginTop: 15}} />  
                 <Text title="Nama Bank" />
                   <Controller
-                      defaultValue=""
+                      defaultValue={listar?.bank_account}
                       name="nama_bank"
                       control={control}
                       rules={{ required: { value: true, message: 'Nominal Pembayaran Harus Di isi' } }}
@@ -426,7 +478,7 @@ const CollectionDetail = ( props ) => {
                 <View style={{marginTop: 15}} />  
                 <Text title="Nominal Payment" />
                   <Controller
-                      defaultValue=""
+                      defaultValue={listar?.amount_payment}
                       name="nominal_payment"
                       control={control}
                       rules={{ required: { value: true, message: 'Nominal Pembayaran Harus Di isi' } }}
@@ -447,7 +499,7 @@ const CollectionDetail = ( props ) => {
               <View style={{marginTop: 15}} />  
               <Text title="Nominal Payment" />
                 <Controller
-                    defaultValue=""
+                    defaultValue={listar?.amount_payment}
                     name="nominal_payment"
                     control={control}
                     rules={{ required: { value: true, message: 'Nominal Pembayaran Harus Di isi' } }}
@@ -530,16 +582,17 @@ const CollectionDetail = ( props ) => {
               h5 bold style={{color: '#000000'}} 
             />        
             <Controller
-                defaultValue=""
-                name="visit_catatan"
+                defaultValue={detaildata?.catatan_collection}
+                name="catatan_collection"
                 control={control}
                 rules={{ required: { value: true, message: 'Catatan collection harus diisi' } }}
-                render={({ field: {onChange, value} }) => (
+                render={({ field: {onChange, value, onBlur} }) => (
                     <Input
-                        error={errors?.visit_catatan}
-                        errorText={errors?.visit_catatan?.message}
+                        error={errors?.catatan_collection}
+                        errorText={errors?.catatan_collection?.message}
                         onChangeText={(text) => {onChange(text)}}
                         value={value}
+                        onBlur={onBlur}
                         multiline={true}
                         placeholder="CATATAN COLLECTION"
                     />
@@ -563,6 +616,8 @@ const CollectionDetail = ( props ) => {
             </Button>
         <View style={{width: '100%', paddingBottom: '10%'}} />
       </View>
+      </React.Fragment>
+      }
     </ScrollView>
     </View>
   )

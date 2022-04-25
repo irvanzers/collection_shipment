@@ -1,10 +1,10 @@
 import React, { useCallback, useState, useEffect }  from 'react'
-import { Button, View, StyleSheet, FlatList, InteractionManager } from 'react-native'
+import { Button, View, StyleSheet, FlatList, InteractionManager, Alert } from 'react-native'
 
 import DateTimePicker from '@react-native-community/datetimepicker';
 import Loading from './../../components/Loading';
 import Text from './../../components/Text';
-import { Card, Title, Colors, Appbar } from 'react-native-paper';
+import { Card, Title, Colors, Appbar, Menu } from 'react-native-paper';
 import Moment from 'moment';
 import List from './../../components/MenuList/List';
 import { connect } from 'react-redux';
@@ -25,6 +25,9 @@ const CollectionList = ( props ) => {
   const [show, setShow] = useState(false);
   const [expanded, setExpanded] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
+  const [visible, setVisible] = useState(false);
+  const openMenu = () => setVisible(true);
+  const closeMenu = () => setVisible(false);
 
   const handlePress = () => setExpanded(!expanded);
   
@@ -42,12 +45,31 @@ const CollectionList = ( props ) => {
         setIsLoading(false);        
     }
 }
+
+const onSubmit = () => {
+    Alert.alert(
+        "PERHATIAN",
+        "JIKA ADA JOB YANG BELUM DI VISIT/SUBMIT, MAKA STATUSNYA TIDAK TERTAGIH!",
+        [{
+            text: "BATAL",
+            onPress: () => console.log("No, continue editing")
+        }, {
+            text: "YA",
+            onPress: () => {
+                console.log('Yes')
+            },
+            style: "cancel"
+        }],
+    );
+}
+
 useEffect(() => {
     const interactionPromise = InteractionManager.runAfterInteractions(() => {
         loadData()
     });
     return () => interactionPromise.cancel();
 },[])
+
 const keyExtractor = useCallback((item, index) => index.toString(), []);
 const listcollection = collectionlistdetail ? collectionlistdetail.assigned_data : [];
 const assignedarcount = collectionlistdetail ? collectionlistdetail.assigned_ar_count : [];
@@ -108,9 +130,9 @@ const statusheader = collectionlistdetail ? collectionlistdetail.header_status :
                             nav="CollectionDetail"  
                             item={item}
                             iconList="briefcase-check"
-                            color={'grey'}
+                            color={'green'}
                             title={item.cust_name}
-                            sizeIcon={28}
+                            sizeIcon={30}
                         />
                     </View>
                     : (
@@ -122,7 +144,7 @@ const statusheader = collectionlistdetail ? collectionlistdetail.header_status :
                             nav="CollectionDetail"
                             item={item}
                             iconList={"briefcase-check"}
-                            color={'green'}
+                            color={'grey'}
                             title={item.cust_name}
                             sizeIcon={30}
                         />
@@ -141,6 +163,12 @@ const statusheader = collectionlistdetail ? collectionlistdetail.header_status :
                 icon={'barcode-scan'} 
                 onPress={() => props.navigation.navigate('ScannerScreen')}
           />
+          <Menu
+              visible={visible}
+              onDismiss={closeMenu}
+              anchor={<Appbar.Action color="white" icon={'dots-vertical'} onPress={() => openMenu()} />}>
+              <Menu.Item onPress={() => { onSubmit('submit') }} title="SUBMIT JOB" />
+          </Menu>
       </Appbar.Header>     
       <Loading loading={isLoading} /> 
     

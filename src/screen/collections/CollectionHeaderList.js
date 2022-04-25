@@ -107,9 +107,10 @@ const CollectionHeaderList = ( props ) => {
         >
         {/* // style={month_now == month_start && year_now == year_start ? null : styles.nonActive} > */}
             <Card.Title     
-                title={<Text title={item.header_date} p />}    
+                title={<Text title={item.header_date} style={{ color: 'white' }} p />}
+                style={styles.colorBox}
             />
-            <Card.Content>
+            <Card.Content style={styles.viewBox}>
                 <View style={styles.viewBox}>
                     <View style={styles.viewLitBox}>
                         <Text title={item.total_customer} style={styles.textLeft} h2 bold />
@@ -118,7 +119,7 @@ const CollectionHeaderList = ( props ) => {
                     <View style={{ paddingLeft: 10, width: '60%' }}>
                         <View style={{ paddingTop: 5, paddingBottom: 5 }}>
                             <ProgressBar progress={item.job_progress} color={item.prog_color} style={{ height: 20 }} />
-                            <Text title={`PROGRESS ${(item.job_progress * 100).toFixed(2)}%`} style={{ color: 'grey', paddingTop: 0, marginTop: 0, alignItems: 'center' }} p italic />
+                            <Text title={`PROGRESS ${(item.job_progress * 100).toFixed(2)}%`} style={{ color: 'white', paddingTop: 0, marginTop: 0, alignItems: 'center' }} p italic />
                         </View>
                         <Text title={item.job_status} style={[styles.approve, {backgroundColor: `${item.job_color}`, color: `${item.job_text}`}]} p bold />
                     </View>
@@ -159,9 +160,14 @@ const styles = StyleSheet.create({
     container: {
         flex: 1
     },
+    colorBox: {
+        backgroundColor: '#4AB5E5',
+        color: 'white'
+    },
     viewBox: { 
         flexDirection: 'row', 
-        width: SCREEN_WIDTH
+        width: SCREEN_WIDTH,
+        backgroundColor: '#4AB5E5',
     },
     viewLitBox: { 
         alignItems: 'center', 
@@ -171,7 +177,7 @@ const styles = StyleSheet.create({
         width: '25%'
     },
     textLeft: { 
-        color: 'grey', 
+        color: 'white', 
         paddingBottom: 0, 
         marginBottom: 0 
     },

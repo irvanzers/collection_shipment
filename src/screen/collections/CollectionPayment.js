@@ -94,7 +94,7 @@ const CollectionPayment = ( props ) => {
 
   const keyExtractor = useCallback((item, index) => index.toString(), []);
   const detailproduct = collectionproduct ? collectionproduct : [];
-  console.log(props.route.params);
+  console.log(detailar);
 
   return (
     <View style={{flex:1}}>
@@ -136,6 +136,70 @@ const CollectionPayment = ( props ) => {
                   }}
               />              
           </View>
+          { detailar.job_status == 2 &&
+            <React.Fragment>
+            <View style={{ marginTop:20 }}>
+              { detailar.payment_type == 'giro_bank' && 
+                <> 
+                <Text title= {`Tipe Pembayaran : ${detailar.payment_type == 'giro_bank' && 'Giro Bank'}`} />
+                <Text title= {`No. Giro : ${detailar.giro_number}`} />
+                <Text title= {`Nama Bank : ${detailar.bank_account}`} />
+                <Text title= {`Tgl. Pencairan Giro : ${detailar.tgl_pencairan_giro}`} />
+                <NumberFormat 
+                    value={detailar.amount_payment} 
+                    displayType={'text'} 
+                    prefix={`Nominal Pembayaran : Rp. `} 
+                    thousandSeparator={true}
+                    renderText={(value) =>  {
+                        return (
+                            <View style={{flexDirection:'row', flexWrap:'wrap', alignItems: 'flex-end'}}>
+                                <Text title={value} />
+                            </View>
+                        )
+                    }}
+                />      
+                </>
+              } 
+              { detailar.payment_type == 'transfer' && 
+                <> 
+                <Text title= {`Tipe Pembayaran : ${detailar.payment_type == transfer && 'Transfer'}`} />
+                <Text title= {`Nama Bank : ${detailar.bank_account}`} />
+                <NumberFormat 
+                    value={detailar.amount_payment} 
+                    displayType={'text'} 
+                    prefix={`Nominal Transfer : Rp. `} 
+                    thousandSeparator={true}
+                    renderText={(value) =>  {
+                        return (
+                            <View style={{flexDirection:'row', flexWrap:'wrap', alignItems: 'flex-end'}}>
+                                <Text title={value} />
+                            </View>
+                        )
+                    }}
+                />      
+                </>
+              } 
+              { detailar.payment_type == 'tunai' && 
+                <> 
+                <Text title= {`Tipe Pembayaran : ${detailar.payment_type == 'tunai' && 'Tunai'}`} />
+                <NumberFormat 
+                    value={detailar.amount_payment} 
+                    displayType={'text'} 
+                    prefix={`Nominal Pembayaran : Rp. `} 
+                    thousandSeparator={true}
+                    renderText={(value) =>  {
+                        return (
+                            <View style={{flexDirection:'row', flexWrap:'wrap', alignItems: 'flex-end'}}>
+                                <Text title={value} />
+                            </View>
+                        )
+                    }}
+                />      
+                </>
+              }        
+            </View>
+            </React.Fragment>
+          }
           <View style={{marginTop: 20}}>
             <Button icon={expanded != 0 ? 'arrow-down-thick' : 'arrow-up-thick'} mode='text' onPress={ () => setExpanded(!expanded) }>
               { expanded != 0 ? 'More Detail' : 'Less More'}
@@ -166,260 +230,264 @@ const CollectionPayment = ( props ) => {
             </Card.Content>
           </Card>         
         </View>
-      }
-      <View style={{ paddingTop: 10 }} />
-      <View style={{ paddingHorizontal: 10, paddingTop: 10 }}>
-        <Card>
-          <Card.Content>             
-            <Text
-              title="Metode Pembayaran" 
-              h5 bold style={{color: '#000000'}} 
-            />            
-            <View style={{marginTop: 15}}>
-              <Controller
-                  defaultValue=""
-                  name="payment_type"
-                  control={control}
-                  rules={{ required: { value: true, message: 'Payment type harus di pilih' } }}
-                  render={({field: { onChange, value, onBlur }}) => (
-                    <SelectPicker
-                        items = {[
-                                    { label: 'Giro Bank', value: 'giro_bank' },
-                                    { label: 'Transfer', value: 'transfer' },
-                                    { label: 'Tunai', value: 'tunai' },
-                                ]}
-                        onDataChange={(value ) => {
-                                                    setJenisPayment(value)
-                                                    onChange(value)
-                                                  }}
-                        placeholder="METODE PEMBAYARAN"
-                        value={value}
-                        error={errors?.payment_type}
-                        errorText={errors?.payment_type?.message}
-                    />     
-                  )}
-              />      
-            </View>
-          </Card.Content>
-        </Card>
-      </View>        
-      <View style={{ paddingTop: 10 }} />      
-      {
-        jenisPayment == 'giro_bank' &&
-      <View style={{ paddingHorizontal: 10, paddingTop: 10, paddingBottom: 20 }}>
-        <Card>
-          <Card.Content>             
-            <Text
-              title="No. Giro" 
-              h5 bold style={{color: '#000000'}} 
-            />            
-            <View style={{marginTop: 15}}>  
-              <Controller
-                  defaultValue=""
-                  name="no_giro"
-                  control={control}
-                  rules={{ required: { value: true, message: 'Nomor Giro Harus Di isi' } }}
-                  render={({field: { onChange, value, onBlur }}) => (
-                  <Input
-                      onChangeText={(text) => {onChange(text)}}
-                      value={value}
-                      placeholder="NO. GIRO"
-                      error={errors?.no_giro}
-                      errorText={errors?.no_giro?.message}
-                  />
-                )}
-              />
-            </View>     
-            <View style={{marginTop: 15}}></View>
-            <View style={{marginTop: 10, marginBottom: 0}}>
-                <View style={{flexDirection: 'row'}}>
-                    <Text title="TANGGAL JATUH TEMPO" h6 bold/>
-                    <Text title=" *" h6 bold style={{color: 'red'}}/>
-                </View>
+      }      
+      { detailar.job_status != 2 &&
+      <React.Fragment>
+        <View style={{ paddingTop: 10 }} />
+        <View style={{ paddingHorizontal: 10, paddingTop: 10 }}>
+          <Card>
+            <Card.Content>             
+              <Text
+                title="Metode Pembayaran" 
+                h5 bold style={{color: '#000000'}} 
+              />            
+              <View style={{marginTop: 15}}>
                 <Controller
-                    defaultValue={moment(new Date()).format('YYYY-MM-DD')}
-                    name="girodate"
+                    defaultValue={detailar?.payment_type}
+                    name="payment_type"
                     control={control}
-                    rules={{ required: { value: true, message: 'Tanggal kunjungan harus diisi' } }}
-                    render={({ onChange, value }) => (
-                        <DatePicker
-                            style={styles.datePickerStyle}
-                            date={value} // Initial date from state
-                            mode="date" // The enum of date, datetime and time
-                            format="YYYY-MM-DD"
-                            value={value}
-                            error={errors.visit_date}
-                            errorText={errors?.giro_date?.message}
-                            onDateChange={(data) => { onChange(data) }}
-                        />
+                    rules={{ required: { value: true, message: 'Payment type harus di pilih' } }}
+                    render={({field: { onChange, value, onBlur }}) => (
+                      <SelectPicker
+                          items = {[
+                                      { label: 'Giro Bank', value: 'giro_bank' },
+                                      { label: 'Transfer', value: 'transfer' },
+                                      { label: 'Tunai', value: 'tunai' },
+                                  ]}
+                          onDataChange={(value ) => {
+                                                      setJenisPayment(value)
+                                                      onChange(value)
+                                                    }}
+                          placeholder="METODE PEMBAYARAN"
+                          value={value}
+                          error={errors?.payment_type}
+                          errorText={errors?.payment_type?.message}
+                      />     
                     )}
+                />      
+              </View>
+            </Card.Content>
+          </Card>
+        </View>        
+        <View style={{ paddingTop: 10 }} />      
+        {
+          jenisPayment == 'giro_bank' &&
+        <View style={{ paddingHorizontal: 10, paddingTop: 10, paddingBottom: 20 }}>
+          <Card>
+            <Card.Content>             
+              <Text
+                title="No. Giro" 
+                h5 bold style={{color: '#000000'}} 
+              />            
+              <View style={{marginTop: 15}}>  
+                <Controller
+                    defaultValue={detailar?.giro_number}
+                    name="no_giro"
+                    control={control}
+                    rules={{ required: { value: true, message: 'Nomor Giro Harus Di isi' } }}
+                    render={({field: { onChange, value, onBlur }}) => (
+                    <Input
+                        onChangeText={(text) => {onChange(text)}}
+                        value={value}
+                        placeholder="NO. GIRO"
+                        error={errors?.no_giro}
+                        errorText={errors?.no_giro?.message}
+                    />
+                  )}
                 />
-            </View>
-            <View style={{marginTop: 15}}></View>
-            <Text
-              title="Nama Bank" 
-              h5 bold style={{color: '#000000'}} 
-            />            
-            <View style={{marginTop: 15}}>    
-              <Controller
-                  defaultValue=""
-                  name="nama_bank"
-                  control={control}
-                  rules={{ required: { value: true, message: 'Nama Bank Harus Di isi' } }}
-                  render={({field: { onChange, value, onBlur }}) => (
-                    <Input
-                        onChangeText={(text) => {onChange(text)}}
-                        value={value}
-                        placeholder="NAMA BANK"
-                        error={errors?.nama_bank}
-                        errorText={errors?.nama_bank?.message}
-                    />
-                  )}
-              />
-            </View>
-            <View style={{marginTop: 15}}></View>
-            <Text
-              title="Nominal Pembayaran" 
-              h5 bold style={{color: '#000000'}} 
-            />            
-            <View style={{marginTop: 15}}>  
-              <Controller
-                  defaultValue=""
-                  name="nominal_payment"
-                  control={control}
-                  rules={{ required: { value: true, message: 'Nominal Pembayaran Harus Di isi' } }}
-                  render={({field: { onChange, value }}) => (
-                    <Input
-                        onChangeText={(text) => {onChange(text)}}
-                        value={value}
-                        placeholder="NOMINAL PEMBAYARAN"
-                        error={errors?.nominal_payment}
-                        errorText={errors?.nominal_payment?.message}
-                    />
-                  )}
-              />
-            </View>
-          </Card.Content>
-        </Card>
-      </View>  
-    }
-    {
-      jenisPayment == 'transfer' &&
-      <View style={{ paddingHorizontal: 10, paddingTop: 10, paddingBottom: 20 }}>
-        <Card>
-          <Card.Content>             
-            <Text
-              title="No. Rekening" 
-              h5 bold style={{color: '#000000'}} 
-            />            
-            <View style={{marginTop: 15}}> 
-              <Controller
-                  defaultValue=""
-                  name="nomor_rekening"
-                  control={control}
-                  rules={{ required: { value: true, message: 'Nominal Pembayaran Harus Di isi' } }}
-                  render={({field: { onChange, value }}) => ( 
-                    <Input
-                        error={errors?.nomor_rekening}
-                        errorText={errors?.nomor_rekening?.message}
-                        onChangeText={(text) => {onChange(text)}}
-                        value={value}
-                        placeholder="NO. REKENING"
-                    />
-                  )}
-              />
-            </View>     
-            <View style={{marginTop: 15}}></View>
-            <Text
-              title="Nama Bank" 
-              h5 bold style={{color: '#000000'}} 
-            />            
-            <View style={{marginTop: 15}}>  
-              <Controller
-                  defaultValue=""
-                  name="nama_bank"
-                  control={control}
-                  rules={{ required: { value: true, message: 'Nominal Pembayaran Harus Di isi' } }}
-                  render={({field: { onChange, value }}) => ( 
+              </View>     
+              <View style={{marginTop: 15}}></View>
+              <View style={{marginTop: 10, marginBottom: 0}}>
+                  <View style={{flexDirection: 'row'}}>
+                      <Text title="TANGGAL JATUH TEMPO" h6 bold/>
+                      <Text title=" *" h6 bold style={{color: 'red'}}/>
+                  </View>
+                  <Controller
+                      defaultValue={moment(new Date()).format('YYYY-MM-DD')}
+                      name="girodate"
+                      control={control}
+                      rules={{ required: { value: true, message: 'Tanggal kunjungan harus diisi' } }}
+                      render={({ onChange, value }) => (
+                          <DatePicker
+                              style={styles.datePickerStyle}
+                              date={value} // Initial date from state
+                              mode="date" // The enum of date, datetime and time
+                              format="YYYY-MM-DD"
+                              value={value}
+                              error={errors.visit_date}
+                              errorText={errors?.giro_date?.message}
+                              onDateChange={(data) => { onChange(data) }}
+                          />
+                      )}
+                  />
+              </View>
+              <View style={{marginTop: 15}}></View>
+              <Text
+                title="Nama Bank" 
+                h5 bold style={{color: '#000000'}} 
+              />            
+              <View style={{marginTop: 15}}>    
+                <Controller
+                    defaultValue={detailar?.bank_account}
+                    name="nama_bank"
+                    control={control}
+                    rules={{ required: { value: true, message: 'Nama Bank Harus Di isi' } }}
+                    render={({field: { onChange, value, onBlur }}) => (
                       <Input
-                          error={errors?.nama_bank}
-                          errorText={errors?.nama_bank?.message}
                           onChangeText={(text) => {onChange(text)}}
                           value={value}
                           placeholder="NAMA BANK"
-                      /> 
-                  )}
-              />
-            </View>
-            <View style={{marginTop: 15}}></View>
-            <Text
-              title="Nominal Pembayaran" 
-              h5 bold style={{color: '#000000'}} 
-            />            
-            <View style={{marginTop: 15}}>  
-              <Controller
-                  defaultValue=""
-                  name="nominal_payment"
-                  control={control}
-                  rules={{ required: { value: true, message: 'Nominal Pembayaran Harus Di isi' } }}
-                  render={({field: { onChange, value }}) => ( 
-                    <Input
-                        error={errors?.nominal_payment}
-                        errorText={errors?.nominal_payment?.message}
-                        onChangeText={(text) => {onChange(text)}}
-                        value={value}
-                        placeholder="NOMINAL PEMBAYARAN"
-                    />
-                  )}
-              />
-            </View>
-          </Card.Content>
-        </Card>
-      </View>  
+                          error={errors?.nama_bank}
+                          errorText={errors?.nama_bank?.message}
+                      />
+                    )}
+                />
+              </View>
+              <View style={{marginTop: 15}}></View>
+              <Text
+                title="Nominal Pembayaran" 
+                h5 bold style={{color: '#000000'}} 
+              />            
+              <View style={{marginTop: 15}}>  
+                <Controller
+                    defaultValue={detailar?.amount_payment}
+                    name="nominal_payment"
+                    control={control}
+                    rules={{ required: { value: true, message: 'Nominal Pembayaran Harus Di isi' } }}
+                    render={({field: { onChange, value }}) => (
+                      <Input
+                          onChangeText={(text) => {onChange(text)}}
+                          value={value}
+                          placeholder="NOMINAL PEMBAYARAN"
+                          error={errors?.nominal_payment}
+                          errorText={errors?.nominal_payment?.message}
+                      />
+                    )}
+                />
+              </View>
+            </Card.Content>
+          </Card>
+        </View>  
+      }
+      {
+        jenisPayment == 'transfer' &&
+        <View style={{ paddingHorizontal: 10, paddingTop: 10, paddingBottom: 20 }}>
+          <Card>
+            <Card.Content>             
+              <Text
+                title="No. Rekening" 
+                h5 bold style={{color: '#000000'}} 
+              />            
+              <View style={{marginTop: 15}}> 
+                <Controller
+                    defaultValue={detailar?.nomor_rekening}
+                    name="nomor_rekening"
+                    control={control}
+                    rules={{ required: { value: true, message: 'Nominal Pembayaran Harus Di isi' } }}
+                    render={({field: { onChange, value }}) => ( 
+                      <Input
+                          error={errors?.nomor_rekening}
+                          errorText={errors?.nomor_rekening?.message}
+                          onChangeText={(text) => {onChange(text)}}
+                          value={value}
+                          placeholder="NO. REKENING"
+                      />
+                    )}
+                />
+              </View>     
+              <View style={{marginTop: 15}}></View>
+              <Text
+                title="Nama Bank" 
+                h5 bold style={{color: '#000000'}} 
+              />            
+              <View style={{marginTop: 15}}>  
+                <Controller
+                    defaultValue={detailar?.bank_account}
+                    name="nama_bank"
+                    control={control}
+                    rules={{ required: { value: true, message: 'Nominal Pembayaran Harus Di isi' } }}
+                    render={({field: { onChange, value }}) => ( 
+                        <Input
+                            error={errors?.nama_bank}
+                            errorText={errors?.nama_bank?.message}
+                            onChangeText={(text) => {onChange(text)}}
+                            value={value}
+                            placeholder="NAMA BANK"
+                        /> 
+                    )}
+                />
+              </View>
+              <View style={{marginTop: 15}}></View>
+              <Text
+                title="Nominal Pembayaran" 
+                h5 bold style={{color: '#000000'}} 
+              />            
+              <View style={{marginTop: 15}}>  
+                <Controller
+                    defaultValue={detailar?.amount_payment}
+                    name="nominal_payment"
+                    control={control}
+                    rules={{ required: { value: true, message: 'Nominal Pembayaran Harus Di isi' } }}
+                    render={({field: { onChange, value }}) => ( 
+                      <Input
+                          error={errors?.nominal_payment}
+                          errorText={errors?.nominal_payment?.message}
+                          onChangeText={(text) => {onChange(text)}}
+                          value={value}
+                          placeholder="NOMINAL PEMBAYARAN"
+                      />
+                    )}
+                />
+              </View>
+            </Card.Content>
+          </Card>
+        </View>  
+      }
+      {
+        (jenisPayment == 'tunai' || detailar.payment_type== 'tunai') &&
+        <View style={{ paddingHorizontal: 10, paddingTop: 10, paddingBottom: 20 }}>
+          <Card>
+            <Card.Content>     
+              <Text
+                title="Nominal Pembayaran" 
+                h5 bold style={{color: '#000000'}} 
+              />            
+              <View style={{marginTop: 15}}>  
+                <Controller
+                    defaultValue={detailar?.amount_payment}
+                    name="nominal_payment"
+                    control={control}
+                    rules={{ required: { value: true, message: 'Nominal Pembayaran Harus Di isi' } }}
+                    render={({field: { onChange, value }}) => ( 
+                      <Input
+                          error={errors?.nominal_payment}
+                          errorText={errors?.nominal_payment?.message}
+                          onChangeText={(text) => {onChange(text)}}
+                          value={value}
+                          placeholder="NOMINAL PEMBAYARAN"
+                      />
+                    )}
+                />
+              </View>
+            </Card.Content>
+          </Card>
+        </View>  
+      }
+      <View style={{ paddingHorizontal: 10, paddingTop: 10, paddingBottom: 20, width: '100%',  paddingTop: '2%'}}>
+        <Button
+          mode="contained"
+          onPress={handleSubmit(onSaveDraft)}  
+        >SAVE DRAFT
+        </Button>
+        <View style={{paddingTop: 10}} />
+        <Button
+          mode="contained"
+          onPress={handleSubmit(onSubmit)}  
+        >SUBMIT
+        </Button>
+      </View> 
+    </React.Fragment>
     }
-    {
-      jenisPayment == 'tunai' &&
-      <View style={{ paddingHorizontal: 10, paddingTop: 10, paddingBottom: 20 }}>
-        <Card>
-          <Card.Content>     
-            <Text
-              title="Nominal Pembayaran" 
-              h5 bold style={{color: '#000000'}} 
-            />            
-            <View style={{marginTop: 15}}>  
-              <Controller
-                  defaultValue=""
-                  name="nominal_payment"
-                  control={control}
-                  rules={{ required: { value: true, message: 'Nominal Pembayaran Harus Di isi' } }}
-                  render={({field: { onChange, value }}) => ( 
-                    <Input
-                        error={errors?.nominal_payment}
-                        errorText={errors?.nominal_payment?.message}
-                        onChangeText={(text) => {onChange(text)}}
-                        value={value}
-                        placeholder="NOMINAL PEMBAYARAN"
-                    />
-                  )}
-              />
-            </View>
-          </Card.Content>
-        </Card>
-      </View>  
-    }
-    <View style={{ paddingHorizontal: 10, paddingTop: 10, paddingBottom: 20, width: '100%',  paddingTop: '2%'}}>
-      <Button
-        mode="contained"
-        onPress={handleSubmit(onSaveDraft)}  
-      >SAVE DRAFT
-      </Button>
-      <View style={{paddingTop: 10}} />
-      <Button
-        mode="contained"
-        onPress={handleSubmit(onSubmit)}  
-      >SUBMIT
-      </Button>
-    </View> 
     </ScrollView>
     </View>
   )
