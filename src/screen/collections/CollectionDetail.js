@@ -49,7 +49,8 @@ const CollectionDetail = ( props ) => {
     setIsLoading(false);  
       try {
           const datasubmit = {
-              cust_id: props.route.params.cust_id
+              cust_id: props.route.params.cust_id,
+              header_id: props.route.params.collection_header_id,
           }
           await props.actions.fetchAll(Common.COLLECTION_DETAIL, datasubmit);    
       } catch (error) {
