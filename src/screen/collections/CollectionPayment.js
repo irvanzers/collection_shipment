@@ -394,28 +394,32 @@ const CollectionPayment = ( props ) => {
                       />
                     )}
                 />
-              </View>     
+              </View>
               <View style={{marginTop: 15}}></View>
-              <Text
-                title="Nama Bank" 
-                h5 bold style={{color: '#000000'}} 
-              />            
-              <View style={{marginTop: 15}}>  
-                <Controller
-                    defaultValue={detailar?.bank_account}
-                    name="nama_bank"
-                    control={control}
-                    rules={{ required: { value: true, message: 'Nominal Pembayaran Harus Di isi' } }}
-                    render={({field: { onChange, value }}) => ( 
-                        <Input
-                            error={errors?.nama_bank}
-                            errorText={errors?.nama_bank?.message}
-                            onChangeText={(text) => {onChange(text)}}
-                            value={value}
-                            placeholder="NAMA BANK"
-                        /> 
-                    )}
-                />
+              <View style={{marginTop: 10, marginBottom: 0}}>
+                  <View style={{flexDirection: 'row'}}>
+                      <Text title="Tanggal Transfer" 
+                      h5 bold style={{color: '#000000'}} />
+                      {/* <Text title=" *" h6 bold style={{color: 'red'}}/> */}
+                  </View>
+                  <Controller
+                      defaultValue={moment(new Date()).format('YYYY-MM-DD')}
+                      name="girodate"
+                      control={control}
+                      rules={{ required: { value: true, message: 'Tanggal kunjungan harus diisi' } }}
+                      render={({ onChange, value }) => (
+                          <DatePicker
+                              style={styles.datePickerStyle}
+                              date={value} // Initial date from state
+                              mode="date" // The enum of date, datetime and time
+                              format="YYYY-MM-DD"
+                              value={value}
+                              error={errors.visit_date}
+                              errorText={errors?.giro_date?.message}
+                              onDateChange={(data) => { onChange(data) }}
+                          />
+                      )}
+                  />
               </View>
               <View style={{marginTop: 15}}></View>
               <Text

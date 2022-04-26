@@ -40,7 +40,7 @@ const CollectionDetail = ( props ) => {
   const [jenisPayment, setJenisPayment] = useState('');
   const [position, setPosition] = useState({
       latitude: '',
-      longitude: ''
+      longitude: '',
   });
   let jobstatus = false;
   let total_tagihan = 0;
@@ -66,11 +66,11 @@ const CollectionDetail = ( props ) => {
           return true;
       }
       setIsLoading(true)
-      data['visit_selfie'] = visitSelfie;
       data['payment_all_ar'] = true;
       data['cust_id'] = detaildata.cust_id;
-      data['visit_lat'] = position.latitude;
-      data['visit_long'] = position.longitude;
+      // data['visit_selfie'] = visitSelfie;
+      // data['visit_lat'] = position.latitude;
+      // data['visit_long'] = position.longitude;
       data['job_status'] = '2';
       const updatePay = await props.actions.storeItem(Common.UPDATE_COLLECTION_PAYMENT, data);
       // console.log(updatePay.success);
@@ -92,11 +92,11 @@ const CollectionDetail = ( props ) => {
           return true;
       }
       setIsLoading(true)
-      data['visit_selfie'] = visitSelfie;
       data['payment_all_ar'] = true;
       data['cust_id'] = detaildata.cust_id;
-      data['visit_lat'] = position.latitude;
-      data['visit_long'] = position.longitude;
+      // data['visit_selfie'] = visitSelfie;
+      // data['visit_lat'] = position.latitude;
+      // data['visit_long'] = position.longitude;
       data['job_status'] = '1';
       const updatePay = await props.actions.storeItem(Common.UPDATE_COLLECTION_PAYMENT, data);
       if(updatePay.success){
@@ -314,8 +314,8 @@ const CollectionDetail = ( props ) => {
                       <SelectPicker
                           items = {[
                                       { label: 'Toko Tutup', value: 'toko_tutup' },
-                                      { label: 'Tidak Ada Faktur', value: 'tidak_ada_faktur' },
                                       { label: 'Tidak Tertagih', value: 'tidak_tertagih' },
+                                      { label: '', value: 'tidak_tertagih' },
                                       { label: 'Tertagih', value: 'tertagih' },
                                   ]}
                           onDataChange={(value) => onChange(value)}
@@ -540,6 +540,32 @@ const CollectionDetail = ( props ) => {
                       onChangeText={(text) => {onChange(text)}}
                       value={value}
                       placeholder="TOTAL PEMBAYARAN"
+                  />
+                )}
+            />
+          </View>
+          </Card.Content>
+        </Card>
+      </View><View style={{ paddingHorizontal: 10, paddingTop: 10 }}>
+        <Card>
+          <Card.Content>             
+            <Text
+              title={"Jumlah Yang Di Bayar"} 
+              h5 bold style={{color: '#000000'}} 
+            />            
+            <View style={{marginTop: 15}}>
+            <Controller
+                defaultValue={total_tagihan}
+                name="jumlah_pembayaran"
+                control={control}
+                rules={{ required: { value: true, message: 'Total pembayaran harus diisi' } }}
+                render={({field: {onChange, value}}) => (
+                  <Input
+                      error={errors?.total_pembayaran}
+                      errorText={errors?.total_pembayaran?.message}
+                      onChangeText={(text) => {onChange(text)}}
+                      value={value}
+                      placeholder="JUMLAH YANG DI BAYAR"
                   />
                 )}
             />
