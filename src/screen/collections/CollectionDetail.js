@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback }  from 'react'
-import { View, StyleSheet, ScrollView, TouchableHighlight, InteractionManager } from 'react-native'
+import { View, StyleSheet, ScrollView, TouchableHighlight, InteractionManager, PermissionsAndroid, Platform } from 'react-native'
 import { useForm, Controller } from 'react-hook-form';
 
 import Text from './../../components/Text';
@@ -44,6 +44,41 @@ const CollectionDetail = ( props ) => {
   });
   let jobstatus = false;
   let total_tagihan = 0;
+
+  const hasLocationPermission = async () => {
+    if (Platform.OS === 'ios') {
+      const hasPermission = await hasLocationPermissionIOS();
+      return hasPermission;
+    }
+    if (Platform.OS === 'android' && Platform.Version < 23) {
+      return true;
+    }
+    
+    const hasPermission = await PermissionsAndroid.check(
+      PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+    );
+    if (hasPermission) {
+      return true;
+    }
+    const status = await PermissionsAndroid.request(
+      PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+    );
+    if (status === PermissionsAndroid.RESULTS.GRANTED) {
+      return true;
+    }
+    if (status === PermissionsAndroid.RESULTS.DENIED) {
+      Toast.show(
+        'Location permission denied by user.',
+        Toast.LONG,
+      );
+    } else if (status === PermissionsAndroid.RESULTS.NEVER_ASK_AGAIN) {
+      Toast.show(
+        'Location permission revoked by user.',
+        Toast.LONG,
+      );
+    }
+    return false;
+  };
 
   const loadData = async () => {
     setIsLoading(false);  
@@ -156,16 +191,23 @@ const CollectionDetail = ( props ) => {
   }
   
   //GETTING POSITION LAT/LONG
-  const getPosition = () => {
+  const getPosition = async() => {
+    const hasPermission = await hasLocationPermission();
+    if(hasPermission){
       Geolocation.getCurrentPosition(
-      pos => {
-          setPosition({
-              latitude: pos.coords.latitude,
-              longitude: pos.coords.longitude
-          });
-      },
-          e => setError(e.message)
+        pos => {
+            console.log(pos)
+            setPosition({
+                latitude: pos.coords.latitude,
+                longitude: pos.coords.longitude
+            });
+        },
+          e => {
+            console.log(e);
+            setError(e.message)
+          }
       );
+    }
   };
 
   useEffect(() => {
