@@ -98,14 +98,11 @@ const CollectionDetail = ( props ) => {
       data['visit_selfie'] = visitSelfie;
       data['payment_all_ar'] = true;
       data['cust_id'] = detaildata.cust_id;
-<<<<<<< HEAD
       data['visit_selfie'] = visitSelfie;
       // data['visit_lat'] = position.latitude;
       // data['visit_long'] = position.longitude;
-=======
       data['visit_lat'] = position.latitude;
       data['visit_long'] = position.longitude;
->>>>>>> f6a6a596ed6a74fd1f3dd2e7113a29e98b641229
       data['job_status'] = '1';
       const updatePay = await props.actions.storeItem(Common.UPDATE_COLLECTION_PAYMENT, data);
       if(updatePay.success){
