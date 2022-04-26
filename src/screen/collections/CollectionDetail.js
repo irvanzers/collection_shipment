@@ -68,7 +68,7 @@ const CollectionDetail = ( props ) => {
       setIsLoading(true)
       data['payment_all_ar'] = true;
       data['cust_id'] = detaildata.cust_id;
-      // data['visit_selfie'] = visitSelfie;
+      data['visit_selfie'] = visitSelfie;
       // data['visit_lat'] = position.latitude;
       // data['visit_long'] = position.longitude;
       data['job_status'] = '2';
@@ -94,7 +94,7 @@ const CollectionDetail = ( props ) => {
       setIsLoading(true)
       data['payment_all_ar'] = true;
       data['cust_id'] = detaildata.cust_id;
-      // data['visit_selfie'] = visitSelfie;
+      data['visit_selfie'] = visitSelfie;
       // data['visit_lat'] = position.latitude;
       // data['visit_long'] = position.longitude;
       data['job_status'] = '1';
