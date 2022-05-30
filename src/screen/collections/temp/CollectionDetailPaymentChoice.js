@@ -42,8 +42,6 @@ const checkSelfie = () => {
   return true;
 }
 
-let total_pembayaran = 9;
-
 const CollectionDetail = ( props ) => {
   const {collectiondetail} = props;
   const navigation = useNavigation();
@@ -57,12 +55,8 @@ const CollectionDetail = ( props ) => {
       latitude: '',
       longitude: ''
   });
-  const [mountTransfer, setMountTransfer] = useState(0);
-  const [mountTunai, setMountTunai] = useState(0);
-  const [mountGiro, setMountGiro] = useState(0);
   let jobstatus = false;
   let total_tagihan = 0;
-  let total_bayar = 0;
 
   const hasLocationPermission = async () => {
     if (Platform.OS === 'ios') {
@@ -116,10 +110,10 @@ const CollectionDetail = ( props ) => {
 
   const onSubmit = async(data) => {
     try {
-      // if(visitSelfie == null){
-      //     checkSelfie()
-      //     return true;
-      // }
+      if(visitSelfie == null){
+          checkSelfie()
+          return true;
+      }
       setIsLoading(true)
       data['payment_all_ar'] = true;
       data['cust_id'] = detaildata.cust_id;
@@ -127,7 +121,6 @@ const CollectionDetail = ( props ) => {
       // data['visit_selfie'] = visitSelfie;
       data['visit_lat'] = position.latitude;
       data['visit_long'] = position.longitude;
-      data['total_payment'] = total_pembayaran;
       data['job_status'] = '2';
       const updatePay = await props.actions.storeItem(Common.UPDATE_COLLECTION_PAYMENT, data);
       // console.log(updatePay.success);
@@ -148,15 +141,37 @@ const CollectionDetail = ( props ) => {
       //     checkSelfie()
       //     return true;
       // }
-      // setIsLoading(true)
+      setIsLoading(true)
       data['payment_all_ar'] = true;
       data['cust_id'] = detaildata.cust_id;
       data['header_id'] = detaildata.collection_header_id;
       // data['visit_selfie'] = visitSelfie;
-      data['visit_lat'] = position.latitude;
-      data['visit_long'] = position.longitude;
-      data['total_payment'] = total_pembayaran;
+      // data['visit_lat'] = position.latitude;
+      // data['visit_long'] = position.longitude;
       data['job_status'] = '1';
+      const updatePay = await props.actions.storeItem(Common.UPDATE_COLLECTION_PAYMENT, data);
+      if(updatePay.success){
+          // await props.actions.fetchAll(Common.USER_PROFILE);
+          Toast.show('Pembayaran berhasil disimpan');
+          props.navigation.goBack();
+      }
+      console.log(data)
+    } catch (error) {
+      alert(error)
+    }
+  }
+
+  const onSavePhoto = async(data) => {
+    try {
+      if(visitSelfie == null){
+          checkSelfie()
+          return true;
+      }
+      setIsLoading(true)
+      data['payment_all_ar'] = true;
+      data['cust_id'] = detaildata.cust_id;
+      data['header_id'] = detaildata.collection_header_id;
+      data['visit_selfie'] = visitSelfie;
       // const updatePay = await props.actions.storeItem(Common.UPDATE_COLLECTION_PAYMENT, data);
       // if(updatePay.success){
       //     // await props.actions.fetchAll(Common.USER_PROFILE);
@@ -169,33 +184,9 @@ const CollectionDetail = ( props ) => {
     }
   }
 
-  const onSavePhoto = async(source) => {
-    try {
-      let datasubmit = {};
-      // if(visitSelfie == null){
-      //     checkSelfie()
-      //     return true;
-      // }
-      // setIsLoading(true)
-      datasubmit['payment_all_ar_photos'] = true;
-      datasubmit['cust_id'] = detaildata.cust_id;
-      datasubmit['header_id'] = detaildata.collection_header_id;
-      datasubmit['visit_selfie'] = source;
-      datasubmit['visit_date'] = moment(new Date()).format('YYYY-MM-DD');
-      // console.log(visitSelfie)
-      const updatePay = await props.actions.storeItem(Common.UPDATE_COLLECTION_PAYMENT, datasubmit);
-      if(updatePay.success){
-          // await props.actions.fetchAll(Common.USER_PROFILE);
-          Toast.show('Foto berhasil disimpan');
-          // props.navigation.goBack();
-      }
-    } catch (error) {
-      alert(error)
-    }
-  }
-
   //GETTING PHOTO
   const renderAsset = (visitSelfie) => {
+    // console.log(visitSelfie)
       return (
           <Card style={{ width: '100%' }}>
               <Card.Cover source={{uri: visitSelfie}} style={{ height: 300 }} />
@@ -221,8 +212,8 @@ const CollectionDetail = ( props ) => {
       }).then(response => {
           if (!response.didCancel && !response.error) {
               const source = 'data:image/jpeg;base64,' + response.data;
+              // onSavePhoto(source);
               setVisitSelfie(source)
-              onSavePhoto(source);
           }
       }).catch(e => alert('ANDA BELUM MENGAMBIL GAMBAR'));
   }
@@ -235,15 +226,19 @@ const CollectionDetail = ( props ) => {
   const getPosition = async() => {
     const hasPermission = await hasLocationPermission();
     if(hasPermission){
+      // console.log(Geolocation.getCurrentPosition((pos) => {
+      //   return pos
+      // }))
       Geolocation.getCurrentPosition(
         pos => {
-          // console.log(pos)
+          console.log(pos)
           setPosition({
               latitude: pos.coords.latitude,
               longitude: pos.coords.longitude
           });
         },
         (e) => {
+          console.log('e');
           setError(e.message)
         }
       );
@@ -261,8 +256,8 @@ const CollectionDetail = ( props ) => {
   const detaildata = collectiondetail ? collectiondetail.cust_detail : [];
   const listar = collectiondetail ? collectiondetail.list_ar : [];
   const statusar = collectiondetail ? collectiondetail.status_ar : [];
-  const trans = mountTunai+mountTransfer+mountGiro;
-  // console.log(visitSelfie)
+  // console.log(detaildata.image_visit)
+  // console.log(position.latitude)
 
   return (
     <View style={{flex:1}}>
@@ -373,13 +368,12 @@ const CollectionDetail = ( props ) => {
             />                
             { listar != undefined && listar?.map((item, index) => {
               total_tagihan += item.amount_due_remaining
-              total_bayar += item.total_payment
-              total_pembayaran =  total_bayar == '0' ? trans : total_bayar;
               !jobstatus ? (jobstatus = item.job_status == 2 && true ) : false
+              // console.log(total_tagihan)
               return (
                 <React.Fragment
                   key={index.toString()}
-                >
+                >                
                 {
                   item.job_status <= 1 &&
                     <>
@@ -442,7 +436,7 @@ const CollectionDetail = ( props ) => {
               <NumberFormat 
                   value={total_tagihan} 
                   displayType={'text'} 
-                  prefix={`Rp. `} 
+                  prefix={`Rp`} 
                   thousandSeparator={true}
                   renderText={(value) =>  {
                       return (
@@ -453,80 +447,22 @@ const CollectionDetail = ( props ) => {
                   }}
               />
             </View>
-            { detaildata.collection_status != null &&
-            <React.Fragment>              
-              { detaildata.amount_payment_tunai != '0' &&
-                <View flexDirection="row" justifyContent="space-between" style={{paddingTop: 10}}>
-                  <Text title={'Jumlah Tunai'} h5 bold />
-                  <NumberFormat 
-                      value={detaildata.amount_payment_tunai}
-                      displayType={'text'}
-                      prefix={`Rp. `}
-                      thousandSeparator={true}
-                      renderText={(value) =>  {
-                          return (
-                              <View style={{flexDirection:'row', flexWrap:'wrap', alignItems: 'flex-end'}}>
-                                  <Text title={value? value : '0'} h5 bold />
-                              </View>
-                          )
-                      }}
-                  />
-                </View>
-              }
-              { detaildata.amount_payment_transfer != '0' &&
-                <View flexDirection="row" justifyContent="space-between" style={{paddingTop: 10}}>
-                  <Text title={'Jumlah Transfer'} h5 bold />
-                  <NumberFormat 
-                      value={detaildata.amount_payment_transfer}
-                      displayType={'text'}
-                      prefix={`Rp. `}
-                      thousandSeparator={true}
-                      renderText={(value) =>  {
-                          return (
-                              <View style={{flexDirection:'row', flexWrap:'wrap', alignItems: 'flex-end'}}>
-                                  <Text title={value? value : '0'} h5 bold />
-                              </View>
-                          )
-                      }}
-                  />
-                </View>
-              }
-              { detaildata.amount_payment_giro != '0' &&
-                <View flexDirection="row" justifyContent="space-between" style={{paddingTop: 10}}>
-                  <Text title={'Jumlah Giro'} h5 bold />
-                  <NumberFormat 
-                      value={detaildata.amount_payment_giro}
-                      displayType={'text'}
-                      prefix={`Rp. `}
-                      thousandSeparator={true}
-                      renderText={(value) =>  {
-                          return (
-                              <View style={{flexDirection:'row', flexWrap:'wrap', alignItems: 'flex-end'}}>
-                                  <Text title={value? value : '0'} h5 bold />
-                              </View>
-                          )
-                      }}
-                  />
-                </View>
-              }
-              <View flexDirection="row" justifyContent="space-between" style={{paddingTop: 10}}>
-                <Text title={'Sisa Tagihan'} h5 bold />
-                <NumberFormat 
-                    value={detaildata.sisa_payment}
-                    displayType={'text'}
-                    prefix={`Rp. `}
-                    thousandSeparator={true}
-                    renderText={(value) =>  {
-                        return (
-                            <View style={{flexDirection:'row', flexWrap:'wrap', alignItems: 'flex-end'}}>
-                                <Text title={value? value : '0'} h5 bold />
-                            </View>
-                        )
-                    }}
-                />
-              </View>
-            </React.Fragment>
-            }
+            <View flexDirection="row" justifyContent="space-between" style={{paddingTop: 10}}>
+              <Text title={'Sisa Tagihan'} h5 bold />
+              <NumberFormat 
+                  value={detaildata.sisa_tagihan} 
+                  displayType={'text'} 
+                  prefix={`Rp `} 
+                  thousandSeparator={true}
+                  renderText={(value) =>  {
+                      return (
+                          <View style={{flexDirection:'row', flexWrap:'wrap', alignItems: 'flex-end'}}>
+                              <Text title={value? value : '0'} h5 bold />
+                          </View>
+                      )
+                  }}
+              />
+            </View>
           </Card.Content>
         </Card>         
       </View>
@@ -544,16 +480,14 @@ const CollectionDetail = ( props ) => {
                   defaultValue={detaildata?.collection_status}
                   name="status_tagihan"
                   control={control}
-                  rules={{ required: { value: true, message: 'Status harus di pilih' } }}
+                  rules={{ required: { value: true, message: 'Payment type harus di pilih' } }}
                   render={({field: { onChange, value, onBlur }}) => (
                       <SelectPicker
                           items = {[
-                                      { label: 'Tertagih', value: 'tertagih' },
-                                      { label: 'Tidak Tertagih', value: 'tidak_tertagih' },
                                       { label: 'Toko Tutup', value: 'toko_tutup' },
-                                      { label: 'Tidak Ada PIC', value: 'tidak_ada_pic' },
-                                      { label: 'Janji Pembayaran', value: 'janji_pembayaran' },
-                                      { label: 'Waktu Tidak Cukup', value: 'waktu_tidak_cukup' },
+                                      { label: 'Tidak Ada Faktur', value: 'tidak_ada_faktur' },
+                                      { label: 'Tidak Tertagih', value: 'tidak_tertagih' },
+                                      { label: 'Tertagih', value: 'tertagih' },
                                   ]}
                           onDataChange={(value) => onChange(value)}
                           placeholder="STATUS TAGIHAN"
@@ -577,20 +511,114 @@ const CollectionDetail = ( props ) => {
               h5 bold style={{color: '#000000'}} 
             />            
             <View style={{marginTop: 15}}>
+            <Text title="Metode Pambayaran" />
+              <Controller
+                  defaultValue={listar?.payment_type}
+                  name="payment_type"
+                  control={control}
+                  rules={{ required: { value: true, message: 'Status tagihan harus di pilih' } }}
+                  render={({field: { onChange, value, onBlur }}) => (
+                    <SelectPicker
+                        items = {[
+                                    { label: 'Giro Bank', value: 'giro_bank' },
+                                    { label: 'Transfer', value: 'transfer' },
+                                    { label: 'Tunai', value: 'tunai' },
+                                ]}
+                        onDataChange={(value ) => {
+                                                    setJenisPayment(value)
+                                                    onChange(value)
+                                                  }}
+                        placeholder="METODE PEMBAYARAN"
+                        value={value}
+                        error={errors?.payment_type}
+                        errorText={errors?.payment_type?.message}
+                    />     
+                  )}
+              />         
+            { jenisPayment == 'giro_bank' &&
+            <>
+              <View style={{marginTop: 15}} />
+              <Text title="No. Giro" />
+                <Controller
+                    defaultValue={listar?.giro_number}
+                    name="no_giro"
+                    control={control}
+                    rules={{ required: { value: true, message: 'Nomor Giro Harus Di isi' } }}
+                    render={({field: { onChange, value, onBlur }}) => (
+                    <Input
+                        onChangeText={(text) => {onChange(text)}}
+                        value={value}
+                        placeholder="NO. GIRO"
+                        error={errors?.no_giro}
+                        errorText={errors?.no_giro?.message}
+                    />
+                  )}
+                />
+              <View style={{marginTop: 15}} />
+              <Text title="Tanggal Jatuh Tempo" />
+                  <Controller
+                      defaultValue={moment(new Date()).format('YYYY-MM-DD')}
+                      name="girodate"
+                      control={control}
+                      rules={{ required: { value: true, message: 'Tanggal kunjungan harus diisi' } }}
+                      render={({ onChange, value }) => (
+                          <DatePicker
+                              style={styles.datePickerStyle}
+                              date={value} // Initial date from state
+                              mode="date" // The enum of date, datetime and time
+                              format="YYYY-MM-DD"
+                              value={value}
+                              error={errors.visit_date}
+                              errorText={errors?.giro_date?.message}
+                              onDateChange={(data) => { onChange(data) }}
+                          />
+                      )}
+                  />
+              <View style={{marginTop: 15}} />
+              <Text title="Nama Bank" />
+                  <Controller
+                      defaultValue={listar?.bank_account}
+                      name="nama_bank"
+                      control={control}
+                      rules={{ required: { value: true, message: 'Nama Bank Harus Di isi' } }}
+                      render={({field: { onChange, value, onBlur }}) => (
+                        <Input
+                            onChangeText={(text) => {onChange(text)}}
+                            value={value}
+                            placeholder="NAMA BANK"
+                            error={errors?.nama_bank}
+                            errorText={errors?.nama_bank?.message}
+                        />
+                      )}
+                  />
+              <View style={{marginTop: 15}} />
+              <Text title="Nominal Payment" />
+                  <Controller
+                      defaultValue={listar?.amount_payment}
+                      name="nominal_payment"
+                      control={control}
+                      rules={{ required: { value: true, message: 'Nominal Pembayaran Harus Di isi' } }}
+                      render={({field: { onChange, value }}) => (
+                        <Input
+                            onChangeText={(text) => {onChange(text)}}
+                            value={value}
+                            placeholder="NOMINAL PEMBAYARAN"
+                            error={errors?.nominal_payment}
+                            errorText={errors?.nominal_payment?.message}
+                        />
+                      )}
+                  />
+              </>
+              }
+              { jenisPayment == 'transfer' && 
+              <>
                 <View style={{marginTop: 15}} /> 
-                <View style={{borderColor: 'grey', borderWidth: .5}} />   
-                <View flexDirection="row" justifyContent="space-between" style={{paddingTop: 10}}>
-                    <Text title=" " />
-                    <View style={{flexDirection:'row', flexWrap:'wrap', alignItems: 'flex-end'}}>
-                        <Text title="TRANSFER" bold />
-                    </View>
-                </View>
                 <Text title="No. Rekening" />
                   <Controller
                       defaultValue={listar?.nomor_rekening}
                       name="nomor_rekening"
                       control={control}
-                      // rules={{ required: { value: true, message: 'Nominal Pembayaran Harus Di isi' } }}
+                      rules={{ required: { value: true, message: 'Nominal Pembayaran Harus Di isi' } }}
                       render={({field: { onChange, value }}) => ( 
                         <Input
                             error={errors?.nomor_rekening}
@@ -601,137 +629,63 @@ const CollectionDetail = ( props ) => {
                         />
                       )}
                   />
-                  <View style={{marginTop: 15}} />
-                  <Text title="Tanggal Transfer" />
-                      <Controller
-                          defaultValue={moment(new Date()).format('YYYY-MM-DD')}
-                          name="transfer_date"
-                          control={control}
-                          rules={{ required: { value: true, message: 'Tanggal transfer harus diisi' } }}
-                          render={({ onChange, value }) => (
-                              <DatePicker
-                                  style={styles.datePickerStyle}
-                                  date={value} // Initial date from state
-                                  mode="date" // The enum of date, datetime and time
-                                  format="YYYY-MM-DD"
-                                  value={value}
-                                  error={errors.transfer_date}
-                                  errorText={errors?.transfer_date?.message}
-                                  onDateChange={(data) => { onChange(data) }}
-                              />
-                          )}
-                      />
                 <View style={{marginTop: 15}} />  
-                <Text title="Nominal Pembayaran Transfer" />
+                <Text title="Nama Bank" />
                   <Controller
-                      defaultValue={listar?.amount_payment_transfer}
-                      name="nominal_payment_transfer"
+                      defaultValue={listar?.bank_account}
+                      name="nama_bank"
                       control={control}
-                      // rules={{ required: { value: true, message: 'Nominal Pembayaran Harus Di isi' } }}
+                      rules={{ required: { value: true, message: 'Nominal Pembayaran Harus Di isi' } }}
+                      render={({field: { onChange, value }}) => ( 
+                          <Input
+                              error={errors?.nama_bank}
+                              errorText={errors?.nama_bank?.message}
+                              onChangeText={(text) => {onChange(text)}}
+                              value={value}
+                              placeholder="NAMA BANK"
+                          /> 
+                      )}
+                  />
+                <View style={{marginTop: 15}} />  
+                <Text title="Nominal Payment" />
+                  <Controller
+                      defaultValue={listar?.amount_payment}
+                      name="nominal_payment"
+                      control={control}
+                      rules={{ required: { value: true, message: 'Nominal Pembayaran Harus Di isi' } }}
                       render={({field: { onChange, value }}) => ( 
                         <Input
-                            error={errors?.nominal_payment_transfer}
-                            errorText={errors?.nominal_payment_transfer?.message}
-                            onChangeText={(text) => {
-                              setMountTransfer(parseInt(text));
-                              onChange(text)
-                            }}
+                            error={errors?.nominal_payment}
+                            errorText={errors?.nominal_payment?.message}
+                            onChangeText={(text) => {onChange(text)}}
                             value={value}
                             placeholder="NOMINAL PEMBAYARAN"
                         />
                       )}
                   />
+            </>
+            }
+            { jenisPayment == 'tunai' &&
+            <>
               <View style={{marginTop: 15}} />  
-              <View style={{borderColor: 'grey', borderWidth: .5}} />   
-              <View flexDirection="row" justifyContent="space-between" style={{paddingTop: 10}}>
-                  <Text title=" " />
-                  <View style={{flexDirection:'row', flexWrap:'wrap', alignItems: 'flex-end'}}>
-                      <Text title="TUNAI" bold />
-                  </View>
-              </View>
-              <Text title="Nominal Pembayaran Tunai" />
+              <Text title="Nominal Payment" />
                 <Controller
-                    defaultValue={listar?.amount_payment_tunai}
-                    name="nominal_payment_tunai"
+                    defaultValue={listar?.amount_payment}
+                    name="nominal_payment"
                     control={control}
-                    // rules={{ required: { value: true, message: 'Nominal Pembayaran Harus Di isi' } }}
+                    rules={{ required: { value: true, message: 'Nominal Pembayaran Harus Di isi' } }}
                     render={({field: { onChange, value }}) => ( 
                       <Input
-                          error={errors?.nominal_payment_tunai}
-                          errorText={errors?.nominal_payment_tunai?.message}
-                          onChangeText={(text) => {
-                            setMountTunai(parseInt(text));
-                            onChange(text)
-                          }}
+                          error={errors?.nominal_payment}
+                          errorText={errors?.nominal_payment?.message}
+                          onChangeText={(text) => {onChange(text)}}
                           value={value}
                           placeholder="NOMINAL PEMBAYARAN"
                       />
                     )}
-                />    
-                <View style={{marginTop: 15}} />  
-                <View style={{borderColor: 'grey', borderWidth: .5}} /> 
-                <View flexDirection="row" justifyContent="space-between" style={{paddingTop: 10}}>
-                    <Text title=" " />
-                    <View style={{flexDirection:'row', flexWrap:'wrap', alignItems: 'flex-end'}}>
-                        <Text title="GIRO" bold />
-                    </View>
-                </View>
-                <Text title="No. Giro" />
-                  <Controller
-                      defaultValue={listar?.giro_number}
-                      name="no_giro"
-                      control={control}
-                      // rules={{ required: { value: true, message: 'Nomor Giro Harus Di isi' } }}
-                      render={({field: { onChange, value, onBlur }}) => (
-                      <Input
-                          onChangeText={(text) => {onChange(text)}}
-                          value={value}
-                          placeholder="NO. GIRO"
-                          error={errors?.no_giro}
-                          errorText={errors?.no_giro?.message}
-                      />
-                    )}
-                  />
-                <View style={{marginTop: 15}} />
-                <Text title="Tanggal Pencairan Giro" />
-                    <Controller
-                        defaultValue={moment(new Date()).format('YYYY-MM-DD')}
-                        name="giro_date"
-                        control={control}
-                        // rules={{ required: { value: true, message: 'Tanggal pencairan giro harus diisi' } }}
-                        render={({ onChange, value }) => (
-                            <DatePicker
-                                style={styles.datePickerStyle}
-                                date={value} // Initial date from state
-                                mode="date" // The enum of date, datetime and time
-                                format="YYYY-MM-DD"
-                                value={value}
-                                error={errors.giro_date}
-                                errorText={errors?.giro_date?.message}
-                                onDateChange={(data) => { onChange(data) }}
-                            />
-                        )}
-                    />
-                <View style={{marginTop: 15}} />
-                <Text title="Nominal Pembayaran Giro" />
-                    <Controller
-                        defaultValue={listar?.amount_payment_giro}
-                        name="nominal_payment_giro"
-                        control={control}
-                        // rules={{ required: { value: true, message: 'Nominal Pembayaran Harus Di isi' } }}
-                        render={({field: { onChange, value }}) => (
-                          <Input
-                              onChangeText={(text) => {
-                                setMountGiro(parseInt(text))
-                                onChange(text)
-                              }}
-                              value={value}
-                              placeholder="NOMINAL PEMBAYARAN"
-                              error={errors?.nominal_payment_giro}
-                              errorText={errors?.nominal_payment_giro?.message}
-                          />
-                        )}
-                    />
+                />
+            </>
+            }
           </View>
           </Card.Content>
         </Card>
@@ -746,18 +700,17 @@ const CollectionDetail = ( props ) => {
             />            
             <View style={{marginTop: 15}}>
             <Controller
-                defaultValue={listar?.total_payment}
-                name="total_payment"
+                defaultValue={total_tagihan}
+                name="total_pembayaran"
                 control={control}
-                // rules={{ required: { value: true, message: 'Total pembayaran harus diisi' } }}
+                rules={{ required: { value: true, message: 'Total pembayaran harus diisi' } }}
                 render={({field: {onChange, value}}) => (
                   <Input
-                      error={errors?.total_payment}
-                      errorText={errors?.total_payment?.message}
+                      error={errors?.total_pembayaran}
+                      errorText={errors?.total_pembayaran?.message}
                       onChangeText={(text) => {onChange(text)}}
-                      value={`${~~total_pembayaran}`}
+                      value={value.toString()}
                       placeholder="TOTAL PEMBAYARAN"
-                      disabled
                   />
                 )}
             />
@@ -832,12 +785,6 @@ const CollectionDetail = ( props ) => {
               onPress={handleSubmit(onSubmit)}  
             >SUBMIT
             </Button>
-            <View style={{paddingTop: 10}} />
-            {/* <Button
-              mode="contained"
-              onPress={handleSubmit(onSavePhoto)}  
-            >SAVE PHOTO
-            </Button> */}
         <View style={{width: '100%', paddingBottom: '10%'}} />
       </View>
       </React.Fragment>

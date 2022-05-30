@@ -15,7 +15,6 @@ import CollectionHeaderList from '../screen/collections/CollectionHeaderList';
 import CollectionList from '../screen/collections/CollectionList';
 import CollectionPickPayment from '../screen/collections/CollectionPickPayment';
 import CollectionDetail from '../screen/collections/CollectionDetail';
-import CollectionDetail2 from '../screen/collections/CollectionDetail2';
 import CollectionPayment from '../screen/collections/CollectionPayment';
 import OthersIndex from '../screen/others/OthersIndex';
 import OthersProfile from '../screen/others/OthersProfile';
@@ -121,21 +120,6 @@ const RootNavigator = (props) => {
       <Stack.Screen
         name="CollectionDetail"
         component={CollectionDetail}
-        options={{
-          title: 'DETAIL TAGIHAN',
-          headerStyle: {
-            backgroundColor: '#4077c4',
-          },
-          headerTintColor: '#fff',
-          headerTitleStyle: {
-            fontWeight: 'bold',
-          },
-          cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
-        }}
-      /> 
-      <Stack.Screen
-        name="CollectionDetail2"
-        component={CollectionDetail2}
         options={{
           title: 'DETAIL TAGIHAN',
           headerStyle: {

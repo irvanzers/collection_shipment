@@ -75,11 +75,20 @@ const listcollection = collectionlistdetail ? collectionlistdetail.assigned_data
 const assignedarcount = collectionlistdetail ? collectionlistdetail.assigned_ar_count : [];
 const assignedcount = collectionlistdetail ? collectionlistdetail.assigned_count : [];
 const statusheader = collectionlistdetail ? collectionlistdetail.header_status : [];
-// console.log(statusheader);
+const tunailist = collectionlistdetail ? collectionlistdetail.tunai_list : [];
+const transferlist = collectionlistdetail ? collectionlistdetail.transfer_list : [];
+// console.log(tunailist);
 
     const renderTopItem = ({}) => {
         return(
             <View style={{flex:1}}>
+            <View flexDirection="row" style={{height: 40, justifyContent: 'space-between', paddingLeft: 10,  backgroundColor: 'white'}}>
+                <View flexDirection="row" style={{ justifyContent: 'space-between' }}>
+                    <View style={{ justifyContent: 'center' }}>
+                        <Text title={`ID HEADER : ${statusheader.id}`} p style={{ textTransform: 'uppercase', color: 'grey' }} bold />
+                    </View>
+                </View>
+            </View>
             <View flexDirection="row" style={{height: 40, justifyContent: 'space-between',  paddingLeft: 10,  backgroundColor: 'white'}}>
                 <View flexDirection="row" style={{ justifyContent: 'space-between',  }}>
                     <View style={{ justifyContent: 'center' }}>
@@ -95,10 +104,10 @@ const statusheader = collectionlistdetail ? collectionlistdetail.header_status :
                     </View>
                 </View>
             </View>
-            <View flexDirection="row" style={{height: 40, justifyContent: 'space-between',paddingBottom: 15,  paddingLeft: 10,  backgroundColor: 'white', borderBottomColor: 'grey', borderBottomWidth: .5}}>
+            <View flexDirection="row" style={{height: 40, justifyContent: 'space-between', paddingBottom: 10, paddingLeft: 10,  backgroundColor: 'white'}}>
                 <View flexDirection="row" style={{ justifyContent: 'space-between',  }}>
                     <View style={{ justifyContent: 'center' }}>
-                        <Text title={`STATUS : ${statusheader?.status}`} p style={{ textTransform: 'uppercase', color: `${statusheader ? statusheader.color : 'grey'}` }} />
+                        <Text title={`STATUS : ${statusheader?.status}`} p style={{ textTransform: 'uppercase', color: `${statusheader ? statusheader.color : '#B4B4B4'}` }} />
                     </View>
                 </View>
                 <View flexDirection="row" style={{ justifyContent: 'space-between',  }}>
@@ -107,6 +116,24 @@ const statusheader = collectionlistdetail ? collectionlistdetail.header_status :
                     </View>
                     <View style={{ justifyContent: 'center', marginRight: 10}}>
                         <Text title={assignedarcount} p style={{color: 'grey', textTransform: 'uppercase'}}/>
+                    </View>
+                </View>
+            </View>
+            <View flexDirection="row" style={{height: 40, justifyContent: 'space-between',paddingBottom: 15,  paddingLeft: 10,  backgroundColor: 'white', borderBottomColor: 'grey', borderBottomWidth: .5}}>
+                <View flexDirection="row" style={{ justifyContent: 'space-between',  }}>
+                    <View style={{ justifyContent: 'center' }}>
+                        <Text title={`TOTAL TRANSFER : `} p style={{ textTransform: 'uppercase', color: 'grey' }} />
+                    </View>
+                    <View style={{ justifyContent: 'center', marginRight: 10}}>
+                        <Text title={transferlist} p style={{color: 'grey', textTransform: 'uppercase'}}/>
+                    </View>
+                </View>
+                <View flexDirection="row" style={{ justifyContent: 'space-between',  }}>
+                    <View style={{ justifyContent: 'center' }}>
+                        <Text title={`TOTAL TUNAI: `} p style={{ textTransform: 'uppercase', color: 'grey' }} />
+                    </View>
+                    <View style={{ justifyContent: 'center', marginRight: 10}}>
+                        <Text title={tunailist} p style={{color: 'grey', textTransform: 'uppercase'}}/>
                     </View>
                 </View>
             </View>
