@@ -171,11 +171,12 @@ const CollectionDetail = ( props ) => {
 
   const onSavePhoto = async(source) => {
     try {
+      // console.log(visitSelfie)
       let datasubmit = {};
-      // if(visitSelfie == null){
-      //     checkSelfie()
-      //     return true;
-      // }
+      if(source == null){
+          checkSelfie()
+          return true;
+      }
       // setIsLoading(true)
       datasubmit['payment_all_ar_photos'] = true;
       datasubmit['cust_id'] = detaildata.cust_id;
