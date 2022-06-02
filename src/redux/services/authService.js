@@ -15,7 +15,7 @@ export const login = (data) => (dispatch) => {
         dispatch(apiAction.apiRequest());
         axios.post('https://egis.galenium.com/v1/api/logincollection', data, headers)
         .then((response) => {
-            console.log(response.data)
+            console.log(response)
             dispatch({
                 type: ActionType.LOG_IN_SUCCESS,
                 payload: response.data.data.token
@@ -25,7 +25,7 @@ export const login = (data) => (dispatch) => {
             resolve(response.data);
         })
         .catch((error) => {
-            // console.log(error)
+            console.log(error)
             authErrorHandler(dispatch, error.response, ActionType.LOG_IN_FAILURE);
             dispatch(FlashMessage.addFlashMessage('error', 'Email address atau kata sandi anda salah.'));
             resolve(error.response)

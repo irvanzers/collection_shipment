@@ -7,7 +7,6 @@ import Text from './../../components/Text';
 import { Card, Title, Colors, Appbar, Menu } from 'react-native-paper';
 import Moment from 'moment';
 import List from './../../components/MenuList/List';
-import { BottomSheetModal, BottomSheetModalProvider, BottomSheetBackdrop } from '@gorhom/bottom-sheet';
 
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
@@ -64,18 +63,6 @@ const onSubmit = () => {
         }],
     );
 }
-
-const toggleBottomNavigationView = () => {
-    setVisible(!visible);
-};
-
-const handlePresentModalPress = useCallback((item) => {
-    bottomSheetModalRef.current?.present();
-}, []);
-
-const handleSheetChanges = useCallback((index: number) => {
-    console.log(index)
-}, []);
 
 useEffect(() => {
     const interactionPromise = InteractionManager.runAfterInteractions(() => {
@@ -208,53 +195,10 @@ const transferlist = collectionlistdetail ? collectionlistdetail.transfer_list :
               visible={visible}
               onDismiss={closeMenu}
               anchor={<Appbar.Action color="white" icon={'dots-vertical'} onPress={() => openMenu()} />}>
-              <Menu.Item onPress={handlePresentModalPress} title="TRANSFER SALDO" />
               <Menu.Item onPress={() => { onSubmit('submit') }} title="SUBMIT JOB" />
           </Menu>
       </Appbar.Header>     
       
-      <View style={{flex: 1, padding: 20}}>
-      <BottomSheetModal
-            ref={bottomSheetModalRef}
-            initialSnapIndex={1}
-            snapPoints={snapPoints}
-            onChange={handleSheetChanges}
-            backdropComponent={renderBackdrop}
-            keyboardBehavior="interactive"
-            keyboardBlurBehavior="restore"
-        >
-            <View style={styles.bottomNavigationView}>
-                <Text title="TRANSFER SALDO KE YASA" h6 bold />
-                <View style={{ marginTop: 10 }}>
-                    <Controller
-                        defaultValue={`${profile.user.user_saldo}`}
-                        name="saldo"
-                        control={control}
-                        rules={{ required: { value: true, message: 'Nilai uang tunai harus diisi' } }}
-                        render={({ onChange, value }) => (
-                            <Input
-                                error={errors.saldo}
-                                errorText={errors?.saldo?.message}
-                                onChangeText={(text) => {
-                                    onChange(text)
-                                }}
-                                style={{ fontSize: 24 }}
-                                value={value}
-                                keyboardType={'numeric'}
-                                placeholder=""
-                            />
-                        )}
-                    />
-                </View>
-                <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 10, marginBottom: 20 }}>
-                    
-                </View>
-                <Button mode="contained" disabled={loading} contentStyle={{ height: 50 }} style={{ width: '100%' }} onPress={handleSubmit(onSubmit)}>
-                    Konfirmasi
-                </Button>
-            </View>
-      </BottomSheetModal>
-      </View>
       <Loading loading={isLoading} /> 
     
         <FlatList style={styles.list}
