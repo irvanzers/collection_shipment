@@ -29,7 +29,7 @@ build/
 local.properties
 *.iml
 *.hprof
-
+java_pid*
 # node.js
 #
 node_modules/

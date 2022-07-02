@@ -44,7 +44,7 @@ const RootNavigator = (props) => {
         name="Beranda"
         component={HomeScreen}
         options={{
-          title: 'GALENIUM',
+          title: 'COLLECTION & SHIPMENT',
           headerLeft: () => <></>,
           headerStyle: {
             backgroundColor: '#4077c4',

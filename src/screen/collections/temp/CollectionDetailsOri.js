@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback }  from 'react'
-import { View, StyleSheet, ScrollView, TouchableHighlight, InteractionManager, PermissionsAndroid, Platform, Alert, TouchableOpacity } from 'react-native'
+import { View, StyleSheet, ScrollView, TouchableHighlight, InteractionManager, PermissionsAndroid, Platform, Alert } from 'react-native'
 import { useForm, Controller } from 'react-hook-form';
 
 import Text from './../../components/Text';
@@ -14,7 +14,6 @@ import moment from 'moment';
 import DatePicker from '../../components/DatePicker';
 import Toast from 'react-native-simple-toast';
 import Geolocation from 'react-native-geolocation-service';
-import Clipboard from '@react-native-clipboard/clipboard';
 
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
@@ -27,6 +26,7 @@ import Common from './../../redux/constants/common';
 import { theme } from '../../redux/constants/theme';
 import {getUuid, setUuid} from './../../redux/utils/actionUtil';
 import { useNavigation } from '@react-navigation/core';
+import { API_URL, URL } from './../../redux/constants/app';
 
 
 const checkSelfie = () => {
@@ -42,17 +42,14 @@ const checkSelfie = () => {
   return true;
 }
 
-let total_pembayaran = 0;
+let total_pembayaran = 9;
 
 const CollectionDetail = ( props ) => {
-  const listcust = props.route.params.data;
   const {collectiondetail} = props;
   const navigation = useNavigation();
   const [text, setText] = React.useState("");
   const { handleSubmit, control, formState: {errors}, setValue, getValues } = useForm(); // initialize the hook
   const [error, setError] = useState('');
-  const [open, setOpen] = useState([]);
-  const [expanded, setExpanded] = useState(1);
   const [visitSelfie, setVisitSelfie] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [jenisPayment, setJenisPayment] = useState('');
@@ -60,14 +57,12 @@ const CollectionDetail = ( props ) => {
       latitude: '',
       longitude: ''
   });
-  const ROOT_URL = 'https://egis.galenium.com/v1/';
   const [mountTransfer, setMountTransfer] = useState(0);
   const [mountTunai, setMountTunai] = useState(0);
   const [mountGiro, setMountGiro] = useState(0);
   let jobstatus = false;
   let total_tagihan = 0;
   let total_bayar = 0;
-  let value_tagihan = parseInt(total_tagihan);
 
   const hasLocationPermission = async () => {
     if (Platform.OS === 'ios') {
@@ -121,10 +116,10 @@ const CollectionDetail = ( props ) => {
 
   const onSubmit = async(data) => {
     try {
-      if(visitSelfie == null){
-          checkSelfie()
-          return true;
-      }
+      // if(visitSelfie == null){
+      //     checkSelfie()
+      //     return true;
+      // }
       setIsLoading(true)
       data['payment_all_ar'] = true;
       data['cust_id'] = detaildata.cust_id;
@@ -135,12 +130,13 @@ const CollectionDetail = ( props ) => {
       data['total_payment'] = total_pembayaran;
       data['job_status'] = '2';
       const updatePay = await props.actions.storeItem(Common.UPDATE_COLLECTION_PAYMENT, data);
+      // console.log(updatePay.success);
       if(updatePay.success){
           // await props.actions.fetchAll(Common.USER_PROFILE);
-          // props.route.params.onBack();
           Toast.show('Pembayaran berhasil disimpan');
-          props.navigation.goBack(data);
+          props.navigation.goBack();
       }
+      // console.log(data)
     } catch (error) {
       alert(error)
     }
@@ -148,10 +144,10 @@ const CollectionDetail = ( props ) => {
   
   const onSaveDraft = async(data) => {
     try {
-      if(visitSelfie == null){
-          checkSelfie()
-          return true;
-      }
+      // if(visitSelfie == null){
+      //     checkSelfie()
+      //     return true;
+      // }
       // setIsLoading(true)
       data['payment_all_ar'] = true;
       data['cust_id'] = detaildata.cust_id;
@@ -161,13 +157,13 @@ const CollectionDetail = ( props ) => {
       data['visit_long'] = position.longitude;
       data['total_payment'] = total_pembayaran;
       data['job_status'] = '1';
-      // console.log(data)
       // const updatePay = await props.actions.storeItem(Common.UPDATE_COLLECTION_PAYMENT, data);
       // if(updatePay.success){
       //     // await props.actions.fetchAll(Common.USER_PROFILE);
       //     Toast.show('Pembayaran berhasil disimpan');
       //     props.navigation.goBack();
       // }
+      console.log(data)
     } catch (error) {
       alert(error)
     }
@@ -175,22 +171,23 @@ const CollectionDetail = ( props ) => {
 
   const onSavePhoto = async(source) => {
     try {
+      // console.log(visitSelfie)
       let datasubmit = {};
       if(source == null){
           checkSelfie()
           return true;
       }
-      setVisitSelfie(source)
-      loadData()
       // setIsLoading(true)
       datasubmit['payment_all_ar_photos'] = true;
       datasubmit['cust_id'] = detaildata.cust_id;
       datasubmit['header_id'] = detaildata.collection_header_id;
       datasubmit['visit_selfie'] = source;
+      // console.log(datasubmit)
       const updatePay = await props.actions.storeItem(Common.UPDATE_COLLECTION_PAYMENT, datasubmit);
       if(updatePay.success){
           // await props.actions.fetchAll(Common.USER_PROFILE);
           Toast.show('Foto berhasil disimpan');
+          // props.navigation.goBack();
       }
     } catch (error) {
       alert(error)
@@ -201,7 +198,7 @@ const CollectionDetail = ( props ) => {
   const renderAsset = (visitSelfie) => {
       return (
           <Card style={{ width: '100%' }}>
-              <Card.Cover source={{uri: `${ROOT_URL}${visitSelfie}`}} style={{ height: 300 }} />
+              <Card.Cover source={{uri: visitSelfie}} style={{ height: 300 }} />
               <Card.Actions style={{justifyContent: 'center'}}>
                   <Button mode="contained" onPress={()=> cleanupImages()}>REMOVE</Button>
               </Card.Actions>
@@ -224,7 +221,7 @@ const CollectionDetail = ( props ) => {
       }).then(response => {
           if (!response.didCancel && !response.error) {
               const source = 'data:image/jpeg;base64,' + response.data;
-              // setVisitSelfie(source)
+              setVisitSelfie(source)
               onSavePhoto(source);
           }
       }).catch(e => alert('ANDA BELUM MENGAMBIL GAMBAR'));
@@ -240,6 +237,7 @@ const CollectionDetail = ( props ) => {
     if(hasPermission){
       Geolocation.getCurrentPosition(
         pos => {
+          // console.log(pos)
           setPosition({
               latitude: pos.coords.latitude,
               longitude: pos.coords.longitude
@@ -251,27 +249,12 @@ const CollectionDetail = ( props ) => {
       );
     }
   };
-  
-  const onMore = (value) => {
-    const currentIndex = open.indexOf(value);
-    const newChecked = [...open];
-    if (currentIndex === -1) {
-      newChecked.push(value);
-    } else {
-      newChecked.splice(currentIndex, 1);
-    }
-    setOpen(newChecked);
-  }
 
   useEffect(() => {
     getPosition()
     const interactionPromise = InteractionManager.runAfterInteractions(() => {
         loadData()
     });
-    if (detaildata.image_visit != null) {
-      setVisitSelfie(detaildata.image_visit);
-    }
-    setIsLoading(false)
     return () => interactionPromise.cancel();
   },[])
   const keyExtractor = useCallback((item, index) => index.toString(), []);
@@ -279,7 +262,8 @@ const CollectionDetail = ( props ) => {
   const listar = collectiondetail ? collectiondetail.list_ar : [];
   const statusar = collectiondetail ? collectiondetail.status_ar : [];
   const trans = mountTunai+mountTransfer+mountGiro;
-  console.log(visitSelfie)
+  // console.log(visitSelfie)
+
   return (
     <View style={{flex:1}}>
     <ScrollView
@@ -289,10 +273,19 @@ const CollectionDetail = ( props ) => {
     >
     <Loading loading={isLoading} /> 
       <View style={{ paddingHorizontal: 10, paddingTop: 10 }}>
-        <View style={{marginTop: 10, paddingBottom: 10}} flexDirection="row">
-              { visitSelfie ?
-                   renderAsset(detaildata.image_visit)
-                   :
+        <View style={{marginTop: 10, paddingBottom: 10}} flexDirection="row">          
+          {/* {detaildata.image_visit != null ? 
+            <Card style={{ width: '100%' }}>
+                <Card.Cover source={{uri: `${URL}${detaildata.image_visit}`}} style={{ height: 300 }} />
+                <Card.Actions style={{justifyContent: 'center'}}>
+                    <Button mode="contained" onPress={()=> cleanupImages()}>REMOVE</Button>
+                </Card.Actions>
+            </Card>
+            :(
+              <> */}
+              { visitSelfie != null ?
+                  renderAsset(visitSelfie)
+                  :
                   (
                   <TouchableHighlight
                       onPress={launchCamera}
@@ -377,53 +370,24 @@ const CollectionDetail = ( props ) => {
             <Text
               title="List Tagihan" 
               h5 bold style={{color: '#000000'}} 
-            />
-            
-            { listar?.map((item, index) => {
+            />                
+            { listar != undefined && listar?.map((item, index) => {
               total_tagihan += item.amount_due_remaining
               total_bayar += item.total_payment
               total_pembayaran =  total_bayar == '0' ? trans : total_bayar;
-              !jobstatus ? (jobstatus = item.job_status == 2 && true ) : false;
+              !jobstatus ? (jobstatus = item.job_status == 2 && true ) : false
               return (
                 <React.Fragment
                   key={index.toString()}
                 >
-                  { (index == 0) &&
+                {
+                  item.job_status <= 1 &&
                     <>
                     <List.Item
-                      style={[ item.job_status != 2 ? {backgroundColor: '#FFFF'} : {backgroundColor: '#C8C8C8'}]}
                       title={`No. AR ${item.trx_number}`}
                       key={index.toString()}
                       description={props => 
                         <NumberFormat 
-                          value={item.amount_due_remaining} 
-                          displayType={'text'} 
-                          prefix={`Nominal Rp. `} 
-                          thousandSeparator={true}
-                          renderText={(value) =>  {
-                              return (
-                                  <View style={{flexDirection:'row', flexWrap:'wrap', alignItems: 'flex-end'}}>
-                                      <Text title={value} italic />
-                                  </View>
-                              )
-                          }}
-                        />
-                      }
-                      left={props => <List.Icon {...props} icon="chevron-double-right" />}
-                      onPress={() => navigation.push('CollectionPayment', {data: item})}
-                    />
-                    <View style={{borderColor: 'grey', borderWidth: .5}} />
-                    </>
-                  }
-                    { expanded == 0 &&
-                      <>
-                      { (index >= 1) &&
-                      <List.Item
-                        style={[ item.job_status != 2 ? {backgroundColor: '#FFFF'} : {backgroundColor: '#C8C8C8'}]}
-                        title={`No. AR ${item.trx_number}`}
-                        key={index.toString()}
-                        description={props => 
-                          <NumberFormat 
                             value={item.amount_due_remaining} 
                             displayType={'text'} 
                             prefix={`Nominal Rp. `} 
@@ -435,33 +399,45 @@ const CollectionDetail = ( props ) => {
                                     </View>
                                 )
                             }}
-                          />
-                        }
-                        left={props => <List.Icon {...props} icon="chevron-double-right" />}
-                        onPress={() => navigation.push('CollectionPayment', {data: item})}
-                      />
-                    }
+                        />}
+                      left={props => <List.Icon {...props} icon="chevron-double-right" />}
+                      onPress={() => navigation.navigate('CollectionPayment', {data: item, onBack: () => onGoBack()})}
+                    />    
                     <View style={{borderColor: 'grey', borderWidth: .5}} />
                     </>
-                  }
-                  { listar.length > 1 ?
-                      [index == 0 && (
-                        <>
-                          <Button icon={expanded != 0 ? 'arrow-down-thick' : 'arrow-up-thick'} mode='text' onPress={() => setExpanded(!expanded)}>
-                            {expanded != 0 ? 'More Detail' : 'Less More'}
-                          </Button>
-                        <View style={{borderColor: 'grey', borderWidth: .5}} />
-                        </>
-                      )]
-                    :
-                      null
-                  }
+                }       
+                {
+                  item.job_status == 2 &&
+                  <>
+                    <List.Item
+                      style={{backgroundColor: '#C8C8C8'}}
+                      title={`No. AR ${item.trx_number}`}
+                      key={index.toString()}
+                      description={props => 
+                        <NumberFormat 
+                            value={item.amount_due_remaining} 
+                            displayType={'text'} 
+                            prefix={`Nominal Rp. `} 
+                            thousandSeparator={true}
+                            renderText={(value) =>  {
+                                return (
+                                    <View style={{flexDirection:'row', flexWrap:'wrap', alignItems: 'flex-end'}}>
+                                        <Text title={value} italic />
+                                    </View>
+                                )
+                            }}
+                        />}
+                      left={props => <List.Icon {...props} icon="chevron-double-right" />}
+                      onPress={() => navigation.push('CollectionPayment', {data: item})}
+                    />
+                    <View style={{borderColor: 'grey', borderWidth: .5}} />    
+                  </>
+                }
                 </React.Fragment>
-                
               )
             })}
+            <View style={{borderColor: 'grey', borderWidth: .5}} />
             <View flexDirection="row" justifyContent="space-between" style={{paddingTop: 10}}>
-              
               <Text title={'Total Tagihan'} h5 bold />
               <NumberFormat 
                   value={total_tagihan} 
@@ -472,15 +448,6 @@ const CollectionDetail = ( props ) => {
                       return (
                           <View style={{flexDirection:'row', flexWrap:'wrap', alignItems: 'flex-end'}}>
                               <Text title={value} h5 bold />
-                              <TouchableOpacity onPress={() => {
-                                Clipboard.setString(`${total_tagihan}`)
-                                }} >
-                                <IconButton 
-                                  icon="content-copy"
-                                  iconColor="blue"
-                                  size={13}                
-                                />
-                              </TouchableOpacity>
                           </View>
                       )
                   }}
@@ -618,26 +585,42 @@ const CollectionDetail = ( props ) => {
                         <Text title="TRANSFER" bold />
                     </View>
                 </View>
-                <View style={{marginTop: 15}} />
-                <Text title="Tanggal Transfer" />
-                    <Controller
-                        defaultValue={moment(new Date()).format('YYYY-MM-DD')}
-                        name="transfer_date"
-                        control={control}
-                        rules={{ required: { value: true, message: 'Tanggal transfer harus diisi' } }}
-                        render={({ onChange, value }) => (
-                            <DatePicker
-                                style={styles.datePickerStyle}
-                                date={value} // Initial date from state
-                                mode="date" // The enum of date, datetime and time
-                                format="YYYY-MM-DD"
-                                value={value}
-                                error={errors.transfer_date}
-                                errorText={errors?.transfer_date?.message}
-                                onDateChange={(data) => { onChange(data) }}
-                            />
-                        )}
-                    />
+                <Text title="No. Rekening" />
+                  <Controller
+                      defaultValue={listar?.nomor_rekening}
+                      name="nomor_rekening"
+                      control={control}
+                      // rules={{ required: { value: true, message: 'Nominal Pembayaran Harus Di isi' } }}
+                      render={({field: { onChange, value }}) => ( 
+                        <Input
+                            error={errors?.nomor_rekening}
+                            errorText={errors?.nomor_rekening?.message}
+                            onChangeText={(text) => {onChange(text)}}
+                            value={value}
+                            placeholder="NO. REKENING"
+                        />
+                      )}
+                  />
+                  <View style={{marginTop: 15}} />
+                  <Text title="Tanggal Transfer" />
+                      <Controller
+                          defaultValue={moment(new Date()).format('YYYY-MM-DD')}
+                          name="transfer_date"
+                          control={control}
+                          rules={{ required: { value: true, message: 'Tanggal transfer harus diisi' } }}
+                          render={({ onChange, value }) => (
+                              <DatePicker
+                                  style={styles.datePickerStyle}
+                                  date={value} // Initial date from state
+                                  mode="date" // The enum of date, datetime and time
+                                  format="YYYY-MM-DD"
+                                  value={value}
+                                  error={errors.transfer_date}
+                                  errorText={errors?.transfer_date?.message}
+                                  onDateChange={(data) => { onChange(data) }}
+                              />
+                          )}
+                      />
                 <View style={{marginTop: 15}} />  
                 <Text title="Nominal Pembayaran Transfer" />
                   <Controller

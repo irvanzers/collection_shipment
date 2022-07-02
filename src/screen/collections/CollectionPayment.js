@@ -60,6 +60,7 @@ const CollectionPayment = ( props ) => {
       data['trx_number'] = detailar.trx_number;
       data['total_payment'] = total_pembayaran;
       data['job_status'] = '2';
+      data['sisa_payment'] = detailar.amount_due_remaining - total_pembayaran;
       const updatePay = await props.actions.storeItem(Common.UPDATE_COLLECTION_PAYMENT, data);
       // console.log(updatePay.success);
       if(updatePay.success){
@@ -300,44 +301,26 @@ const CollectionPayment = ( props ) => {
                         <Text title="TRANSFER" bold />
                     </View>
                 </View>
-                <Text title="No. Rekening" />
-                  <Controller
-                      defaultValue={detailar?.nomor_rekening}
-                      name="nomor_rekening"
-                      control={control}
-                      // rules={{ required: { value: true, message: 'Nominal Pembayaran Harus Di isi' } }}
-                      render={({field: { onChange, value }}) => ( 
-                        <Input
-                            error={errors?.nomor_rekening}
-                            errorText={errors?.nomor_rekening?.message}
-                            onChangeText={(text) => {
-                              onChange(text)
-                            }}
-                            value={value}
-                            placeholder="NO. REKENING"
-                        />
-                      )}
-                  />
-                  <View style={{marginTop: 15}} />
-                  <Text title="Tanggal Transfer" />
-                      <Controller
-                          defaultValue={moment(new Date()).format('YYYY-MM-DD')}
-                          name="transfer_date"
-                          control={control}
-                          // rules={{ required: { value: true, message: 'Tanggal kunjungan harus diisi' } }}
-                          render={({ onChange, value }) => (
-                              <DatePicker
-                                  style={styles.datePickerStyle}
-                                  date={value} // Initial date from state
-                                  mode="date" // The enum of date, datetime and time
-                                  format="YYYY-MM-DD"
-                                  value={value}
-                                  error={errors.transfer_date}
-                                  errorText={errors?.transfer_date?.message}
-                                  onDateChange={(data) => { onChange(data) }}
-                              />
-                          )}
-                      />
+                <View style={{marginTop: 15}} />
+                <Text title="Tanggal Transfer" />
+                    <Controller
+                        defaultValue={moment(new Date()).format('YYYY-MM-DD')}
+                        name="transfer_date"
+                        control={control}
+                        // rules={{ required: { value: true, message: 'Tanggal kunjungan harus diisi' } }}
+                        render={({ onChange, value }) => (
+                            <DatePicker
+                                style={styles.datePickerStyle}
+                                date={value} // Initial date from state
+                                mode="date" // The enum of date, datetime and time
+                                format="YYYY-MM-DD"
+                                value={value}
+                                error={errors.transfer_date}
+                                errorText={errors?.transfer_date?.message}
+                                onDateChange={(data) => { onChange(data) }}
+                            />
+                        )}
+                    />
                 <View style={{marginTop: 15}} />  
                 <Text title={"Nominal Pembayaran Transfer" }/>
                   <Controller

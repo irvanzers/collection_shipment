@@ -7,6 +7,7 @@ import Text from './../../components/Text';
 import { Card, Title, Colors, Appbar, Menu } from 'react-native-paper';
 import Moment from 'moment';
 import List from './../../components/MenuList/List';
+import Toast from 'react-native-simple-toast';
 
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
@@ -18,6 +19,8 @@ import * as authService from './../../redux/services/authService';
 import Common from './../../redux/constants/common';
 import { theme } from '../../redux/constants/theme';
 import {getUuid, setUuid} from './../../redux/utils/actionUtil';
+import { useNavigation } from '@react-navigation/core';
+import { API_URL, ROOT_URL } from './../../redux/constants/app';
 
 const CollectionList = ( props ) => {
   const { collectiondata, collectionlistdetail }=props; 
@@ -35,7 +38,7 @@ const CollectionList = ( props ) => {
   const loadData = async() => {  
     try {
         const datasubmit = {
-            header_id: props.route.params.data
+            header_id: props.route.params.data,
         }
         // await props.actions.fetchAll(Common.COLLECTION_DATA);    
         await props.actions.fetchAll(Common.COLLECTION_LIST_DETAIL, datasubmit);
@@ -50,7 +53,7 @@ const CollectionList = ( props ) => {
 const onSubmit = () => {
     Alert.alert(
         "PERHATIAN",
-        "JIKA ADA JOB YANG BELUM DI VISIT/SUBMIT, MAKA STATUSNYA TIDAK TERTAGIH!",
+        "JIKA ADA JOB YANG BELUM DI VISIT/SUBMIT, MAKA STATUSNYA TIDAK TERKUNJUNGI!",
         [{
             text: "BATAL",
             onPress: () => console.log("No, continue editing")
@@ -58,11 +61,34 @@ const onSubmit = () => {
             text: "YA",
             onPress: () => {
                 console.log('Yes')
+                onSubmitHeader()
             },
             style: "cancel"
         }],
     );
 }
+
+const onSubmitHeader = async(data) => {
+    try {
+        const datasubmit = {
+            collection_header_id: props.route.params.data,
+        }
+    //   setIsLoading(true)
+    //   data['collection_header_id'] = props.route.params.data;
+    //   console.log(data)
+      const submitHeader = await props.actions.storeItem(Common.SUBMIT_HEADER_JOB, datasubmit);
+      if(submitHeader.success){
+          Toast.show('Header job berhasil disubmit');
+          props.navigation.goBack();
+      }
+    } catch (error) {
+      alert(error)
+    }
+}
+
+const onGoBack = (data) => {
+    loadData(data);
+  }
 
 useEffect(() => {
     const interactionPromise = InteractionManager.runAfterInteractions(() => {
@@ -78,7 +104,8 @@ const assignedcount = collectionlistdetail ? collectionlistdetail.assigned_count
 const statusheader = collectionlistdetail ? collectionlistdetail.header_status : [];
 const tunailist = collectionlistdetail ? collectionlistdetail.tunai_list : [];
 const transferlist = collectionlistdetail ? collectionlistdetail.transfer_list : [];
-// console.log(tunailist);
+
+console.log(listcollection)
 
     const renderTopItem = ({}) => {
         return(

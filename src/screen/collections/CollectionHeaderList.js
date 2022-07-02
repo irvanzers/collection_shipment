@@ -58,6 +58,9 @@ const CollectionHeaderList = ( props ) => {
           
       }
   }
+  const onGoBack = () => {
+    loadData();
+  }
   useEffect(() => {
       const interactionPromise = InteractionManager.runAfterInteractions(() => {
           loadData()
@@ -66,8 +69,6 @@ const CollectionHeaderList = ( props ) => {
   },[])
   const keyExtractor = useCallback((item, index) => index.toString(), []);
   const listcollectionheader = collectionheader ? collectionheader : [];
-//   const custcount = collectionheader ? collectionheader.cust_count : [];
-//   console.log(listcollectionheader);
   
   const renderTopItem = ({}) => {
       return(

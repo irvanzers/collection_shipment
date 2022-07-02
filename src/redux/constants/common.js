@@ -7,6 +7,9 @@ const commons = {
     COLLECTION_HEADER_LIST: 'collectionheader',
     COLLECTION_DETAIL_PRODUCT: 'collectionproduct',
     UPDATE_COLLECTION_PAYMENT: 'paymentcollection',
+    SUBMIT_HEADER_JOB: 'submitheaderjob',
+    USER_COLLECTOR_PROFILE: 'usercollector',
+    POST_SETOR_KEKASIR: 'setorkekasir',
 };
 
 export default commons
