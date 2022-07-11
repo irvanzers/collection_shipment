@@ -29,7 +29,7 @@ const OthersIndex = ( props ) => {
           sizeIcon={80}
           height={150}
         />            
-        <View style={styles.viewLine, { paddingTop: 10 }} />
+        {/* <View style={styles.viewLine, { paddingTop: 10 }} />
           <View style={styles.divider} />
           <List
             nav="OthersAbsenCar"
@@ -52,7 +52,7 @@ const OthersIndex = ( props ) => {
             fontSize={23}
             sizeIcon={80}
             height={150}
-          />
+          /> */}
       {/* <View style={{ paddingHorizontal: 10, paddingTop: 10, justifyContent: 'center'}}>
         <Card style={{ alignItems: 'center' }}>
           <Card.Content

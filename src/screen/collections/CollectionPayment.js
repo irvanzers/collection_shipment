@@ -13,6 +13,7 @@ import { theme } from '../../constants/theme';
 import Toast from 'react-native-simple-toast';
 import Loading from './../../components/Loading';
 import NumberFormat from 'react-number-format';
+import Clipboard from '@react-native-clipboard/clipboard';
 
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
@@ -68,6 +69,7 @@ const CollectionPayment = ( props ) => {
           props.route.params.onBack();
           Toast.show('Pembayaran berhasil disimpan');
           props.navigation.goBack();
+          // console.log(props.route.params.onBack())
       }
     } catch (error) {
       alert(error)
@@ -81,13 +83,14 @@ const CollectionPayment = ( props ) => {
       data['total_payment'] = total_pembayaran;
       data['job_status'] = '1';
       data['sisa_payment'] = detailar.amount_due_remaining - total_pembayaran;
-      // const updatePay = await props.actions.storeItem(Common.UPDATE_COLLECTION_PAYMENT, data);
+      const updatePay = await props.actions.storeItem(Common.UPDATE_COLLECTION_PAYMENT, data);
       // console.log(updatePay.success);
-      // if(updatePay.success){
+      if(updatePay.success){
       //     // await props.actions.fetchAll(Common.USER_PROFILE);
-      //     Toast.show('Pembayaran berhasil disimpan');
-      //     props.navigation.goBack();
-      // }
+          props.route.params.onBack();
+          Toast.show('Pembayaran berhasil disimpan');
+          props.navigation.goBack();
+      }
       console.log(data)
     } catch (error) {
       alert(error)
@@ -106,7 +109,7 @@ const CollectionPayment = ( props ) => {
   // console.log(detailar);
   const trans = mountTunai+mountTransfer+mountGiro;
   total_pembayaran =  detailar?.total_payment == '0' ? trans : detailar?.total_payment;
-
+  console.log(detailar.job_status)
   return (
     <View style={{flex:1}}>
     <ScrollView
@@ -134,7 +137,12 @@ const CollectionPayment = ( props ) => {
                     :
                     (
                       <>
-                      {detailar.collection_status == 'tertagih' &&
+                      {detailar.job_status >= 2 &&
+                        <Text 
+                          title={'TAGIHAN TERSUBMIT'} bold style={{ color: 'green' }}
+                        />
+                      }
+                      {/* {detailar.collection_status == 'tertagih' &&
                         <Text 
                           title={'TERTAGIH'} bold style={{ color: 'green' }}
                         />
@@ -158,7 +166,7 @@ const CollectionPayment = ( props ) => {
                         <Text 
                           title={'BELUM DI KUNJUNGI'} bold style={{ color: 'grey' }}
                         />
-                      }
+                      } */}
                       </>
                     )
                   }
@@ -171,23 +179,125 @@ const CollectionPayment = ( props ) => {
             </Title>
           <View style={{ marginTop:10 }} />
           <Paragraph>{detailar.bill_to_address}</Paragraph>
-          <View flexDirection="row" justifyContent="space-between" style={{paddingTop: 20}}>
-            <Text title={'Total Tagihan'} h5 bold />
+          <View flexDirection="row" justifyContent="space-between" style={{paddingTop: 20, paddingBottom: 5}}>
+            <Text title={'Total Tagihan'} h5 bold style={{paddingTop:8}} />
             <NumberFormat 
                 value={detailar.amount_due_remaining} 
                 displayType={'text'} 
-                prefix={`Rp`} 
+                prefix={`Rp. `} 
                 thousandSeparator={true}
                 renderText={(value) =>  {
                     return (
                         <View style={{flexDirection:'row', flexWrap:'wrap', alignItems: 'flex-end'}}>
+                          <TouchableOpacity onPress={() => {
+                            Clipboard.setString(`${detailar.amount_due_remaining}`)
+                            Toast.show('Sudah di salin.');
+                            }} >
                             <Text title={value} h5 bold />
+                          </TouchableOpacity>
+                          <TouchableOpacity onPress={() => {
+                            Clipboard.setString(`${detailar.amount_due_remaining}`)
+                            Toast.show('Sudah di salin.');
+                            }} >
+                              <IconButton 
+                                icon="content-copy"
+                                iconColor="blue"
+                                size={15}                
+                              />
+                          </TouchableOpacity>
                         </View>
                     )
                 }}
             />
           </View>
-          { detailar.job_status == 2 &&
+          {detailar.amount_payment_tunai != 0 &&
+          <View flexDirection="row" justifyContent="space-between" style={{paddingTop: 20}}>
+            <Text title={'Jumlah Tunai'} h6 bold style={{paddingTop:8}} />
+            <NumberFormat 
+                value={detailar.amount_payment_tunai} 
+                displayType={'text'} 
+                prefix={`Rp. `} 
+                thousandSeparator={true}
+                renderText={(value) =>  {
+                    return (
+                        <View style={{flexDirection:'row', flexWrap:'wrap', alignItems: 'flex-end'}}>
+                            <Text title={value} h6 bold style={{paddingTop:8}} />
+                        </View>
+                    )
+                }}
+            />
+          </View>
+          }
+          {detailar.amount_payment_transfer != 0 &&
+          <View flexDirection="row" justifyContent="space-between" style={{paddingTop: 10}}>
+            <Text title={'Jumlah Transfer'} h6 bold style={{paddingTop:8}} />
+            <NumberFormat 
+                value={detailar.amount_payment_transfer} 
+                displayType={'text'} 
+                prefix={`Rp. `} 
+                thousandSeparator={true}
+                renderText={(value) =>  {
+                    return (
+                        <View style={{flexDirection:'row', flexWrap:'wrap', alignItems: 'flex-end'}}>
+                            <Text title={value} h6 bold style={{paddingTop:8}} />
+                        </View>
+                    )
+                }}
+            />
+          </View>
+          }
+          {detailar.amount_payment_giro != 0 &&
+          <View flexDirection="row" justifyContent="space-between" style={{paddingTop: 10, paddingBottom: 5}}>
+            <Text title={'Jumlah Giro'} h6 bold style={{paddingTop:8}} />
+            <NumberFormat 
+                value={detailar.amount_payment_giro} 
+                displayType={'text'} 
+                prefix={`Rp. `} 
+                thousandSeparator={true}
+                renderText={(value) =>  {
+                    return (
+                        <View style={{flexDirection:'row', flexWrap:'wrap', alignItems: 'flex-end'}}>
+                            <Text title={value} h6 bold style={{paddingTop:8}} />
+                        </View>
+                    )
+                }}
+            />
+          </View>
+          }
+          <View style={{borderColor: 'grey', borderWidth: .5}} />
+          <View flexDirection="row" justifyContent="space-between" style={{paddingTop: 0}}>
+            <Text title={'Jumlah Bayar'} h6 bold style={{paddingTop:8}} />
+            <NumberFormat 
+                value={detailar.total_payment} 
+                displayType={'text'} 
+                prefix={`Rp. `} 
+                thousandSeparator={true}
+                renderText={(value) =>  {
+                    return (
+                        <View style={{flexDirection:'row', flexWrap:'wrap', alignItems: 'flex-end'}}>
+                            <Text title={value} h6 bold style={{paddingTop:8}} />
+                        </View>
+                    )
+                }}
+            />
+          </View>
+          <View flexDirection="row" justifyContent="space-between" style={{paddingTop: 0}}>
+            <Text title={'Sisa Bayar'} h6 bold style={{paddingTop:8}} />
+            <NumberFormat 
+                value={detailar.sisa_payment} 
+                displayType={'text'} 
+                prefix={`Rp. `} 
+                thousandSeparator={true}
+                renderText={(value) =>  {
+                    return (
+                        <View style={{flexDirection:'row', flexWrap:'wrap', alignItems: 'flex-end'}}>
+                            <Text title={value} h6 bold style={{paddingTop:8}} />
+                        </View>
+                    )
+                }}
+            />
+          </View>
+          { detailar.job_status == 3 &&
             <React.Fragment>
             <View style={{ marginTop:20 }}>
               { detailar.payment_type == 'giro_bank' && 
@@ -282,7 +392,7 @@ const CollectionPayment = ( props ) => {
           </Card>         
         </View>
       }      
-      { detailar.job_status != 2 &&
+      { detailar.job_status <= 1 &&
       <React.Fragment>
         <View style={{ paddingTop: 10 }} />
         <View style={{ paddingHorizontal: 10, paddingTop: 10 }}>

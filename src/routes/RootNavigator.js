@@ -121,14 +121,7 @@ const RootNavigator = (props) => {
         name="CollectionDetail"
         component={CollectionDetail}
         options={{
-          title: 'DETAIL TAGIHAN',
-          headerStyle: {
-            backgroundColor: '#4077c4',
-          },
-          headerTintColor: '#fff',
-          headerTitleStyle: {
-            fontWeight: 'bold',
-          },
+          headerShown: false,
           cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
         }}
       /> 

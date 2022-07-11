@@ -5,7 +5,7 @@ import { useForm, Controller } from 'react-hook-form';
 import Text from './../../components/Text';
 import Input from '../../components/Input';
 import SelectPicker from './../../components/SelectPicker';
-import { List, Card, Title, Paragraph, Button, IconButton } from 'react-native-paper';
+import { List, Card, Title, Paragraph, Button, IconButton, Appbar } from 'react-native-paper';
 import ImagePicker from 'react-native-image-crop-picker';
 import NumberFormat from 'react-number-format';
 import Collapsible from 'react-native-collapsible';
@@ -27,7 +27,7 @@ import Common from './../../redux/constants/common';
 import { theme } from '../../redux/constants/theme';
 import {getUuid, setUuid} from './../../redux/utils/actionUtil';
 import { useNavigation } from '@react-navigation/core';
-
+import { TextInputMask } from 'react-native-masked-text';
 
 const checkSelfie = () => {
   Alert.alert(
@@ -46,6 +46,7 @@ let total_pembayaran = 0;
 
 const CollectionDetail = ( props ) => {
   const listcust = props.route.params.data;
+  const itemDet = props.route.params.item;
   const {collectiondetail} = props;
   const navigation = useNavigation();
   const [text, setText] = React.useState("");
@@ -67,7 +68,9 @@ const CollectionDetail = ( props ) => {
   let jobstatus = false;
   let total_tagihan = 0;
   let total_bayar = 0;
-  let value_tagihan = parseInt(total_tagihan);
+  let total_transfer = 0;
+  let total_tunai = 0;
+  let total_giro = 0;
 
   const hasLocationPermission = async () => {
     if (Platform.OS === 'ios') {
@@ -103,13 +106,18 @@ const CollectionDetail = ( props ) => {
     }
     return false;
   };
+  
+  const onBackz = () => { props.navigation.goBack(); props.route.params.onBackList(); };
 
   const loadData = async () => {
     setIsLoading(false);  
       try {
           const datasubmit = {
-              cust_id: props.route.params.cust_id,
-              header_id: props.route.params.collection_header_id,
+              cust_id: itemDet?.cust_id,
+              header_id: itemDet?.collection_header_id,
+          }
+          if (detaildata.image_visit != '') {
+            setVisitSelfie(detaildata.image_visit);
           }
           await props.actions.fetchAll(Common.COLLECTION_DETAIL, datasubmit);    
       } catch (error) {
@@ -133,13 +141,13 @@ const CollectionDetail = ( props ) => {
       data['visit_lat'] = position.latitude;
       data['visit_long'] = position.longitude;
       data['total_payment'] = total_pembayaran;
-      data['job_status'] = '2';
+      data['job_status'] = '3';
       const updatePay = await props.actions.storeItem(Common.UPDATE_COLLECTION_PAYMENT, data);
       if(updatePay.success){
           // await props.actions.fetchAll(Common.USER_PROFILE);
-          // props.route.params.onBack();
+          props.route.params.onBackList();
           Toast.show('Pembayaran berhasil disimpan');
-          props.navigation.goBack(data);
+          props.navigation.goBack();
       }
     } catch (error) {
       alert(error)
@@ -161,10 +169,11 @@ const CollectionDetail = ( props ) => {
       data['visit_long'] = position.longitude;
       data['total_payment'] = total_pembayaran;
       data['job_status'] = '1';
-      // console.log(data)
+      console.log(data)
       // const updatePay = await props.actions.storeItem(Common.UPDATE_COLLECTION_PAYMENT, data);
       // if(updatePay.success){
-      //     // await props.actions.fetchAll(Common.USER_PROFILE);
+      // //  await props.actions.fetchAll(Common.USER_PROFILE);
+      //     props.route.params.onBackList();
       //     Toast.show('Pembayaran berhasil disimpan');
       //     props.navigation.goBack();
       // }
@@ -180,8 +189,6 @@ const CollectionDetail = ( props ) => {
           checkSelfie()
           return true;
       }
-      setVisitSelfie(source)
-      loadData()
       // setIsLoading(true)
       datasubmit['payment_all_ar_photos'] = true;
       datasubmit['cust_id'] = detaildata.cust_id;
@@ -191,6 +198,7 @@ const CollectionDetail = ( props ) => {
       if(updatePay.success){
           // await props.actions.fetchAll(Common.USER_PROFILE);
           Toast.show('Foto berhasil disimpan');
+          loadData()
       }
     } catch (error) {
       alert(error)
@@ -198,12 +206,12 @@ const CollectionDetail = ( props ) => {
   }
 
   //GETTING PHOTO
-  const renderAsset = (visitSelfie) => {
+  const renderAsset = (fotoSelfie) => {
       return (
           <Card style={{ width: '100%' }}>
-              <Card.Cover source={{uri: `${ROOT_URL}${visitSelfie}`}} style={{ height: 300 }} />
+              <Card.Cover source={{uri: `${ROOT_URL}${fotoSelfie}`}} style={{ height: 300 }} />
               <Card.Actions style={{justifyContent: 'center'}}>
-                  <Button mode="contained" onPress={()=> cleanupImages()}>REMOVE</Button>
+                  {/* <Button mode="contained" onPress={()=> cleanupImages()}>REMOVE</Button> */}
               </Card.Actions>
           </Card>
       );
@@ -224,7 +232,7 @@ const CollectionDetail = ( props ) => {
       }).then(response => {
           if (!response.didCancel && !response.error) {
               const source = 'data:image/jpeg;base64,' + response.data;
-              // setVisitSelfie(source)
+              setVisitSelfie(source)
               onSavePhoto(source);
           }
       }).catch(e => alert('ANDA BELUM MENGAMBIL GAMBAR'));
@@ -268,9 +276,6 @@ const CollectionDetail = ( props ) => {
     const interactionPromise = InteractionManager.runAfterInteractions(() => {
         loadData()
     });
-    if (detaildata.image_visit != null) {
-      setVisitSelfie(detaildata.image_visit);
-    }
     setIsLoading(false)
     return () => interactionPromise.cancel();
   },[])
@@ -279,9 +284,19 @@ const CollectionDetail = ( props ) => {
   const listar = collectiondetail ? collectiondetail.list_ar : [];
   const statusar = collectiondetail ? collectiondetail.status_ar : [];
   const trans = mountTunai+mountTransfer+mountGiro;
-  console.log(visitSelfie)
+  console.log(mountTunai)
+  // console.log(visitSelfie)
+  // const onBacks = () => {
+  //   props.route.params.onGoBack()
+  //   Toast.show('Pembayaran berhasil disimpan');
+  //   props.navigation.goBack();
+  // }
   return (
     <View style={{flex:1}}>
+    <Appbar.Header>
+        <Appbar.BackAction onPress={() => onBackz()} />
+        <Appbar.Content title={'LIST TAGIHAN'} />
+    </Appbar.Header>
     <ScrollView
         style={{flex:1}}
         showsVerticalScrollIndicator={false}
@@ -290,7 +305,7 @@ const CollectionDetail = ( props ) => {
     <Loading loading={isLoading} /> 
       <View style={{ paddingHorizontal: 10, paddingTop: 10 }}>
         <View style={{marginTop: 10, paddingBottom: 10}} flexDirection="row">
-              { visitSelfie ?
+              { visitSelfie != null || detaildata.image_visit != null ?
                    renderAsset(detaildata.image_visit)
                    :
                   (
@@ -381,6 +396,9 @@ const CollectionDetail = ( props ) => {
             
             { listar?.map((item, index) => {
               total_tagihan += item.amount_due_remaining
+              total_transfer += item.amount_payment_transfer;
+              total_tunai += item.amount_payment_tunai;
+              total_giro += item.amount_payment_giro;
               total_bayar += item.total_payment
               total_pembayaran =  total_bayar == '0' ? trans : total_bayar;
               !jobstatus ? (jobstatus = item.job_status == 2 && true ) : false;
@@ -391,7 +409,7 @@ const CollectionDetail = ( props ) => {
                   { (index == 0) &&
                     <>
                     <List.Item
-                      style={[ item.job_status != 2 ? {backgroundColor: '#FFFF'} : {backgroundColor: '#C8C8C8'}]}
+                      style={[ item.job_status <= 1 ? {backgroundColor: '#FFFF'} : {backgroundColor: '#C8C8C8'}]}
                       title={`No. AR ${item.trx_number}`}
                       key={index.toString()}
                       description={props => 
@@ -410,7 +428,7 @@ const CollectionDetail = ( props ) => {
                         />
                       }
                       left={props => <List.Icon {...props} icon="chevron-double-right" />}
-                      onPress={() => navigation.push('CollectionPayment', {data: item})}
+                      onPress={() => navigation.push('CollectionPayment', {data: item, onBack: () => onGoBack()})}
                     />
                     <View style={{borderColor: 'grey', borderWidth: .5}} />
                     </>
@@ -419,7 +437,7 @@ const CollectionDetail = ( props ) => {
                       <>
                       { (index >= 1) &&
                       <List.Item
-                        style={[ item.job_status != 2 ? {backgroundColor: '#FFFF'} : {backgroundColor: '#C8C8C8'}]}
+                        style={[ item.job_status <= 1 ? {backgroundColor: '#FFFF'} : {backgroundColor: '#C8C8C8'}]}
                         title={`No. AR ${item.trx_number}`}
                         key={index.toString()}
                         description={props => 
@@ -438,7 +456,7 @@ const CollectionDetail = ( props ) => {
                           />
                         }
                         left={props => <List.Icon {...props} icon="chevron-double-right" />}
-                        onPress={() => navigation.push('CollectionPayment', {data: item})}
+                        onPress={() => navigation.push('CollectionPayment', {data: item, onBack: () => onGoBack()})}
                       />
                     }
                     <View style={{borderColor: 'grey', borderWidth: .5}} />
@@ -462,7 +480,7 @@ const CollectionDetail = ( props ) => {
             })}
             <View flexDirection="row" justifyContent="space-between" style={{paddingTop: 10}}>
               
-              <Text title={'Total Tagihan'} h5 bold />
+              <Text title={'Total Tagihan'} h5 bold style={{ paddingTop: 8 }} />
               <NumberFormat 
                   value={total_tagihan} 
                   displayType={'text'} 
@@ -471,16 +489,22 @@ const CollectionDetail = ( props ) => {
                   renderText={(value) =>  {
                       return (
                           <View style={{flexDirection:'row', flexWrap:'wrap', alignItems: 'flex-end'}}>
-                              <Text title={value} h5 bold />
-                              <TouchableOpacity onPress={() => {
-                                Clipboard.setString(`${total_tagihan}`)
-                                }} >
-                                <IconButton 
-                                  icon="content-copy"
-                                  iconColor="blue"
-                                  size={13}                
-                                />
-                              </TouchableOpacity>
+                          <TouchableOpacity onPress={() => {
+                            Clipboard.setString(`${total_tagihan}`)
+                            Toast.show('Sudah di salin.');
+                            }} >
+                            <Text title={value} h5 bold />
+                          </TouchableOpacity>
+                          <TouchableOpacity onPress={() => {
+                            Clipboard.setString(`${total_tagihan}`)
+                            Toast.show('Sudah di salin.');
+                            }} >
+                              <IconButton 
+                                icon="content-copy"
+                                iconColor="blue"
+                                size={15}                
+                              />
+                          </TouchableOpacity>
                           </View>
                       )
                   }}
@@ -488,11 +512,11 @@ const CollectionDetail = ( props ) => {
             </View>
             { detaildata.collection_status != null &&
             <React.Fragment>              
-              { detaildata.amount_payment_tunai != '0' &&
+              { total_tunai != '0' &&
                 <View flexDirection="row" justifyContent="space-between" style={{paddingTop: 10}}>
                   <Text title={'Jumlah Tunai'} h5 bold />
                   <NumberFormat 
-                      value={detaildata.amount_payment_tunai}
+                      value={total_tunai}
                       displayType={'text'}
                       prefix={`Rp. `}
                       thousandSeparator={true}
@@ -506,11 +530,11 @@ const CollectionDetail = ( props ) => {
                   />
                 </View>
               }
-              { detaildata.amount_payment_transfer != '0' &&
+              { total_transfer != '0' &&
                 <View flexDirection="row" justifyContent="space-between" style={{paddingTop: 10}}>
                   <Text title={'Jumlah Transfer'} h5 bold />
                   <NumberFormat 
-                      value={detaildata.amount_payment_transfer}
+                      value={total_transfer}
                       displayType={'text'}
                       prefix={`Rp. `}
                       thousandSeparator={true}
@@ -524,11 +548,11 @@ const CollectionDetail = ( props ) => {
                   />
                 </View>
               }
-              { detaildata.amount_payment_giro != '0' &&
+              { total_giro != '0' &&
                 <View flexDirection="row" justifyContent="space-between" style={{paddingTop: 10}}>
                   <Text title={'Jumlah Giro'} h5 bold />
                   <NumberFormat 
-                      value={detaildata.amount_payment_giro}
+                      value={total_giro}
                       displayType={'text'}
                       prefix={`Rp. `}
                       thousandSeparator={true}
@@ -563,7 +587,8 @@ const CollectionDetail = ( props ) => {
           </Card.Content>
         </Card>         
       </View>
-      { detaildata.job_status <= 1 && 
+      {/* { detaildata.job_status <= 1 && detaildata.collection_status == null &&  */}
+      { detaildata.job_status <= 2 && 
       <React.Fragment>
       <View style={{ paddingHorizontal: 10, paddingTop: 10 }}>
         <Card>
@@ -682,6 +707,23 @@ const CollectionDetail = ( props ) => {
                           }}
                           value={value}
                           placeholder="NOMINAL PEMBAYARAN"
+                          render={(props) => {
+                            // console.log(props)
+                            return (
+                            <TextInputMask
+                              {...props}
+                              value={value}
+                              type="custom"                              
+                              // options={{
+                              //   delimiter: '.',
+                              //   unit: 'Rp. ',
+                              //   suffixUnit: ''
+                              // }}
+                              options={{mask: '99.999.999.999'}}                              
+                              ref={(ref) => tunaiField = ref}
+                              onChangeText={(text) => onChange(text)}
+                            />
+                          )}}
                       />
                     )}
                 />    

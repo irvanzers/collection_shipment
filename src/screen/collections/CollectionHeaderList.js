@@ -29,6 +29,8 @@ const CollectionHeaderList = ( props ) => {
   const [mode, setMode] = useState('date');
   const [show, setShow] = useState(false);
   const [expanded, setExpanded] = useState(true);
+  
+  const onBackPage = () => { props.navigation.goBack(); props.route.params.onBackPage(); };
 
   const handlePress = () => setExpanded(!expanded);
   const onChange = (event, selectedDate) => {
@@ -104,7 +106,7 @@ const CollectionHeaderList = ( props ) => {
         <View style={{ paddingTop: 10}}>
         <Card 
             key={index}
-            onPress={() => navigation.push('CollectionList', {data: item.id})}
+            onPress={() => navigation.push('CollectionList', {data: item.id, onBackp: () => onGoBack()})}
         >
         {/* // style={month_now == month_start && year_now == year_start ? null : styles.nonActive} > */}
             <Card.Title     
@@ -134,9 +136,9 @@ const CollectionHeaderList = ( props ) => {
   return (
     <View style={{ flex: 1 }}>      
       <Appbar.Header>
-          <Appbar.BackAction onPress={() => props.navigation.goBack()} />
+          <Appbar.BackAction onPress={() => onBackPage()} />
           <Appbar.Content title={'HEADER LIST TAGIHAN'} />
-          <Appbar.Action icon={'calendar'} onPress={showDatepicker} />
+          {/* <Appbar.Action icon={'calendar'} onPress={showDatepicker} /> */}
       </Appbar.Header>
       
       <View style={{ flex: 1 }}>

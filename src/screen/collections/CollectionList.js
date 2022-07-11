@@ -1,9 +1,11 @@
 import React, { useCallback, useState, useEffect }  from 'react'
-import { Button, View, StyleSheet, FlatList, InteractionManager, Alert } from 'react-native'
+import { Button, View, StyleSheet, FlatList, InteractionManager, Alert, TouchableHighlight } from 'react-native'
 
 import DateTimePicker from '@react-native-community/datetimepicker';
 import Loading from './../../components/Loading';
 import Text from './../../components/Text';
+import MaterialComunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import Icon from 'react-native-vector-icons/MaterialIcons';
 import { Card, Title, Colors, Appbar, Menu } from 'react-native-paper';
 import Moment from 'moment';
 import List from './../../components/MenuList/List';
@@ -21,9 +23,11 @@ import { theme } from '../../redux/constants/theme';
 import {getUuid, setUuid} from './../../redux/utils/actionUtil';
 import { useNavigation } from '@react-navigation/core';
 import { API_URL, ROOT_URL } from './../../redux/constants/app';
+import CollectionDetail from './CollectionDetail';
 
 const CollectionList = ( props ) => {
   const { collectiondata, collectionlistdetail }=props; 
+  const navigation = useNavigation();
   const [date, setDate] = useState(new Date());
   const [mode, setMode] = useState('date');
   const [show, setShow] = useState(false);
@@ -33,7 +37,10 @@ const CollectionList = ( props ) => {
   const openMenu = () => setVisible(true);
   const closeMenu = () => setVisible(false);
 
+
   const handlePress = () => setExpanded(!expanded);
+  
+  const onBacks = () => { props.navigation.goBack(); props.route.params.onBackp(); };
   
   const loadData = async() => {  
     try {
@@ -87,8 +94,8 @@ const onSubmitHeader = async(data) => {
 }
 
 const onGoBack = (data) => {
-    loadData(data);
-  }
+    loadData()
+}
 
 useEffect(() => {
     const interactionPromise = InteractionManager.runAfterInteractions(() => {
@@ -105,7 +112,7 @@ const statusheader = collectionlistdetail ? collectionlistdetail.header_status :
 const tunailist = collectionlistdetail ? collectionlistdetail.tunai_list : [];
 const transferlist = collectionlistdetail ? collectionlistdetail.transfer_list : [];
 
-console.log(listcollection)
+// console.log(listcollection)
 
     const renderTopItem = ({}) => {
         return(
@@ -177,47 +184,70 @@ console.log(listcollection)
     const renderCategory = ({item, index}) => {
         return (
             <>
-                { item.job_status <= 1 ?
+                {/* { item.job_status <= 1 ?      */}
                     <View flexDirection="row" style={{marginVertical: 5}}>                
                         <View style={[styles.viewLine, { paddingTop: 0 }]} />
-                        <View style={styles.divider} />
-                        <List
-                            nav="CollectionDetail"  
-                            item={item}
-                            iconList="briefcase-check"
-                            color={'green'}
-                            title={item.cust_name}
-                            sizeIcon={30}
-                        />
-                    </View>
-                    : (
-                    <View flexDirection="row" style={{marginVertical: 5}}>                
-                        <View style={[styles.viewLine, { paddingTop: 0 }]} />
-                        <View style={styles.divider} />
-                        <List
-                            style={{backgroundColor: '#C8C8C8'}}
-                            nav="CollectionDetail"
-                            item={item}
-                            iconList={"briefcase-check"}
-                            color={'grey'}
-                            title={item.cust_name}
-                            sizeIcon={30}
-                        />
-                    </View>
-                    )}
+                        <View style={styles.divider} />               
+                            <TouchableHighlight
+                                onPress={() => navigation.push('CollectionDetail', {item: item ? item : {}, onBackList: () => onGoBack()})}
+                                style={{ backgroundColor: 'white' }}
+                                activeOpacity={0.8}
+                                underlayColor="#bbbcbd"
+                                style={[styles.listMenu]}
+                            >
+                                <>
+                                    <View style={styles.listSubMenu}>
+                                        <MaterialComunityIcons color={item.job_status <= 1 ? 'green' : 'grey'} name={"briefcase-check"} size={30} />
+                                        <Text style={[styles.textMenu]} title={item.cust_name} p />
+                                    </View>
+                                    <View flexDirection="row" style={{ alignItems: 'center' }}>
+                                            <Icon name="keyboard-arrow-right" color="#aeaeae" size={28} />
+                                    </View>
+                                </>
+                            </TouchableHighlight>
+                        </View>
+
+                    
+{/* <View flexDirection="row" style={{marginVertical: 5}}>                
+// <View style={[styles.viewLine, { paddingTop: 0 }]} />
+// <View style={styles.divider} />
+// <List
+//     nav="CollectionDetail"  
+//     item={item}
+//     iconList="briefcase-check"
+//     color={'green'}
+//     title={item.cust_name}
+//     sizeIcon={30}
+// />
+// </View> 
+// : (
+                    // <View flexDirection="row" style={{marginVertical: 5}}>                
+                    //     <View style={[styles.viewLine, { paddingTop: 0 }]} />
+                    //     <View style={styles.divider} />
+                    //     <List
+                    //         style={{backgroundColor: '#C8C8C8'}}
+                    //         // nav="CollectionDetail"
+                    //         item={item}
+                    //         iconList={"briefcase-check"}
+                    //         color={'grey'}
+                    //         title={item.cust_name}
+                    //         sizeIcon={30}
+                    //     />
+                    // </View>
+                    // )} */}
             </>
         )
     }
 
   return (
-    <View>      
+    <View style={{ flex: 1 }}>      
       <Appbar.Header>
-          <Appbar.BackAction onPress={() => props.navigation.goBack()} />
+          <Appbar.BackAction onPress={() => onBacks()} />
           <Appbar.Content title={'LIST TAGIHAN'} />
-          <Appbar.Action
+          {/* <Appbar.Action
                 icon={'barcode-scan'} 
                 onPress={() => props.navigation.navigate('ScannerScreen')}
-          />
+          /> */}
           <Menu
               visible={visible}
               onDismiss={closeMenu}
@@ -270,7 +300,25 @@ const styles = StyleSheet.create({
       marginTop: 10, 
       backgroundColor: '#ffff', 
       padding: 10
-  }
+  },
+  listMenu: {
+      flexDirection: 'row',
+      padding: 10,
+      width: '100%',
+      height: 50,
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      backgroundColor: 'white'
+  },
+  listSubMenu: {
+      flexDirection: 'row',
+      alignItems: 'center'
+  },
+  textMenu: {
+      paddingLeft: 10,
+      letterSpacing: .5,
+      fontSize: 16
+  },
 })
 
 

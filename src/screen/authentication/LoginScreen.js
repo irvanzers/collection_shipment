@@ -35,18 +35,18 @@ const LoginScreen = (props) => {
     try {
       const login = await props.actions.login({email: data.email, password: data.password})
       console.log(login);
-      // if(login.success) {
-      //   await props.actions.removeFlashMessage();
-      //   await props.actions.apiClearState();
-      //   props.navigation.reset({
-      //     index: 0,
-      //     routes: [{ name: 'Home' }],
-      //   })
-      // } else {
-      //   Toast.show(login?.data?.message, Toast.LONG);
-      //   await props.actions.removeFlashMessage();
-      //   await props.actions.apiClearState();
-      // }
+      if(login.success) {
+        await props.actions.removeFlashMessage();
+        await props.actions.apiClearState();
+        props.navigation.reset({
+          index: 0,
+          routes: [{ name: 'Home' }],
+        })
+      } else {
+        Toast.show(login?.data?.message, Toast.LONG);
+        await props.actions.removeFlashMessage();
+        await props.actions.apiClearState();
+      }
     } catch (error) {
       alert(error)
     } finally {
@@ -110,7 +110,6 @@ const LoginScreen = (props) => {
         }} 
       />
       <View style={{width: '100%', marginTop: 10}}>
-        {/* <Button mode="contained" fullWidth disabled={loading} loading={loading} contentStyle={{height: 50}} onPress={() => navigation.navigate('Beranda')}> */}
         <Button mode="contained" fullWidth disabled={loading} loading={loading} contentStyle={{height: 50}} onPress={handleSubmit(onSubmit)}>
           LOGIN
         </Button>

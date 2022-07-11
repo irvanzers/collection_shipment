@@ -8,10 +8,11 @@ import { connect } from 'react-redux';
 import { theme } from './../../constants/theme';
 import Text from './../Text/';
 
-const List = props => {
+const List = (props) => {
     const navigation = useNavigation();
     const {
         nav,
+        funct,
         item,
         title,
         iconList,
@@ -21,13 +22,18 @@ const List = props => {
         color,
         sizeIcon,
         fontSize,
+        onBack,
          ...rest
     } = props;
-    // console.log(item.cust_id);
+    const ittts = item ? item : {};
+    const onGoBack = () => {
+        console.log('go back list')
+    }
     return (
         <TouchableHighlight
             // onPress={() => navigation.push(nav, {data: item.cust_id})}
-            onPress={() => navigation.navigate(nav, item ? item : {})}
+            onPress={() => navigation.push(nav, {item: ittts, onGoBack : onGoBack })}
+            // onPress={() => navigation.push(nav, {item: item ? item : {}}, onBack: () => onGoBack())}
             style={{ backgroundColor: 'white' }}
             activeOpacity={0.8}
             underlayColor="#bbbcbd"
