@@ -109,6 +109,10 @@ const CollectionDetail = ( props ) => {
   
   const onBackz = () => { props.navigation.goBack(); props.route.params.onBackList(); };
 
+  const addCommas = num => num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  const removeNonNumeric = num => num.toString().replace(/[^0-9]/g, "");
+  const removeCommas = num => num.toString().replace(/\,/g, "");
+
   const loadData = async () => {
     setIsLoading(false);  
       try {
@@ -116,10 +120,11 @@ const CollectionDetail = ( props ) => {
               cust_id: itemDet?.cust_id,
               header_id: itemDet?.collection_header_id,
           }
-          if (detaildata.image_visit != '') {
-            setVisitSelfie(detaildata.image_visit);
-          }
-          await props.actions.fetchAll(Common.COLLECTION_DETAIL, datasubmit);    
+          await props.actions.fetchAll(Common.COLLECTION_DETAIL, datasubmit); 
+          // GAUSAH DI PAKE UDH FIX UNTUK FOTO   
+          // if (detaildata.image_visit != '') {
+          //   setVisitSelfie(detaildata.image_visit);
+          // }
       } catch (error) {
           alert(error)
       } finally {
@@ -141,6 +146,9 @@ const CollectionDetail = ( props ) => {
       data['visit_lat'] = position.latitude;
       data['visit_long'] = position.longitude;
       data['total_payment'] = total_pembayaran;
+      data['nominal_payment_tunai'] = parseInt(removeCommas(mountTunai));
+      data['nominal_payment_transfer'] = parseInt(removeCommas(mountTransfer));
+      data['nominal_payment_giro'] = parseInt(removeCommas(mountGiro));
       data['job_status'] = '3';
       const updatePay = await props.actions.storeItem(Common.UPDATE_COLLECTION_PAYMENT, data);
       if(updatePay.success){
@@ -168,15 +176,18 @@ const CollectionDetail = ( props ) => {
       data['visit_lat'] = position.latitude;
       data['visit_long'] = position.longitude;
       data['total_payment'] = total_pembayaran;
+      data['nominal_payment_tunai'] = parseInt(removeCommas(mountTunai));
+      data['nominal_payment_transfer'] = parseInt(removeCommas(mountTransfer));
+      data['nominal_payment_giro'] = parseInt(removeCommas(mountGiro));
       data['job_status'] = '1';
       console.log(data)
-      // const updatePay = await props.actions.storeItem(Common.UPDATE_COLLECTION_PAYMENT, data);
-      // if(updatePay.success){
-      // //  await props.actions.fetchAll(Common.USER_PROFILE);
-      //     props.route.params.onBackList();
-      //     Toast.show('Pembayaran berhasil disimpan');
-      //     props.navigation.goBack();
-      // }
+      const updatePay = await props.actions.storeItem(Common.UPDATE_COLLECTION_PAYMENT, data);
+      if(updatePay.success){
+      //  await props.actions.fetchAll(Common.USER_PROFILE);
+          props.route.params.onBackList();
+          Toast.show('Pembayaran berhasil disimpan');
+          props.navigation.goBack();
+      }
     } catch (error) {
       alert(error)
     }
@@ -283,8 +294,8 @@ const CollectionDetail = ( props ) => {
   const detaildata = collectiondetail ? collectiondetail.cust_detail : [];
   const listar = collectiondetail ? collectiondetail.list_ar : [];
   const statusar = collectiondetail ? collectiondetail.status_ar : [];
-  const trans = mountTunai+mountTransfer+mountGiro;
-  console.log(mountTunai)
+  const trans = parseInt(removeCommas(mountTunai))+parseInt(removeCommas(mountTransfer))+parseInt(removeCommas(mountGiro));
+  // console.log(mountTunai)
   // console.log(visitSelfie)
   // const onBacks = () => {
   //   props.route.params.onGoBack()
@@ -303,7 +314,7 @@ const CollectionDetail = ( props ) => {
         horizontal={false}
     >
     <Loading loading={isLoading} /> 
-      <View style={{ paddingHorizontal: 10, paddingTop: 10 }}>
+      <View style={{ paddingHorizontal: 10, paddingTop: 10}}>
         <View style={{marginTop: 10, paddingBottom: 10}} flexDirection="row">
               { visitSelfie != null || detaildata.image_visit != null ?
                    renderAsset(detaildata.image_visit)
@@ -386,7 +397,7 @@ const CollectionDetail = ( props ) => {
           </Card.Content>
         </Card>
       </View>
-      <View style={{ paddingHorizontal: 10, paddingTop: 10 }}>     
+      <View style={{ paddingHorizontal: 10, paddingTop: 10, paddingBottom: 20 }}>     
         <Card>
           <Card.Content>
             <Text
@@ -675,8 +686,10 @@ const CollectionDetail = ( props ) => {
                             error={errors?.nominal_payment_transfer}
                             errorText={errors?.nominal_payment_transfer?.message}
                             onChangeText={(text) => {
-                              setMountTransfer(parseInt(text));
-                              onChange(text)
+                              // setMountTransfer(parseInt(text));
+                              // onChange(text)
+                              setMountTransfer(text);
+                              onChange(addCommas(removeNonNumeric(text)))
                             }}
                             value={value}
                             placeholder="NOMINAL PEMBAYARAN"
@@ -702,28 +715,28 @@ const CollectionDetail = ( props ) => {
                           error={errors?.nominal_payment_tunai}
                           errorText={errors?.nominal_payment_tunai?.message}
                           onChangeText={(text) => {
-                            setMountTunai(parseInt(text));
-                            onChange(text)
+                            setMountTunai(text);
+                            onChange(addCommas(removeNonNumeric(text)))
                           }}
                           value={value}
                           placeholder="NOMINAL PEMBAYARAN"
-                          render={(props) => {
-                            // console.log(props)
-                            return (
-                            <TextInputMask
-                              {...props}
-                              value={value}
-                              type="custom"                              
-                              // options={{
-                              //   delimiter: '.',
-                              //   unit: 'Rp. ',
-                              //   suffixUnit: ''
-                              // }}
-                              options={{mask: '99.999.999.999'}}                              
-                              ref={(ref) => tunaiField = ref}
-                              onChangeText={(text) => onChange(text)}
-                            />
-                          )}}
+                          // render={(props) => {
+                          //   // console.log(props)
+                          //   return (
+                          //   <TextInputMask
+                          //     {...props}
+                          //     value={value}
+                          //     type="custom"                              
+                          //     // options={{
+                          //     //   delimiter: '.',
+                          //     //   unit: 'Rp. ',
+                          //     //   suffixUnit: ''
+                          //     // }}
+                          //     options={{mask: '99.999.999.999'}}                              
+                          //     ref={(ref) => tunaiField = ref}
+                          //     onChangeText={(text) => onChange(text)}
+                          //   />
+                          // )}}
                       />
                     )}
                 />    
@@ -781,8 +794,8 @@ const CollectionDetail = ( props ) => {
                         render={({field: { onChange, value }}) => (
                           <Input
                               onChangeText={(text) => {
-                                setMountGiro(parseInt(text))
-                                onChange(text)
+                                setMountGiro(text);
+                                onChange(addCommas(removeNonNumeric(text)))
                               }}
                               value={value}
                               placeholder="NOMINAL PEMBAYARAN"

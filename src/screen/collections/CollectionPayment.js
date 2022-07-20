@@ -14,6 +14,8 @@ import Toast from 'react-native-simple-toast';
 import Loading from './../../components/Loading';
 import NumberFormat from 'react-number-format';
 import Clipboard from '@react-native-clipboard/clipboard';
+import { TextInputMask } from 'react-native-masked-text';
+import CurrencyFormat from 'react-currency-format';
 
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
@@ -40,6 +42,7 @@ const CollectionPayment = ( props ) => {
   const [mountTransfer, setMountTransfer] = useState(0);
   const [mountTunai, setMountTunai] = useState(0);
   const [mountGiro, setMountGiro] = useState(0);
+  const [nominal, setNominal] = useState(0);
 
   const loadData = async () => {
       try {
@@ -55,6 +58,10 @@ const CollectionPayment = ( props ) => {
       }
   }
 
+  const addCommas = num => num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  const removeNonNumeric = num => num.toString().replace(/[^0-9]/g, "");
+  const removeCommas = num => num.toString().replace(/\,/g, "");
+
   const onSubmit = async(data) => {
     try {
       data['payment_ar'] = true;
@@ -62,6 +69,9 @@ const CollectionPayment = ( props ) => {
       data['total_payment'] = total_pembayaran;
       data['job_status'] = '2';
       data['sisa_payment'] = detailar.amount_due_remaining - total_pembayaran;
+      data['nominal_payment_tunai'] = parseInt(removeCommas(mountTunai));
+      data['nominal_payment_transfer'] = parseInt(removeCommas(mountTransfer));
+      data['nominal_payment_giro'] = parseInt(removeCommas(mountGiro));
       const updatePay = await props.actions.storeItem(Common.UPDATE_COLLECTION_PAYMENT, data);
       // console.log(updatePay.success);
       if(updatePay.success){
@@ -83,6 +93,9 @@ const CollectionPayment = ( props ) => {
       data['total_payment'] = total_pembayaran;
       data['job_status'] = '1';
       data['sisa_payment'] = detailar.amount_due_remaining - total_pembayaran;
+      data['nominal_payment_tunai'] = parseInt(removeCommas(mountTunai));
+      data['nominal_payment_transfer'] = parseInt(removeCommas(mountTransfer));
+      data['nominal_payment_giro'] = parseInt(removeCommas(mountGiro));
       const updatePay = await props.actions.storeItem(Common.UPDATE_COLLECTION_PAYMENT, data);
       // console.log(updatePay.success);
       if(updatePay.success){
@@ -107,9 +120,9 @@ const CollectionPayment = ( props ) => {
   const keyExtractor = useCallback((item, index) => index.toString(), []);
   const detailproduct = collectionproduct ? collectionproduct : [];
   // console.log(detailar);
-  const trans = mountTunai+mountTransfer+mountGiro;
+  const trans = parseInt(removeCommas(mountTunai))+parseInt(removeCommas(mountTransfer))+parseInt(removeCommas(mountGiro));
   total_pembayaran =  detailar?.total_payment == '0' ? trans : detailar?.total_payment;
-  console.log(detailar.job_status)
+  console.log(trans)
   return (
     <View style={{flex:1}}>
     <ScrollView
@@ -439,16 +452,22 @@ const CollectionPayment = ( props ) => {
                       control={control}
                       // rules={{ required: { value: true, message: 'Nominal Pembayaran Harus Di isi' } }}
                       render={({field: { onChange, value }}) => ( 
+                        <>
                         <Input
                             error={errors?.nominal_payment_transfer}
                             errorText={errors?.nominal_payment_transfer?.message}
                             onChangeText={(text) => {
-                              setMountTransfer(parseInt(text));
-                              onChange(text)
+                              setMountTransfer(text);
+                              onChange(addCommas(removeNonNumeric(text)))
+                              // onChange(Intl.NumberFormat('en').format(text))
+                              // onChange(handleChange(text))                              
                             }}
-                            value={value}
+                            value={value} 
                             placeholder="NOMINAL PEMBAYARAN"
+
                         />
+                        {/* <CurrencyFormat value={value} thousandSeparator={true} prefix={'$'} /> */}
+                        </>
                       )}
                   />
               <View style={{marginTop: 15}} />  
@@ -470,8 +489,10 @@ const CollectionPayment = ( props ) => {
                           error={errors?.nominal_payment_tunai}
                           errorText={errors?.nominal_payment_tunai?.message}
                           onChangeText={(text) => {
-                            setMountTunai(parseInt(text));
-                            onChange(text)
+                            setMountTunai(text);
+                            onChange(addCommas(removeNonNumeric(text)))
+                            // setMountTunai(parseInt(text));
+                            // onChange(text)
                           }}
                           value={value}
                           placeholder="NOMINAL PEMBAYARAN"
@@ -532,8 +553,8 @@ const CollectionPayment = ( props ) => {
                         render={({field: { onChange, value }}) => (
                           <Input
                               onChangeText={(text) => {
-                                setMountGiro(parseInt(text));
-                                onChange(text)
+                                setMountGiro(text);
+                                onChange(addCommas(removeNonNumeric(text)))
                               }}
                               value={value}
                               placeholder="NOMINAL PEMBAYARAN"
