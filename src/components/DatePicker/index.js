@@ -1,11 +1,12 @@
 import React from 'react';
 import {PropTypes} from 'prop-types'
 import DatePicker from 'react-native-datepicker';
-// import DatePicker from '@react-native-community/datetimepicker';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import {theme} from './../../constants/theme';
 
 function MyDatePicker(props) {
     return (
+        // <DateTimePicker
         <DatePicker
             style={{
                 width: '100%'

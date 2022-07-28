@@ -54,9 +54,10 @@ const CollectionDetail = ( props ) => {
   const [error, setError] = useState('');
   const [open, setOpen] = useState([]);
   const [expanded, setExpanded] = useState(1);
+  const [date, setDate] = useState(new Date());
   const [visitSelfie, setVisitSelfie] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [jenisPayment, setJenisPayment] = useState('');
+  const [statusTagihan, setStatusTagihan] = useState('');
   const [position, setPosition] = useState({
       latitude: '',
       longitude: ''
@@ -132,9 +133,9 @@ const CollectionDetail = ( props ) => {
       }
   }
 
-  const onSubmit = async(data) => {
+  const onSubmitAll = async(data) => {
     try {
-      if(visitSelfie == null){
+      if(detaildata.image_visit == null){
           checkSelfie()
           return true;
       }
@@ -145,10 +146,46 @@ const CollectionDetail = ( props ) => {
       data['visit_date'] = moment(new Date()).format('YYYY-MM-DD');
       data['visit_lat'] = position.latitude;
       data['visit_long'] = position.longitude;
-      data['total_payment'] = total_pembayaran;
+      if (statusTagihan == 'tukar_faktur'){
+        data['status_tukar_faktur'] = '1';
+      }
       data['nominal_payment_tunai'] = parseInt(removeCommas(mountTunai));
       data['nominal_payment_transfer'] = parseInt(removeCommas(mountTransfer));
       data['nominal_payment_giro'] = parseInt(removeCommas(mountGiro));
+      data['total_payment'] = total_pembayaran;
+      data['job_status'] = '3';
+      const updatePay = await props.actions.storeItem(Common.UPDATE_COLLECTION_PAYMENT, data);
+      if(updatePay.success){
+          // await props.actions.fetchAll(Common.USER_PROFILE);
+          props.route.params.onBackList();
+          Toast.show('Pembayaran berhasil disimpan');
+          props.navigation.goBack();
+      }
+    } catch (error) {
+      alert(error)
+    }
+  }
+
+  const onSubmit = async(data) => {
+    try {
+      if(detaildata.image_visit == null){
+          checkSelfie()
+          return true;
+      }
+      setIsLoading(true)
+      data['submit_all_ar'] = true;
+      data['cust_id'] = detaildata.cust_id;
+      data['header_id'] = detaildata.collection_header_id;
+      data['visit_date'] = moment(new Date()).format('YYYY-MM-DD');
+      data['visit_lat'] = position.latitude;
+      data['visit_long'] = position.longitude;
+      if (statusTagihan == 'tukar_faktur'){
+        data['status_tukar_faktur'] = '1';
+      }
+      // data['nominal_payment_tunai'] = parseInt(removeCommas(mountTunai));
+      // data['nominal_payment_transfer'] = parseInt(removeCommas(mountTransfer));
+      // data['nominal_payment_giro'] = parseInt(removeCommas(mountGiro));
+      // data['total_payment'] = total_pembayaran;
       data['job_status'] = '3';
       const updatePay = await props.actions.storeItem(Common.UPDATE_COLLECTION_PAYMENT, data);
       if(updatePay.success){
@@ -164,7 +201,7 @@ const CollectionDetail = ( props ) => {
   
   const onSaveDraft = async(data) => {
     try {
-      if(visitSelfie == null){
+      if(detaildata.image_visit == null){
           checkSelfie()
           return true;
       }
@@ -175,10 +212,13 @@ const CollectionDetail = ( props ) => {
       data['visit_date'] = moment(new Date()).format('YYYY-MM-DD');
       data['visit_lat'] = position.latitude;
       data['visit_long'] = position.longitude;
-      data['total_payment'] = total_pembayaran;
+      if (statusTagihan == 'tukar_faktur' || detaildata.status_tukar_faktur == '1'){
+        data['status_tukar_faktur'] = '1';
+      }
       data['nominal_payment_tunai'] = parseInt(removeCommas(mountTunai));
       data['nominal_payment_transfer'] = parseInt(removeCommas(mountTransfer));
       data['nominal_payment_giro'] = parseInt(removeCommas(mountGiro));
+      data['total_payment'] = total_pembayaran;
       data['job_status'] = '1';
       console.log(data)
       const updatePay = await props.actions.storeItem(Common.UPDATE_COLLECTION_PAYMENT, data);
@@ -294,9 +334,9 @@ const CollectionDetail = ( props ) => {
   const detaildata = collectiondetail ? collectiondetail.cust_detail : [];
   const listar = collectiondetail ? collectiondetail.list_ar : [];
   const statusar = collectiondetail ? collectiondetail.status_ar : [];
-  const trans = parseInt(removeCommas(mountTunai))+parseInt(removeCommas(mountTransfer))+parseInt(removeCommas(mountGiro));
+  const trans = [parseInt(removeCommas(mountTunai))+parseInt(removeCommas(mountTransfer))+parseInt(removeCommas(mountGiro))];
   // console.log(mountTunai)
-  // console.log(visitSelfie)
+  console.log(detaildata.image_visit)
   // const onBacks = () => {
   //   props.route.params.onGoBack()
   //   Toast.show('Pembayaran berhasil disimpan');
@@ -363,6 +403,11 @@ const CollectionDetail = ( props ) => {
                   {detaildata.collection_status == 'tidak_tertagih' &&
                     <Text 
                       title={'TIDAK TERTAGIH'} bold style={{ color: 'grey' }}
+                    />
+                  }
+                  {detaildata.collection_status == 'tukar_faktur' &&
+                    <Text 
+                      title={'TUKAR FAKTUR'} bold style={{ color: 'green' }}
                     />
                   }
                   {detaildata.collection_status == 'toko_tutup' &&
@@ -619,12 +664,16 @@ const CollectionDetail = ( props ) => {
                           items = {[
                                       { label: 'Tertagih', value: 'tertagih' },
                                       { label: 'Tidak Tertagih', value: 'tidak_tertagih' },
+                                      { label: 'Tukar Faktur', value: 'tukar_faktur' },
                                       { label: 'Toko Tutup', value: 'toko_tutup' },
                                       { label: 'Tidak Ada PIC', value: 'tidak_ada_pic' },
                                       { label: 'Janji Pembayaran', value: 'janji_pembayaran' },
                                       { label: 'Waktu Tidak Cukup', value: 'waktu_tidak_cukup' },
                                   ]}
-                          onDataChange={(value) => onChange(value)}
+                          onDataChange={(value) => {
+                            onChange(value);
+                            setStatusTagihan(value);
+                          }}
                           placeholder="STATUS TAGIHAN"
                           value={value}
                           onBlur={onBlur}
@@ -661,17 +710,30 @@ const CollectionDetail = ( props ) => {
                         name="transfer_date"
                         control={control}
                         rules={{ required: { value: true, message: 'Tanggal transfer harus diisi' } }}
-                        render={({ onChange, value }) => (
-                            <DatePicker
-                                style={styles.datePickerStyle}
-                                date={value} // Initial date from state
-                                mode="date" // The enum of date, datetime and time
-                                format="YYYY-MM-DD"
-                                value={value}
-                                error={errors.transfer_date}
-                                errorText={errors?.transfer_date?.message}
-                                onDateChange={(data) => { onChange(data) }}
-                            />
+                        // render={({ onChange, value }) => (
+                          
+                        render={({ field: {onChange, value, onBlur} }) => (
+                            // <DatePicker
+                            //     style={styles.datePickerStyle}
+                            //     date={value} // Initial date from state
+                            //     mode="date" // The enum of date, datetime and time
+                            //     format="YYYY-MM-DD"
+                            //     value={date}
+                            //     error={errors.transfer_date}
+                            //     errorText={errors?.transfer_date?.message}
+                            //     onDateChange={(data) => { onChange(data) }}
+                            // />
+                            <Input
+                              error={errors?.transfer_date}
+                              errorText={errors?.transfer_date?.message}
+                              onChangeText={(text) => {
+                                // setMountTransfer(parseInt(text));
+                                onChange(text);
+                                // setMountTransfer(text);
+                              }}
+                              value={value}
+                              placeholder="TANGGAL PEMBAYARAN CTH: 2022-07-28"
+                          />
                         )}
                     />
                 <View style={{marginTop: 15}} />  
@@ -771,17 +833,29 @@ const CollectionDetail = ( props ) => {
                         name="giro_date"
                         control={control}
                         // rules={{ required: { value: true, message: 'Tanggal pencairan giro harus diisi' } }}
-                        render={({ onChange, value }) => (
-                            <DatePicker
-                                style={styles.datePickerStyle}
-                                date={value} // Initial date from state
-                                mode="date" // The enum of date, datetime and time
-                                format="YYYY-MM-DD"
-                                value={value}
-                                error={errors.giro_date}
-                                errorText={errors?.giro_date?.message}
-                                onDateChange={(data) => { onChange(data) }}
-                            />
+                        // render={({ onChange, value }) => (
+                        render={({ field: {onChange, value, onBlur} }) => (
+                            <Input
+                              error={errors?.giro_date}
+                              errorText={errors?.giro_date?.message}
+                              onChangeText={(text) => {
+                                // setMountTransfer(parseInt(text));
+                                onChange(text);
+                                // setMountTransfer(text);
+                              }}
+                              value={value}
+                              placeholder="TANGGAL GIRO CTH: 2022-07-28"
+                           />
+                            // <DatePicker
+                            //     style={styles.datePickerStyle}
+                            //     date={value} // Initial date from state
+                            //     mode="date" // The enum of date, datetime and time
+                            //     format="YYYY-MM-DD"
+                            //     value={value}
+                            //     error={errors.giro_date}
+                            //     errorText={errors?.giro_date?.message}
+                            //     onDateChange={(data) => { onChange(data) }}
+                            // />
                         )}
                     />
                 <View style={{marginTop: 15}} />
@@ -808,7 +882,8 @@ const CollectionDetail = ( props ) => {
           </Card.Content>
         </Card>
       </View>
-      }
+      }      
+      { !jobstatus &&
       <View style={{ paddingHorizontal: 10, paddingTop: 10 }}>
         <Card>
           <Card.Content>             
@@ -827,7 +902,7 @@ const CollectionDetail = ( props ) => {
                       error={errors?.total_payment}
                       errorText={errors?.total_payment?.message}
                       onChangeText={(text) => {onChange(text)}}
-                      value={`${~~total_pembayaran}`}
+                      value={`${addCommas(removeNonNumeric(~~total_pembayaran))}`}
                       placeholder="TOTAL PEMBAYARAN"
                       disabled
                   />
@@ -837,6 +912,7 @@ const CollectionDetail = ( props ) => {
           </Card.Content>
         </Card>
       </View>
+      }
       {/* <View style={{ paddingHorizontal: 10, paddingTop: 10 }}>
         <Card>
           <Card.Content>             
@@ -899,11 +975,20 @@ const CollectionDetail = ( props ) => {
             >SAVE DRAFT
             </Button>
             <View style={{paddingTop: 10}} />
+          { !jobstatus &&
+            <Button
+              mode="contained"
+              onPress={handleSubmit(onSubmitAll)}  
+            >SUBMIT
+            </Button>
+          }
+          { jobstatus && 
             <Button
               mode="contained"
               onPress={handleSubmit(onSubmit)}  
             >SUBMIT
             </Button>
+          }
             <View style={{paddingTop: 10}} />
             {/* <Button
               mode="contained"

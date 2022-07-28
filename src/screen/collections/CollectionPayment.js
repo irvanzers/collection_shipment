@@ -42,7 +42,7 @@ const CollectionPayment = ( props ) => {
   const [mountTransfer, setMountTransfer] = useState(0);
   const [mountTunai, setMountTunai] = useState(0);
   const [mountGiro, setMountGiro] = useState(0);
-  const [nominal, setNominal] = useState(0);
+  const [statusTagihan, setStatusTagihan] = useState('tertagih');
 
   const loadData = async () => {
       try {
@@ -66,12 +66,15 @@ const CollectionPayment = ( props ) => {
     try {
       data['payment_ar'] = true;
       data['trx_number'] = detailar.trx_number;
-      data['total_payment'] = total_pembayaran;
       data['job_status'] = '2';
+      if (statusTagihan == 'tukar_faktur'){
+        data['status_tukar_faktur'] = '1';
+      }
       data['sisa_payment'] = detailar.amount_due_remaining - total_pembayaran;
       data['nominal_payment_tunai'] = parseInt(removeCommas(mountTunai));
       data['nominal_payment_transfer'] = parseInt(removeCommas(mountTransfer));
       data['nominal_payment_giro'] = parseInt(removeCommas(mountGiro));
+      data['total_payment'] = total_pembayaran;
       const updatePay = await props.actions.storeItem(Common.UPDATE_COLLECTION_PAYMENT, data);
       // console.log(updatePay.success);
       if(updatePay.success){
@@ -90,12 +93,15 @@ const CollectionPayment = ( props ) => {
     try {
       data['payment_ar'] = true;
       data['trx_number'] = detailar.trx_number;
-      data['total_payment'] = total_pembayaran;
       data['job_status'] = '1';
+      if (statusTagihan == 'tukar_faktur'){
+        data['status_tukar_faktur'] = '1';
+      }
       data['sisa_payment'] = detailar.amount_due_remaining - total_pembayaran;
       data['nominal_payment_tunai'] = parseInt(removeCommas(mountTunai));
       data['nominal_payment_transfer'] = parseInt(removeCommas(mountTransfer));
       data['nominal_payment_giro'] = parseInt(removeCommas(mountGiro));
+      data['total_payment'] = total_pembayaran;
       const updatePay = await props.actions.storeItem(Common.UPDATE_COLLECTION_PAYMENT, data);
       // console.log(updatePay.success);
       if(updatePay.success){
@@ -120,7 +126,7 @@ const CollectionPayment = ( props ) => {
   const keyExtractor = useCallback((item, index) => index.toString(), []);
   const detailproduct = collectionproduct ? collectionproduct : [];
   // console.log(detailar);
-  const trans = parseInt(removeCommas(mountTunai))+parseInt(removeCommas(mountTransfer))+parseInt(removeCommas(mountGiro));
+  const trans = [parseInt(removeCommas(mountTunai))+parseInt(removeCommas(mountTransfer))+parseInt(removeCommas(mountGiro))];
   total_pembayaran =  detailar?.total_payment == '0' ? trans : detailar?.total_payment;
   console.log(trans)
   return (
@@ -150,11 +156,21 @@ const CollectionPayment = ( props ) => {
                     :
                     (
                       <>
-                      {detailar.job_status >= 2 &&
+                      {detailar.job_status >= 2 && detailar.collection_status != 'tukar_faktur' &&
                         <Text 
                           title={'TAGIHAN TERSUBMIT'} bold style={{ color: 'green' }}
                         />
                       }
+                      {detailar.job_status >= 2 && detailar.collection_status == 'tukar_faktur' &&
+                        <Text 
+                          title={'TUKAR FAKTUR TERSUBMIT'} bold style={{ color: 'green' }}
+                        />
+                      }
+                      {/* {detailar.collection_status == 'tertagih' &&
+                        <Text 
+                          title={'TERTAGIH'} bold style={{ color: 'green' }}
+                        />
+                      } */}
                       {/* {detailar.collection_status == 'tertagih' &&
                         <Text 
                           title={'TERTAGIH'} bold style={{ color: 'green' }}
@@ -406,7 +422,43 @@ const CollectionPayment = ( props ) => {
         </View>
       }      
       { detailar.job_status <= 1 &&
-      <React.Fragment>
+      <React.Fragment>                  
+          <View style={{ paddingTop: 10 }} />
+          <View style={{ paddingHorizontal: 10, paddingTop: 10 }}>
+            <Card>
+              <Card.Content>                    
+              <Text
+                title="Status Tagihan" 
+                h5 bold style={{color: '#000000'}} 
+              />           
+              <View style={{marginTop: 15}}>
+                <Controller
+                    defaultValue={detailar?.collection_status}
+                    name="status_tagihan"
+                    control={control}
+                    rules={{ required: { value: true, message: 'Status harus di pilih' } }}
+                    render={({field: { onChange, value, onBlur }}) => (
+                        <SelectPicker
+                            items = {[
+                                        { label: 'Tertagih', value: 'tertagih' },
+                                        { label: 'Tukar Faktur', value: 'tukar_faktur' },
+                                    ]}
+                            onDataChange={(value) => {
+                              onChange(value);
+                              setStatusTagihan(value);
+                            }}
+                            placeholder="STATUS TAGIHAN"
+                            value={value}
+                            onBlur={onBlur}
+                            error={errors?.status_tagihan}
+                            errorText={errors?.status_tagihan?.message}
+                        />         
+                    )}
+              />
+              </View>
+            </Card.Content>
+          </Card>
+        </View>
         <View style={{ paddingTop: 10 }} />
         <View style={{ paddingHorizontal: 10, paddingTop: 10 }}>
           <Card>
@@ -431,17 +483,30 @@ const CollectionPayment = ( props ) => {
                         name="transfer_date"
                         control={control}
                         // rules={{ required: { value: true, message: 'Tanggal kunjungan harus diisi' } }}
-                        render={({ onChange, value }) => (
-                            <DatePicker
-                                style={styles.datePickerStyle}
-                                date={value} // Initial date from state
-                                mode="date" // The enum of date, datetime and time
-                                format="YYYY-MM-DD"
-                                value={value}
-                                error={errors.transfer_date}
-                                errorText={errors?.transfer_date?.message}
-                                onDateChange={(data) => { onChange(data) }}
-                            />
+                        
+                        render={({ field: {onChange, value, onBlur} }) => (
+                          <Input
+                            error={errors?.transfer_date}
+                            errorText={errors?.transfer_date?.message}
+                            onChangeText={(text) => {
+                              // setMountTransfer(parseInt(text));
+                              onChange(text);
+                              // setMountTransfer(text);
+                            }}
+                            value={value}
+                            placeholder="TANGGAL TRANSFER CTH: 2022-07-28"
+                         />
+                        // render={({ onChange, value }) => (
+                        //     <DatePicker
+                        //         style={styles.datePickerStyle}
+                        //         date={value} // Initial date from state
+                        //         mode="date" // The enum of date, datetime and time
+                        //         format="YYYY-MM-DD"
+                        //         value={value}
+                        //         error={errors.transfer_date}
+                        //         errorText={errors?.transfer_date?.message}
+                        //         onDateChange={(data) => { onChange(data) }}
+                        //     />
                         )}
                     />
                 <View style={{marginTop: 15}} />  
@@ -529,18 +594,30 @@ const CollectionPayment = ( props ) => {
                         defaultValue={moment(new Date()).format('YYYY-MM-DD')}
                         name="giro_date"
                         control={control}
-                        // rules={{ required: { value: true, message: 'Tanggal kunjungan harus diisi' } }}
-                        render={({ onChange, value }) => (
-                            <DatePicker
-                                style={styles.datePickerStyle}
-                                date={value} // Initial date from state
-                                mode="date" // The enum of date, datetime and time
-                                format="YYYY-MM-DD"
-                                value={value}
-                                error={errors.giro_date}
-                                errorText={errors?.giro_date?.message}
-                                onDateChange={(data) => { onChange(data) }}
-                            />
+                        // rules={{ required: { value: true, message: 'Tanggal kunjungan harus diisi' } }}                        
+                        render={({ field: {onChange, value, onBlur} }) => (
+                          <Input
+                            error={errors?.giro_date}
+                            errorText={errors?.giro_date?.message}
+                            onChangeText={(text) => {
+                              // setMountTransfer(parseInt(text));
+                              onChange(text);
+                              // setMountTransfer(text);
+                            }}
+                            value={value}
+                            placeholder="TANGGAL GIRO CTH: 2022-07-28"
+                         />
+                        // render={({ onChange, value }) => (
+                        //     <DatePicker
+                        //         style={styles.datePickerStyle}
+                        //         date={value} // Initial date from state
+                        //         mode="date" // The enum of date, datetime and time
+                        //         format="YYYY-MM-DD"
+                        //         value={value}
+                        //         error={errors.giro_date}
+                        //         errorText={errors?.giro_date?.message}
+                        //         onDateChange={(data) => { onChange(data) }}
+                        //     />
                         )}
                     />
                 <View style={{marginTop: 15}} />
@@ -579,7 +656,7 @@ const CollectionPayment = ( props ) => {
                             errorText={errors?.total_payment?.message}
                             onChangeText={(text) => {onChange(text)}}
                             disabled
-                            value={`${~~total_pembayaran}`}
+                            value={`${addCommas(removeNonNumeric(~~total_pembayaran))}`}
                             placeholder="TOTAL PEMBAYARAN"
                         />
                       )}
