@@ -39,10 +39,10 @@ const ShipmentList = ( props ) => {
                 icon={'briefcase-account-outline'} 
                 onPress={() => props.navigation.navigate('AbsenMobil')}
           />
-          <Appbar.Action
+          {/* <Appbar.Action
                 icon={'barcode-scan'} 
                 onPress={() => props.navigation.navigate('ScannerScreen')}
-          />
+          /> */}
 
           {/* <Menu
               visible={visible}
@@ -98,7 +98,7 @@ const ShipmentList = ( props ) => {
             </View>
             <View flexDirection="row" style={{ justifyContent: 'space-between',  }}>
                 <View style={{ justifyContent: 'center' }}>
-                    <Text title={`TOTAL TAGIHAN(AR): `} p style={{ textTransform: 'uppercase', color: 'grey' }} />
+                    <Text title={`TOTAL PENGIRIMAN(SJ): `} p style={{ textTransform: 'uppercase', color: 'grey' }} />
                 </View>
                 <View style={{ justifyContent: 'center', marginRight: 10}}>
                     <Text title={`8`} p style={{color: 'grey', textTransform: 'uppercase'}}/>

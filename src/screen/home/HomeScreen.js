@@ -51,6 +51,7 @@ const HomeScreen = (props) => {
   
   const onSubmit = async (data) => {
       try {
+            setIsLoading(true)
             if (data.setor_saldo > user?.wallet){
                 alert('Saldo anda tidak mencukupi');
                 return true;
@@ -69,6 +70,7 @@ const HomeScreen = (props) => {
           alert(error)
       } finally {
         bottomSheetModalRef.current?.close();
+        setIsLoading(false)
       }
   }
 
@@ -84,8 +86,9 @@ const HomeScreen = (props) => {
       setVisible(!visible);
   };
   
-  const snapPoints = useMemo(() => ['42']);
-//   const snapPoints = useMemo(() => ['30']);
+//   const snapPoints = useMemo(() => ['42']);
+//   Layout Xiaomi Redmi a7
+  const snapPoints = useMemo(() => ['52']);
   
   const bottomSheetModalRef = useRef(null);
   const handlePresentModalPress = useCallback(() => {
@@ -121,6 +124,7 @@ const HomeScreen = (props) => {
     }
   
     const user = usercollector ? usercollector : [];
+    // console.log(user)
   return (
     <BottomSheetModalProvider style={styles.container}>
         <View style={{flex:1}}>      
@@ -140,6 +144,7 @@ const HomeScreen = (props) => {
                 <View style={{ paddingLeft: 10, marginTop: 10 }}>
                     <Text title={`Selamat Datang, ${user.name}`} h6 style={{color: '#FFFF'}} />
                 </View>
+                { user.app_name == 'COLLECTION' &&
                 <View style={{marginTop: 80, paddingLeft: 10}}>
                     <Text title=" " h6 style={{color: '#0000'}} />
                     <NumberFormat 
@@ -156,20 +161,25 @@ const HomeScreen = (props) => {
                         }}
                     />
                 </View>
+                }
             </ImageBackground>
         </TouchableHighlight>
         
         <View flexDirection="row" style={{justifyContent: 'space-around', marginTop: 10, marginBottom: 10}}>
-            {/* <MenuHome item={{
+            { user.app_name != 'SHIPMENT' &&
+            <MenuHome item={{
                 text: 'Shipment',
                 image: require(`./../../assets/icon-shipment.png`),
                 onNavigation: () => props.navigation.navigate('ShipmentHeaderList')
-            }} /> */}
+            }} />
+            }
+            { user.app_name == 'COLLECTION' &&
             <MenuHome item={{
                 text: 'Collections',
                 image: require(`./../../assets/icon-collection.png`),
                 onNavigation: () => props.navigation.navigate('CollectionHeaderList', {onBackPage: () => onGoBack()})
             }} />
+            }
             <MenuHome item={{
                 text: 'Lainnya',
                 image: require(`./../../assets/icon-others.png`),

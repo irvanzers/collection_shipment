@@ -3,7 +3,7 @@ import { Button, View, StyleSheet, FlatList } from 'react-native'
 
 import DateTimePicker from '@react-native-community/datetimepicker';
 import Text from './../../components/Text';
-import { Card, Title, Colors, Appbar } from 'react-native-paper';
+import { Card, Title, Colors, Appbar, ProgressBar } from 'react-native-paper';
 import Moment from 'moment';
 import List from './../../components/MenuList/List';
 
@@ -89,7 +89,36 @@ const ShipmentHeaderList = ( props ) => {
                 <Text title={'DATA KUNJUNGAN TIDAK DITEMUKAN'} p style={{color: 'grey'}} />
             </View>
         } */}
-    
+           
+           <View style={{ paddingTop: 10}}>
+    <Card 
+        // key={index}
+        // onPress={() => navigation.push('ShipmentList', {data: item.id, onBackp: () => onGoBack()})}
+        onPress={() => navigation.push('ShipmentList')}
+    >
+    {/* // style={month_now == month_start && year_now == year_start ? null : styles.nonActive} > */}
+        <Card.Title     
+            title={<Text title={'2022-08-03'} style={{ color: 'white' }} p />}
+            style={styles.colorBox}
+        />
+        <Card.Content style={styles.viewBox}>
+            <View style={styles.viewBox}>
+                <View style={styles.viewLitBox}>
+                    <Text title={'2'} style={styles.textLeft} h2 bold />
+                    <Text title="OUTLET" style={styles.textLeft} p bold />
+                </View>
+                <View style={{ paddingLeft: 10, width: '60%' }}>
+                    <View style={{ paddingTop: 5, paddingBottom: 5 }}>
+                        <ProgressBar progress={'0'} color={'grey'} style={{ height: 20 }} />
+                        <Text title={`PROGRESS 10%`} style={{ color: 'white', paddingTop: 0, marginTop: 0, alignItems: 'center' }} p italic />
+                    </View>
+                    <Text title={'ON PROGRESS'} style={[styles.approve, {backgroundColor: `grey`, color: `white`}]} p bold />
+                </View>
+            </View>
+        </Card.Content>
+    </Card>
+    </View>
+
     <View style={[styles.viewLine, { paddingTop: 10 }]} />
         <View style={styles.divider} />
         <List

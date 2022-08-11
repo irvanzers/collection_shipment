@@ -140,6 +140,25 @@ const OthersAbsenCar = (props) => {
 
         }
     }
+
+    const onSubmit = () => {
+        Alert.alert(
+            "PERHATIAN",
+            "JIKA ADA JOB YANG BELUM DI VISIT/SUBMIT, MAKA STATUSNYA TIDAK TERKUNJUNGI!",
+            [{
+                text: "BATAL",
+                onPress: () => console.log("No, continue editing")
+            }, {
+                text: "YA",
+                onPress: () => {
+                    console.log('Yes')
+                    // onSubmitHeader()
+                },
+                style: "cancel"
+            }],
+        );
+    }
+
     return (
         <View style={{flex: 1, backgroundColor: '#ffff', paddingLeft: 15, paddingRight: 15}}>
           <ScrollView
@@ -147,6 +166,9 @@ const OthersAbsenCar = (props) => {
             showsVerticalScrollIndicator={false}
             horizontal={false}
           >
+            <View style={{marginTop: 25}} flexDirection="row">
+                <Text title="KILOMETER BERANGKAT" h6 bold />
+            </View>
             <View style={{marginTop: 15}} flexDirection="row">
                 { imageActivity == null ?
                     <TouchableHighlight
@@ -157,7 +179,7 @@ const OthersAbsenCar = (props) => {
                     >
                         <View style={{minHeight: 180, backgroundColor: 'grey', borderRadius: 10, width: '100%'}} alignItems="center" justifyContent="center">
                             <Text title="UPLOAD FOTO" style={{color: '#FFFF'}} bold h2 />
-                            <Text title="KILOMETER" style={{color: '#FFFF'}} bold h2 />
+                            <Text title="KM BERANGKAT" style={{color: '#FFFF'}} bold h2 />
                         </View>
                     </TouchableHighlight>
                     :
@@ -176,27 +198,79 @@ const OthersAbsenCar = (props) => {
             </View>
             <View style={{marginTop: 15, marginBottom: 15}}>
                 <View style={{flexDirection: 'row'}}>
-                    <Text title="CATATAN KILOMETER" h6 bold />
+                    <Text title="CATATAN KM BERANGKAT" h6 bold />
                     <Text title=" *" h6 bold style={{ color: 'red' }} />
                 </View>
                 <Controller
                     defaultValue=""
-                    name="catatan_kilometer"
+                    name="catatan_kilometer_go"
                     control={control}
                     rules={{ required: { value: true, message: 'Catatan kilometer harus diisi' } }}
                     render={({ onChange, value }) => (
                         <Input
-                            error={errors?.visit_catatan}
-                            errorText={errors?.visit_catatan?.message}
+                            error={errors?.catatan_kilometer_go}
+                            errorText={errors?.catatan_kilometer_go?.message}
                             value={value}
                             onChangeText={(text) => onChange(text)}
                             multiline={true}
-                            placeholder="CATATAN KILOMETER"
+                            placeholder="CATATAN KILOMETER - CTH : 289019KM"
                         />
                     )}
                 />
             </View>
-            <Button contentStyle={{height: 50}} mode="contained" onPress={{}}>
+            <View style={{marginTop: 25}} flexDirection="row">
+                <Text title="KILOMETER PULANG" h6 bold />
+            </View>
+            <View style={{marginTop: 15}} flexDirection="row">
+                { imageActivity == null ?
+                    <TouchableHighlight
+                        onPress={() => handlePresentModalPress()}
+                        style={{ backgroundColor: 'white', width: '100%', borderRadius: 10}} 
+                        activeOpacity={0.8} 
+                        underlayColor="#bbbcbd"  
+                    >
+                        <View style={{minHeight: 180, backgroundColor: 'grey', borderRadius: 10, width: '100%'}} alignItems="center" justifyContent="center">
+                            <Text title="UPLOAD FOTO" style={{color: '#FFFF'}} bold h2 />
+                            <Text title="KM PULANG" style={{color: '#FFFF'}} bold h2 />
+                        </View>
+                    </TouchableHighlight>
+                    :
+                    <View style={{minHeight: 180, borderRadius: 10, width: '100%'}}>
+                        <Image source={{uri: imageActivity}} style={{height: 180}} />
+                        <View style={{backgroundColor: '#FFFF', position: 'absolute', borderRadius: 20, top: 10, right: 10}}>
+                            <IconButton 
+                                icon="close"
+                                color={'red'}
+                                size={20}
+                                onPress={() => cleanupImages()}
+                            />
+                        </View>
+                    </View>
+                }
+            </View>
+            <View style={{marginTop: 15, marginBottom: 15}}>
+                <View style={{flexDirection: 'row'}}>
+                    <Text title="CATATAN KM PULANG" h6 bold />
+                    <Text title=" *" h6 bold style={{ color: 'red' }} />
+                </View>
+                <Controller
+                    defaultValue=""
+                    name="catatan_kilometer_back"
+                    control={control}
+                    rules={{ required: { value: true, message: 'Catatan kilometer harus diisi' } }}
+                    render={({ onChange, value }) => (
+                        <Input
+                            error={errors?.catatan_kilometer_back}
+                            errorText={errors?.catatan_kilometer_back?.message}
+                            value={value}
+                            onChangeText={(text) => onChange(text)}
+                            multiline={true}
+                            placeholder="CATATAN KILOMETER - CTH : 289019KM"
+                        />
+                    )}
+                />
+            </View>
+            <Button contentStyle={{height: 50}} mode="contained" onPress={() => { onSubmit() }}>
                 SUBMIT
             </Button>
           </ScrollView>
