@@ -18,7 +18,7 @@ import CollectionDetail from '../screen/collections/CollectionDetail';
 import CollectionPayment from '../screen/collections/CollectionPayment';
 import OthersIndex from '../screen/others/OthersIndex';
 import OthersProfile from '../screen/others/OthersProfile';
-import AbsenMobil from '../screen/shipment/AbsenMobil';
+import ShipmentAbsenCar from '../screen/shipment/ShipmentAbsenCar';
 
 const RootNavigator = (props) => {
   const auth = useSelector((state) => {
@@ -44,7 +44,14 @@ const RootNavigator = (props) => {
         name="Beranda"
         component={HomeScreen}
         options={{
-          title: 'COLLECTION & SHIPMENT',
+          headerShown: false,
+          cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
+        }}
+      /> 
+      {/* <Stack.Screen
+        name="Beranda"
+        component={HomeScreen}
+        options={{
           headerLeft: () => <></>,
           headerStyle: {
             backgroundColor: '#4077c4',
@@ -54,7 +61,7 @@ const RootNavigator = (props) => {
             fontWeight: 'bold',
           },
         }}
-      />   
+      />    */}
       <Stack.Screen
         name="ScannerScreen"
         component={ScannerScreen}
@@ -69,19 +76,12 @@ const RootNavigator = (props) => {
           },
           cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
         }}
-      /> 
+      />       
       <Stack.Screen
         name="ShipmentDetail"
         component={ShipmentDetail}
         options={{
-          title: 'DETAIL PENGIRIMAN',
-          headerStyle: {
-            backgroundColor: '#4077c4',
-          },
-          headerTintColor: '#fff',
-          headerTitleStyle: {
-            fontWeight: 'bold',
-          },
+          headerShown: false,
           cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
         }}
       /> 
@@ -186,17 +186,10 @@ const RootNavigator = (props) => {
         }}
       /> 
       <Stack.Screen
-        name="AbsenMobil"
-        component={AbsenMobil}
+        name="ShipmentAbsenCar"
+        component={ShipmentAbsenCar}
         options={{
-          title: 'ABSEN KILOMETER',
-          headerStyle: {
-            backgroundColor: '#4077c4',
-          },
-          headerTintColor: '#fff',
-          headerTitleStyle: {
-            fontWeight: 'bold',
-          },
+          headerShown: false,
           cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
         }}
       /> 

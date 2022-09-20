@@ -32,6 +32,7 @@ import { useNavigation } from '@react-navigation/core';
 let total_pembayaran = 0;
 
 function useInput(){
+  const [pickDate, setPickDate] = useState(new Date());
   const [date, setDate] = useState(new Date());
   const [mode, setMode] = useState('date');
   const [show, setShow] = useState(false);
@@ -40,6 +41,7 @@ function useInput(){
       const currentDate = selectedDate || date;
       setShow(Platform.OS === 'ios');
       setDate(currentDate);
+      setPickDate(selectedDate);
   };
 
   const showMode = (currentMode) => {
@@ -55,6 +57,7 @@ function useInput(){
       showDatepicker,
       show,
       mode,
+      pickDate,
       onChangeDate,
   }
 }
@@ -72,11 +75,10 @@ const CollectionPayment = ( props ) => {
   const [mountTunai, setMountTunai] = useState(0);
   const [mountGiro, setMountGiro] = useState(0);
   const [statusTagihan, setStatusTagihan] = useState('tertagih');
+  const [disButton, setDisButton] = useState(false);
   
-  // const input1 = useInput(new Date());
-  // const input2 = useInput(new Date());
-  const input1 = useInput(detailar.transfer_date);
-  const input2 = useInput(detailar.giro_date);
+  const input1 = useInput(null);
+  const input2 = useInput(null);
 
   const loadData = async () => {
       try {
@@ -85,10 +87,12 @@ const CollectionPayment = ( props ) => {
           }
           await props.actions.fetchAll(Common.COLLECTION_DETAIL_PRODUCT, datasubmit); 
           setIsLoading(false);     
+          setDisButton(false);
       } catch (error) {
           alert(error)
       } finally {
-        setIsLoading(false);  
+        setIsLoading(false);     
+        setDisButton(false);
       }
   }
 
@@ -98,6 +102,8 @@ const CollectionPayment = ( props ) => {
 
   const onSubmit = async(data) => {
     try {
+      // setDisButton(true);
+      // setIsLoading(true);
       data['payment_ar'] = true;
       data['trx_number'] = detailar.trx_number;
       data['header_id'] = detailar.collection_header_id;
@@ -106,9 +112,9 @@ const CollectionPayment = ( props ) => {
         data['status_tukar_faktur'] = '1';
       }
       data['sisa_payment'] = detailar.amount_due_remaining - total_pembayaran;
-      data['nominal_payment_tunai'] = parseInt(removeCommas(mountTunai));
-      data['nominal_payment_transfer'] = parseInt(removeCommas(mountTransfer));
-      data['nominal_payment_giro'] = parseInt(removeCommas(mountGiro));
+      data['nominal_payment_tunai'] = totTunai;
+      data['nominal_payment_transfer'] = totTransfer;
+      data['nominal_payment_giro'] = totGiro;
       data['total_payment'] = total_pembayaran;
       data['transfer_date'] = moment(input1.date).format('YYYY-MM-DD');
       data['giro_date'] = moment(input2.date).format('YYYY-MM-DD');
@@ -129,6 +135,8 @@ const CollectionPayment = ( props ) => {
 
   const onSaveDraft = async(data) => {
     try {
+      // setIsLoading(true)
+      // setDisButton(true);
       data['payment_ar'] = true;
       data['trx_number'] = detailar.trx_number;
       data['header_id'] = detailar.collection_header_id;
@@ -137,20 +145,20 @@ const CollectionPayment = ( props ) => {
         data['status_tukar_faktur'] = '1';
       }
       data['sisa_payment'] = detailar.amount_due_remaining - total_pembayaran;
-      data['nominal_payment_tunai'] = parseInt(removeCommas(mountTunai));
-      data['nominal_payment_transfer'] = parseInt(removeCommas(mountTransfer));
-      data['nominal_payment_giro'] = parseInt(removeCommas(mountGiro));
+      data['nominal_payment_tunai'] = totTunai;
+      data['nominal_payment_transfer'] = totTransfer;
+      data['nominal_payment_giro'] = totGiro;
       data['total_payment'] = total_pembayaran;
       data['transfer_date'] = moment(input1.date).format('YYYY-MM-DD');
       data['giro_date'] = moment(input2.date).format('YYYY-MM-DD');
-      // const updatePay = await props.actions.storeItem(Common.UPDATE_COLLECTION_PAYMENT, data);
+      const updatePay = await props.actions.storeItem(Common.UPDATE_COLLECTION_PAYMENT, data);
       // console.log(updatePay.success);
-      // if(updatePay.success){
-      // //     // await props.actions.fetchAll(Common.USER_PROFILE);
-      //     props.route.params.onBack();
-      //     Toast.show('Pembayaran berhasil disimpan');
-      //     props.navigation.goBack();
-      // }
+      if(updatePay.success){
+      //     // await props.actions.fetchAll(Common.USER_PROFILE);
+          props.route.params.onBack();
+          Toast.show('Pembayaran berhasil disimpan');
+          props.navigation.goBack();
+      }
       console.log(data)
     } catch (error) {
       alert(error)
@@ -165,10 +173,18 @@ const CollectionPayment = ( props ) => {
   },[])
 
   const keyExtractor = useCallback((item, index) => index.toString(), []);
+
   const detailproduct = collectionproduct ? collectionproduct : [];
-  const trans = [parseInt(removeCommas(mountTunai))+parseInt(removeCommas(mountTransfer))+parseInt(removeCommas(mountGiro))];
+  const totTunai = mountTunai != '0' ? mountTunai : detailar.amount_payment_tunai;
+  const totTransfer = mountTransfer != '0' ? mountTransfer : detailar.amount_payment_transfer;
+  const totGiro = mountGiro != '0' ? mountGiro : detailar.amount_payment_giro;
+
+  const trans = [totTunai+totTransfer+totGiro];
   total_pembayaran =  detailar?.total_payment == '0' ? trans : detailar?.total_payment;
-  // console.log(moment(date).format('YYYY-MM-DD'))
+  const dateinput1 = input1.date != new Date(detailar.tgl_transfer) ? new Date(detailar.tgl_transfer) : input1.date;
+  const dateinput2 = input2.date != new Date(detailar.tgl_pencairan_giro) ? new Date(detailar.tgl_pencairan_giro) : input2.date;
+  // console.log(detailar.tgl_transfer)
+  // console.log(new Date())
   return (
     <View style={{flex:1}}>
     <ScrollView
@@ -206,36 +222,6 @@ const CollectionPayment = ( props ) => {
                           title={'TUKAR FAKTUR TERSUBMIT'} bold style={{ color: 'green' }}
                         />
                       }
-                      {/* {detailar.collection_status == 'tertagih' &&
-                        <Text 
-                          title={'TERTAGIH'} bold style={{ color: 'green' }}
-                        />
-                      } */}
-                      {/* {detailar.collection_status == 'tertagih' &&
-                        <Text 
-                          title={'TERTAGIH'} bold style={{ color: 'green' }}
-                        />
-                      }
-                      {detailar.collection_status == 'tidak_tertagih' &&
-                        <Text 
-                          title={'TIDAK TERTAGIH'} bold style={{ color: 'grey' }}
-                        />
-                      }
-                      {detailar.collection_status == 'toko_tutup' &&
-                        <Text 
-                          title={'TOKO TUTUP'} bold style={{ color: 'red' }}
-                        />
-                      }
-                      {detailar.collection_status == 'tidak_ada_dana' &&
-                        <Text 
-                          title={'TIDAK ADA DANA'} bold style={{ color: 'red' }}
-                        />
-                      }
-                      {detailar.collection_status == null &&
-                        <Text 
-                          title={'BELUM DI KUNJUNGI'} bold style={{ color: 'grey' }}
-                        />
-                      } */}
                       </>
                     )
                   }
@@ -508,6 +494,33 @@ const CollectionPayment = ( props ) => {
               h5 bold style={{color: '#000000'}} 
             />            
             <View style={{marginTop: 15}}>  
+                <View style={{marginTop: 15}} />  
+                <View style={{borderColor: 'grey', borderWidth: .5}} />   
+                <View flexDirection="row" justifyContent="space-between" style={{paddingTop: 10}}>
+                    <Text title=" " />
+                    <View style={{flexDirection:'row', flexWrap:'wrap', alignItems: 'flex-end'}}>
+                        <Text title="TUNAI" bold />
+                    </View>
+                </View>
+                <Text title="Nominal Pembayaran Tunai" />
+                  <Controller
+                      defaultValue={detailar?.amount_payment_tunai}
+                      name="nominal_payment_tunai"
+                      control={control}
+                      // rules={{ required: { value: true, message: 'Nominal Pembayaran Harus Di isi' } }}
+                      render={({field: { onChange, value }}) => ( 
+                        <Input
+                            error={errors?.nominal_payment_tunai}
+                            errorText={errors?.nominal_payment_tunai?.message}
+                            onChangeText={(text) => {
+                              setMountTunai(parseInt(removeCommas(text)));
+                              onChange(addCommas(removeNonNumeric(text)))
+                            }}
+                            value={addCommas(removeNonNumeric(value))}
+                            placeholder="NOMINAL PEMBAYARAN TUNAI"
+                        />
+                      )}
+                  /> 
                 <View style={{marginTop: 15}} /> 
                 <View style={{borderColor: 'grey', borderWidth: .5}} />   
                 <View flexDirection="row" justifyContent="space-between" style={{paddingTop: 10}}>
@@ -519,6 +532,47 @@ const CollectionPayment = ( props ) => {
                 <View style={{marginTop: 15}} />
                 <Text title="Tanggal Transfer" />
                     <Controller
+                      // defaultValue={dateinput1}
+                      name="transfer_date"
+                      control={control}
+                      // rules={{ required: { value: true, message: 'Tanggal kunjungan harus diisi' } }}
+                      render={({ field: {onChange, value, onBlur} }) => {
+                        console.log(dateinput1)
+                        // console.log(new Date())
+                        console.log('test')
+                        console.log(input1.pickDate)
+                        return (
+                        <>                                 
+                          <View flexDirection="row" justifyContent="space-between" style={{ borderColor: 'grey', borderWidth: 0 }}>
+                            {input1.show && (
+                                <DateTimePicker
+                                    testID="dateTimePicker1"
+                                    value={new Date(dateinput1)}
+                                    mode={'date'}
+                                    format="YYYY-MM-DD"
+                                    display="default"
+                                    onChange={input1.onChangeDate}
+                                />
+                            )}
+                            <Text 
+                              // title={moment(dateinput1).format('YYYY-MM-DD')}
+                              title={moment(input1.date == input1.pickDate ? input1.pickDate : dateinput1).format('YYYY-MM-DD')}
+                              style={{ paddingTop: '9%', paddingLeft: '35%', fontSize: 15 }}
+                              onPress={input1.showDatepicker}
+                            />
+                            <IconButton
+                              icon="calendar-range"
+                              color={Colors.red400}
+                              size={35}
+                              onPress={input1.showDatepicker}
+                              style={{ paddingTop: 20, color: '#F3114B'}}
+                            />
+                          </View>
+                          <View style={{borderColor: theme.colors.primary, borderWidth: 1}} />  
+                        </>
+                      )}}
+                    />
+                    {/* <Controller
                         defaultValue={input1.date}
                         name="transfer_date"
                         control={control}
@@ -555,7 +609,7 @@ const CollectionPayment = ( props ) => {
                             <View style={{borderColor: theme.colors.primary, borderWidth: 1}} />  
                           </>
                         )}}
-                    />
+                    /> */}
                 <View style={{marginTop: 15}} />  
                 <Text title={"Nominal Pembayaran Transfer" }/>
                   <Controller
@@ -569,7 +623,7 @@ const CollectionPayment = ( props ) => {
                             error={errors?.nominal_payment_transfer}
                             errorText={errors?.nominal_payment_transfer?.message}
                             onChangeText={(text) => {
-                              setMountTransfer(text);
+                              setMountTransfer(parseInt(removeCommas(text)));
                               onChange(addCommas(removeNonNumeric(text)))
                               // onChange(Intl.NumberFormat('en').format(text))
                               // onChange(handleChange(text))                              
@@ -582,35 +636,6 @@ const CollectionPayment = ( props ) => {
                         </>
                       )}
                   />
-              <View style={{marginTop: 15}} />  
-              <View style={{borderColor: 'grey', borderWidth: .5}} />   
-              <View flexDirection="row" justifyContent="space-between" style={{paddingTop: 10}}>
-                  <Text title=" " />
-                  <View style={{flexDirection:'row', flexWrap:'wrap', alignItems: 'flex-end'}}>
-                      <Text title="TUNAI" bold />
-                  </View>
-              </View>
-              <Text title="Nominal Pembayaran Tunai" />
-                <Controller
-                    defaultValue={detailar?.amount_payment_tunai}
-                    name="nominal_payment_tunai"
-                    control={control}
-                    // rules={{ required: { value: true, message: 'Nominal Pembayaran Harus Di isi' } }}
-                    render={({field: { onChange, value }}) => ( 
-                      <Input
-                          error={errors?.nominal_payment_tunai}
-                          errorText={errors?.nominal_payment_tunai?.message}
-                          onChangeText={(text) => {
-                            setMountTunai(text);
-                            onChange(addCommas(removeNonNumeric(text)))
-                            // setMountTunai(parseInt(text));
-                            // onChange(text)
-                          }}
-                          value={addCommas(removeNonNumeric(value))}
-                          placeholder="NOMINAL PEMBAYARAN TUNAI"
-                      />
-                    )}
-                /> 
                 <View style={{marginTop: 15}} />
                 <View style={{borderColor: 'grey', borderWidth: .5}} />   
                 <View flexDirection="row" justifyContent="space-between" style={{paddingTop: 10}}>
@@ -638,27 +663,26 @@ const CollectionPayment = ( props ) => {
                 <View style={{marginTop: 15}} />
                 <Text title="Tanggal Pencairan Giro" />
                     <Controller
-                        // defaultValue={moment(new Date()).format('YYYY-MM-DD')}
-                        defaultValue={input2.date}
+                        // defaultValue={dateinput1}
                         name="giro_date"
                         control={control}
+                        // rules={{ required: { value: true, message: 'Tanggal kunjungan harus diisi' } }}
                         render={({ field: {onChange, value, onBlur} }) => {
                           return (
-                          <>                                 
+                          <>
                             <View flexDirection="row" justifyContent="space-between" style={{ borderColor: 'grey', borderWidth: 0 }}>
                               {input2.show && (
                                   <DateTimePicker
-                                      testID="dateTimePicker2"
-                                      value={input2.date}
-                                      mode={input2.mode}
-                                      is24Hour={true}
+                                      testID="dateTimePicker1"
+                                      value={new Date(dateinput2)}
+                                      mode={'date'}
+                                      format="YYYY-MM-DD"
                                       display="default"
                                       onChange={input2.onChangeDate}
-                                      // onChange
                                   />
                               )}
                               <Text 
-                                title={moment(input2.date).format('YYYY-MM-DD')}
+                                title={moment(input2.date == input2.pickDate ? input2.pickDate : dateinput2).format('YYYY-MM-DD')}
                                 style={{ paddingTop: '9%', paddingLeft: '35%', fontSize: 15 }}
                                 onPress={input2.showDatepicker}
                               />
@@ -673,31 +697,6 @@ const CollectionPayment = ( props ) => {
                             <View style={{borderColor: theme.colors.primary, borderWidth: 1}} />  
                           </>
                         )}}
-                        // rules={{ required: { value: true, message: 'Tanggal kunjungan harus diisi' } }}                        
-                        // render={({ field: {onChange, value, onBlur} }) => (
-                        //   <Input
-                        //     error={errors?.giro_date}
-                        //     errorText={errors?.giro_date?.message}
-                        //     onChangeText={(text) => {
-                        //       // setMountTransfer(parseInt(text));
-                        //       onChange(text);
-                        //       // setMountTransfer(text);
-                        //     }}
-                        //     value={value}
-                        //     placeholder="TANGGAL GIRO CTH: 2022-07-28"
-                        //  />
-                        // render={({ onChange, value }) => (
-                        //     <DatePicker
-                        //         style={styles.datePickerStyle}
-                        //         date={value} // Initial date from state
-                        //         mode="date" // The enum of date, datetime and time
-                        //         format="YYYY-MM-DD"
-                        //         value={value}
-                        //         error={errors.giro_date}
-                        //         errorText={errors?.giro_date?.message}
-                        //         onDateChange={(data) => { onChange(data) }}
-                        //     />
-                        // )}
                     />
                 <View style={{marginTop: 15}} />
                 <Text title="Nominal Pembayaran Giro" />
@@ -709,7 +708,7 @@ const CollectionPayment = ( props ) => {
                         render={({field: { onChange, value }}) => (
                           <Input
                               onChangeText={(text) => {
-                                setMountGiro(text);
+                                setMountGiro(parseInt(removeCommas(text)));
                                 onChange(addCommas(removeNonNumeric(text)))
                               }}
                               value={addCommas(removeNonNumeric(value))}
@@ -748,6 +747,7 @@ const CollectionPayment = ( props ) => {
         <Button
           mode="contained"
           onPress={handleSubmit(onSaveDraft)}  
+          disabled={disButton}
         >
           SAVE DRAFT
         </Button>
@@ -755,7 +755,8 @@ const CollectionPayment = ( props ) => {
         <Button
           mode="contained"
           onPress={handleSubmit(onSubmit)}
-          disabled={!handleSubmit(onSubmit)}
+          disabled={disButton}
+          // disabled={!handleSubmit(onSubmit)}
         >
           SUBMIT
         </Button>

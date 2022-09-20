@@ -1,17 +1,15 @@
 import React, { useState, useEffect, useCallback }  from 'react'
 import { View, StyleSheet, ScrollView, TouchableHighlight, InteractionManager, PermissionsAndroid, Platform, Alert, TouchableOpacity } from 'react-native'
 import { useForm, Controller } from 'react-hook-form';
-
+import PropTypes from 'prop-types';
 import Text from './../../components/Text';
 import Input from '../../components/Input';
 import SelectPicker from './../../components/SelectPicker';
 import { List, Card, Title, Paragraph, Button, IconButton, Appbar, Colors } from 'react-native-paper';
 import ImagePicker from 'react-native-image-crop-picker';
 import NumberFormat from 'react-number-format';
-import Collapsible from 'react-native-collapsible';
 import Loading from './../../components/Loading';
 import moment from 'moment';
-import DatePicker from '../../components/DatePicker';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import Toast from 'react-native-simple-toast';
 import Geolocation from 'react-native-geolocation-service';
@@ -19,7 +17,7 @@ import Clipboard from '@react-native-clipboard/clipboard';
 
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
-import _, { reduce } from 'lodash';
+import _, { pick, reduce } from 'lodash';
 import * as apiAction from './../../redux/actions/apiAction';
 import * as crudAction from '../../redux/actions/crudAction';
 import * as flashMessage from '../../redux/actions/flashMessage';
@@ -44,6 +42,7 @@ const checkSelfie = () => {
 }
 
 function useInput(){
+  const [pickDate, setPickDate] = useState(new Date());
   const [date, setDate] = useState(new Date());
   const [mode, setMode] = useState('date');
   const [show, setShow] = useState(false);
@@ -52,6 +51,7 @@ function useInput(){
       const currentDate = selectedDate || date;
       setShow(Platform.OS === 'ios');
       setDate(currentDate);
+      setPickDate(selectedDate);
   };
 
   const showMode = (currentMode) => {
@@ -67,12 +67,12 @@ function useInput(){
       showDatepicker,
       show,
       mode,
+      pickDate,
       onChangeDate,
   }
 }
 
 let total_pembayaran = 0;
-let draft_tunai = 0;
 
 const CollectionDetail = ( props ) => {
   const listcust = props.route.params.data;
@@ -84,7 +84,6 @@ const CollectionDetail = ( props ) => {
   const [error, setError] = useState('');
   const [open, setOpen] = useState([]);
   const [expanded, setExpanded] = useState(1);
-  const [date, setDate] = useState(new Date());
   const [visitSelfie, setVisitSelfie] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [statusTagihan, setStatusTagihan] = useState('');
@@ -96,8 +95,9 @@ const CollectionDetail = ( props ) => {
   const [mountTransfer, setMountTransfer] = useState(0);
   const [mountTunai, setMountTunai] = useState(0);
   const [mountGiro, setMountGiro] = useState(0);
-  const input1 = useInput(new Date());
-  const input2 = useInput(new Date());
+  const [disButton, setDisButton] = useState(false);
+  const input1 = useInput(null);
+  const input2 = useInput(null);
   let jobstatus = false;
   let total_tagihan = 0;
   let total_bayar = 0;
@@ -145,6 +145,7 @@ const CollectionDetail = ( props ) => {
 
   const loadData = async () => {
     setIsLoading(false);  
+    setDisButton(false);
       try {
           const datasubmit = {
               cust_id: itemDet?.cust_id,
@@ -159,6 +160,7 @@ const CollectionDetail = ( props ) => {
           alert(error)
       } finally {
         setIsLoading(false);  
+        setDisButton(false);  
       }
   }
   
@@ -172,7 +174,8 @@ const CollectionDetail = ( props ) => {
           checkSelfie()
           return true;
       }
-      // setIsLoading(true)
+      // setDisButton(true);
+      // setIsLoading(true);  
       data['payment_all_ar'] = true;
       data['cust_id'] = detaildata.cust_id;
       data['header_id'] = detaildata.collection_header_id;
@@ -182,13 +185,14 @@ const CollectionDetail = ( props ) => {
       if (statusTagihan == 'tukar_faktur'){
         data['status_tukar_faktur'] = '1';
       }
-      data['nominal_payment_tunai'] = parseInt(removeCommas(mountTunai));
-      data['nominal_payment_transfer'] = parseInt(removeCommas(mountTransfer));
-      data['nominal_payment_giro'] = parseInt(removeCommas(mountGiro));
+      data['nominal_payment_tunai'] = totTunai;
+      data['nominal_payment_transfer'] = totTransfer;
+      data['nominal_payment_giro'] = totGiro;
       data['total_payment'] = total_pembayaran;
       data['job_status'] = '3';
-      data['transfer_date'] = moment(input1.date).format('YYYY-MM-DD');
-      data['giro_date'] = moment(input2.date).format('YYYY-MM-DD');
+      data['transfer_date'] = moment(pickdate1).format('YYYY-MM-DD');
+      data['giro_date'] = moment(pickdate2).format('YYYY-MM-DD');
+      console.log(data)
       const updatePay = await props.actions.storeItem(Common.UPDATE_COLLECTION_PAYMENT, data);
       if(updatePay.success){
           // await props.actions.fetchAll(Common.USER_PROFILE);
@@ -206,8 +210,9 @@ const CollectionDetail = ( props ) => {
       if(detaildata.image_visit == null){
           checkSelfie()
           return true;
-      }
-      setIsLoading(true)
+      } 
+      setDisButton(true);
+      setIsLoading(true); 
       data['submit_all_ar'] = true;
       data['cust_id'] = detaildata.cust_id;
       data['header_id'] = detaildata.collection_header_id;
@@ -217,10 +222,6 @@ const CollectionDetail = ( props ) => {
       if (statusTagihan == 'tukar_faktur'){
         data['status_tukar_faktur'] = '1';
       }
-      // data['nominal_payment_tunai'] = parseInt(removeCommas(mountTunai));
-      // data['nominal_payment_transfer'] = parseInt(removeCommas(mountTransfer));
-      // data['nominal_payment_giro'] = parseInt(removeCommas(mountGiro));
-      // data['total_payment'] = total_pembayaran;
       data['job_status'] = '3';
       // console.log(data)
       const updatePay = await props.actions.storeItem(Common.UPDATE_COLLECTION_PAYMENT, data);
@@ -240,8 +241,9 @@ const CollectionDetail = ( props ) => {
       if(detaildata.image_visit == null){
           checkSelfie()
           return true;
-      }
-      setIsLoading(true)
+      } 
+      // setDisButton(true);
+      // setIsLoading(true); 
       data['payment_all_ar'] = true;
       data['cust_id'] = detaildata.cust_id;
       data['header_id'] = detaildata.collection_header_id;
@@ -251,23 +253,25 @@ const CollectionDetail = ( props ) => {
       if (statusTagihan == 'tukar_faktur' || detaildata.status_tukar_faktur == '1'){
         data['status_tukar_faktur'] = '1';
       }
-      data['nominal_payment_tunai'] = parseInt(removeCommas(mountTunai));
-      data['nominal_payment_transfer'] = parseInt(removeCommas(mountTransfer));
-      data['nominal_payment_giro'] = parseInt(removeCommas(mountGiro));
+      // data['nominal_payment_tunai'] = totTunai;
+      // data['nominal_payment_transfer'] = totTransfer;
+      // data['nominal_payment_giro'] = totGiro;
       data['total_payment'] = total_pembayaran;
       data['job_status'] = '1';
-      data['transfer_date'] = moment(input1.date).format('YYYY-MM-DD');
-      data['giro_date'] = moment(input2.date).format('YYYY-MM-DD');
+      data['transfer_date'] = moment(pickdate1).format('YYYY-MM-DD');
+      data['giro_date'] = moment(pickdate2).format('YYYY-MM-DD');
       console.log(data)
-      // const updatePay = await props.actions.storeItem(Common.UPDATE_COLLECTION_PAYMENT, data);
-      // if(updatePay.success){
-      // //  await props.actions.fetchAll(Common.USER_PROFILE);
-      //     props.route.params.onBackList();
-      //     Toast.show('Pembayaran berhasil disimpan');
-      //     props.navigation.goBack();
-      // }
+      const updatePay = await props.actions.storeItem(Common.UPDATE_COLLECTION_PAYMENT, data);
+      if(updatePay.success){
+      //  await props.actions.fetchAll(Common.USER_PROFILE);
+          props.route.params.onBackList();
+          Toast.show('Pembayaran berhasil disimpan');
+          props.navigation.goBack();
+      }
     } catch (error) {
       alert(error)
+    } finally {
+      setIsLoading(false)
     }
   }
 
@@ -283,7 +287,6 @@ const CollectionDetail = ( props ) => {
       datasubmit['cust_id'] = detaildata.cust_id;
       datasubmit['header_id'] = detaildata.collection_header_id;
       datasubmit['visit_selfie'] = source;
-      console.log(datasubmit);
       const updatePay = await props.actions.storeItem(Common.UPDATE_COLLECTION_PAYMENT, datasubmit);
       if(updatePay.success){
           // await props.actions.fetchAll(Common.USER_PROFILE);
@@ -373,14 +376,15 @@ const CollectionDetail = ( props ) => {
   const detaildata = collectiondetail ? collectiondetail.cust_detail : [];
   const listar = collectiondetail ? collectiondetail.list_ar : [];
   const statusar = collectiondetail ? collectiondetail.status_ar : [];
-  const trans = [parseInt(removeCommas(mountTunai))+parseInt(removeCommas(mountTransfer))+parseInt(removeCommas(mountGiro))];
-  // console.log(mountTunai)
-  // console.log(detaildata.image_visit)
-  // const onBacks = () => {
-  //   props.route.params.onGoBack()
-  //   Toast.show('Pembayaran berhasil disimpan');
-  //   props.navigation.goBack();
-  // }
+  const dateinput1 = input1.date != new Date(detaildata.tgl_transfer) ? new Date(detaildata.tgl_transfer) : input1.date;
+  const dateinput2 = input2.date != new Date(detaildata.tgl_pencairan_giro) ? new Date(detaildata.tgl_pencairan_giro) : input2.date;
+  const pickdate1 = input1.date == input1.pickDate ? input1.pickDate : dateinput1;
+  const pickdate2 = input2.date == input2.pickDate ? input2.pickDate : dateinput2;
+  // const trans = [mountTunai+mountTransfer+mountGiro];
+  // console.log(input1.date == new Date(detaildata.tgl_transfer))
+  console.log (dateinput1);
+  console.log('-');
+  console.log(pickdate1);
   return (
     <View style={{flex:1}}>
     <Appbar.Header>
@@ -412,9 +416,6 @@ const CollectionDetail = ( props ) => {
                   </TouchableHighlight>
                   )
               }
-              {/* </>
-            )
-          } */}
         </View>
         <Card style={{ alignItems: 'center' }}>
           <Card.Content
@@ -505,7 +506,13 @@ const CollectionDetail = ( props ) => {
               total_tunai += item.amount_payment_tunai;
               total_giro += item.amount_payment_giro;
               total_sisa += item.sisa_payment;
-              total_bayar += item.total_payment
+              total_bayar += item.total_payment;
+
+              totTunai = mountTunai != '0' ? mountTunai : total_tunai;
+              totTransfer = mountTransfer != '0' ? mountTransfer : total_transfer;
+              totGiro = mountGiro != '0' ? mountGiro : total_giro;
+
+              trans = totTunai + totTransfer + totGiro;
               total_pembayaran =  total_bayar == '0' ? trans : total_bayar;
               !jobstatus ? (jobstatus = item.job_status == 2 && true ) : false;
               return (
@@ -516,6 +523,7 @@ const CollectionDetail = ( props ) => {
                     <>
                     <List.Item
                       style={[ item.job_status <= 1 ? {backgroundColor: '#FFFF'} : {backgroundColor: '#C8C8C8'}]}
+                      // title={`No. AR ${item.trx_number} - ${[ item.job_status == 1 ? 'ON DRAFT' : '']}`}
                       title={`No. AR ${item.trx_number}`}
                       key={index.toString()}
                       description={props => 
@@ -616,7 +624,7 @@ const CollectionDetail = ( props ) => {
                   }}
               />
             </View>
-            { detaildata.collection_status != null &&
+            { detaildata.job_status >= 2 &&
             <React.Fragment>              
               { total_tunai != '0' &&
                 <View flexDirection="row" justifyContent="space-between" style={{paddingTop: 10}}>
@@ -745,6 +753,35 @@ const CollectionDetail = ( props ) => {
               h5 bold style={{color: '#000000'}} 
             />            
             <View style={{marginTop: 15}}>
+              <View style={{marginTop: 15}} />  
+              <View style={{borderColor: 'grey', borderWidth: .5}} />   
+              <View flexDirection="row" justifyContent="space-between" style={{paddingTop: 10}}>
+                  <Text title=" " />
+                  <View style={{flexDirection:'row', flexWrap:'wrap', alignItems: 'flex-end'}}>
+                      <Text title="TUNAI" bold />
+                  </View>
+              </View>
+              <Text title="Nominal Pembayaran Tunai" />
+                <Controller
+                    // BAYAR TUNAI
+                    defaultValue={`${totTunai}`}
+                    name="nominal_payment_tunai"
+                    control={control}
+                    // rules={{ required: { value: true, message: 'Nominal Pembayaran Harus Di isi' } }}
+                    render={({field: { onChange, value, onBlur }}) => ( 
+                      <Input
+                          error={errors?.nominal_payment_tunai}
+                          errorText={errors?.nominal_payment_tunai?.message}
+                          onChangeText={(text) => {
+                            setMountTunai(parseInt(removeCommas(text)));
+                            onChange(addCommas(removeNonNumeric(text)))
+                          }}
+                          value={addCommas(removeNonNumeric(value))}
+                          placeholder="NOMINAL PEMBAYARAN TUNAI"
+                          onBlur={onBlur}
+                      />
+                    )}
+                />    
                 <View style={{marginTop: 15}} /> 
                 <View style={{borderColor: 'grey', borderWidth: .5}} />   
                 <View flexDirection="row" justifyContent="space-between" style={{paddingTop: 10}}>
@@ -756,28 +793,30 @@ const CollectionDetail = ( props ) => {
                 <View style={{marginTop: 15}} />
                 <Text title="Tanggal Transfer" />
                     <Controller
-                        defaultValue={input1.date}
+                        // defaultValue={dateinput1}
                         name="transfer_date"
                         control={control}
                         // rules={{ required: { value: true, message: 'Tanggal kunjungan harus diisi' } }}
                         render={({ field: {onChange, value, onBlur} }) => {
+                          // console.log(dateinput1)
+                          // console.log(new Date())
+                          // console.log('test')
+                          // console.log(input1.pickDate)
                           return (
                           <>                                 
                             <View flexDirection="row" justifyContent="space-between" style={{ borderColor: 'grey', borderWidth: 0 }}>
                               {input1.show && (
                                   <DateTimePicker
                                       testID="dateTimePicker1"
-                                      // value={input1.value}
-                                      value={input1.date}
-                                      mode={input1.mode}
-                                      is24Hour={true}
+                                      value={new Date(pickdate1)}
+                                      mode={'date'}
+                                      format="YYYY-MM-DD"
                                       display="default"
                                       onChange={input1.onChangeDate}
-                                      // onChange
                                   />
                               )}
                               <Text 
-                                title={moment(input1.date).format('YYYY-MM-DD')}
+                                title={moment(pickdate1).format('YYYY-MM-DD')}
                                 style={{ paddingTop: '9%', paddingLeft: '35%', fontSize: 15 }}
                                 onPress={input1.showDatepicker}
                               />
@@ -834,7 +873,7 @@ const CollectionDetail = ( props ) => {
                             error={errors?.nominal_payment_transfer}
                             errorText={errors?.nominal_payment_transfer?.message}
                             onChangeText={(text) => {
-                              setMountTransfer(text);
+                              setMountTransfer(parseInt(removeCommas(text)));
                               onChange(addCommas(removeNonNumeric(text)))
                             }}
                             value={addCommas(removeNonNumeric(value))}
@@ -842,36 +881,6 @@ const CollectionDetail = ( props ) => {
                         />
                       )}
                   />
-              <View style={{marginTop: 15}} />  
-              <View style={{borderColor: 'grey', borderWidth: .5}} />   
-              <View flexDirection="row" justifyContent="space-between" style={{paddingTop: 10}}>
-                  <Text title=" " />
-                  <View style={{flexDirection:'row', flexWrap:'wrap', alignItems: 'flex-end'}}>
-                      <Text title="TUNAI" bold />
-                  </View>
-              </View>
-              <Text title="Nominal Pembayaran Tunai" />
-                <Controller
-                    // BAYAR TUNAI
-                    // defaultValue={listar?.amount_payment_tunai}
-                    defaultValue={`${total_tunai}`}
-                    name="nominal_payment_tunai"
-                    control={control}
-                    // rules={{ required: { value: true, message: 'Nominal Pembayaran Harus Di isi' } }}
-                    render={({field: { onChange, value }}) => ( 
-                      <Input
-                          error={errors?.nominal_payment_tunai}
-                          errorText={errors?.nominal_payment_tunai?.message}
-                          onChangeText={(text) => {
-                            setMountTunai(text);
-                            onChange(addCommas(removeNonNumeric(text)))
-                          }}
-                          // value={addCommas(removeNonNumeric(value))}
-                          value={addCommas(removeNonNumeric(value))}
-                          placeholder="NOMINAL PEMBAYARAN TUNAI"
-                      />
-                    )}
-                />    
                 <View style={{marginTop: 15}} />  
                 <View style={{borderColor: 'grey', borderWidth: .5}} /> 
                 <View flexDirection="row" justifyContent="space-between" style={{paddingTop: 10}}>
@@ -899,27 +908,26 @@ const CollectionDetail = ( props ) => {
                 <View style={{marginTop: 15}} />
                 <Text title="Tanggal Pencairan Giro" />
                     <Controller
-                        // defaultValue={moment(new Date()).format('YYYY-MM-DD')}
-                        defaultValue={input2.date}
+                        // defaultValue={dateinput1}
                         name="giro_date"
                         control={control}
+                        // rules={{ required: { value: true, message: 'Tanggal kunjungan harus diisi' } }}
                         render={({ field: {onChange, value, onBlur} }) => {
                           return (
                           <>                                 
                             <View flexDirection="row" justifyContent="space-between" style={{ borderColor: 'grey', borderWidth: 0 }}>
                               {input2.show && (
                                   <DateTimePicker
-                                      testID="dateTimePicker2"
-                                      value={input2.date}
-                                      mode={input2.mode}
-                                      is24Hour={true}
+                                      testID="dateTimePicker1"
+                                      value={new Date(pickdate2)}
+                                      mode={'date'}
+                                      format="YYYY-MM-DD"
                                       display="default"
                                       onChange={input2.onChangeDate}
-                                      // onChange
                                   />
                               )}
                               <Text 
-                                title={moment(input2.date).format('YYYY-MM-DD')}
+                                title={moment(pickdate2).format('YYYY-MM-DD')}
                                 style={{ paddingTop: '9%', paddingLeft: '35%', fontSize: 15 }}
                                 onPress={input2.showDatepicker}
                               />
@@ -945,7 +953,7 @@ const CollectionDetail = ( props ) => {
                         render={({field: { onChange, value }}) => (
                           <Input
                               onChangeText={(text) => {
-                                setMountGiro(text);
+                                setMountGiro(parseInt(removeCommas(text)));
                                 onChange(addCommas(removeNonNumeric(text)))
                               }}
                               value={addCommas(removeNonNumeric(value))}
@@ -970,7 +978,7 @@ const CollectionDetail = ( props ) => {
             />            
             <View style={{marginTop: 15}}>
             <Controller
-                defaultValue={listar?.total_payment}
+                defaultValue={`${total_pembayaran}`}
                 name="total_payment"
                 control={control}
                 // rules={{ required: { value: true, message: 'Total pembayaran harus diisi' } }}
@@ -1021,7 +1029,8 @@ const CollectionDetail = ( props ) => {
         <View style={{width: '100%', paddingTop: 10}} />
             <Button
               mode="contained"
-              onPress={handleSubmit(onSaveDraft)}  
+              onPress={handleSubmit(onSaveDraft)}
+              disabled={disButton} 
             >SAVE DRAFT
             </Button>
             <View style={{paddingTop: 10}} />
@@ -1029,7 +1038,7 @@ const CollectionDetail = ( props ) => {
             <Button
               mode="contained"
               onPress={handleSubmit(onSubmitAll)}
-              // disabled="true"
+              disabled={disButton} 
             >SUBMIT
             </Button>
           }
@@ -1037,16 +1046,11 @@ const CollectionDetail = ( props ) => {
             <Button
               mode="contained"
               onPress={handleSubmit(onSubmit)}
-              // disabled="true"
+              disabled={disButton} 
             >SUBMIT
             </Button>
           }
             <View style={{paddingTop: 10}} />
-            {/* <Button
-              mode="contained"
-              onPress={handleSubmit(onSavePhoto)}  
-            >SAVE PHOTO
-            </Button> */}
         <View style={{width: '100%', paddingBottom: '10%'}} />
       </View>
       </React.Fragment>

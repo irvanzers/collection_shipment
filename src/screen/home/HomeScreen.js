@@ -3,7 +3,7 @@ import { Button, View, ImageBackground, ScrollView, StyleSheet, InteractionManag
 
 import { useForm, Controller } from 'react-hook-form';
 import { BottomSheetModal, BottomSheetModalProvider, BottomSheetBackdrop } from '@gorhom/bottom-sheet';
-import { RadioButton } from "react-native-paper";
+import { RadioButton, Appbar } from "react-native-paper";
 import MenuHome from './../../components/Menu/MenuHome';
 import Text from './../../components/Text';
 import Input from './../../components/Input';
@@ -23,21 +23,24 @@ import Common from './../../redux/constants/common';
 import { TouchableHighlight } from 'react-native-gesture-handler';
 
 const HomeScreen = (props) => {
-  const { usercollector } = props;
+  const { usercollectorz, usercollector } = props;
   const { handleSubmit, control, formState: {errors}, setValue } = useForm();
   const [loading, setLoading] = useState(false);
   const [jenisSetor, setJenisSetor] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
+  const [ disButton, setDisButton] = useState(false);
   
 
   const loadData = async() => {  
     try { 
         await props.actions.fetchAll(Common.USER_COLLECTOR_PROFILE);
-        setIsLoading(true);  
+        setIsLoading(false);  
+        setDisButton(false);
     } catch (error) {
         alert(error)
     } finally {
-        setIsLoading(false);        
+        setIsLoading(false);  
+        setDisButton(false);        
     }
   }
 
@@ -50,8 +53,9 @@ const HomeScreen = (props) => {
   }
   
   const onSubmit = async (data) => {
-      try {
-            setIsLoading(true)
+      try {  
+            setDisButton(true);
+            setIsLoading(true);
             if (data.setor_saldo > user?.wallet){
                 alert('Saldo anda tidak mencukupi');
                 return true;
@@ -123,7 +127,8 @@ const HomeScreen = (props) => {
         loadData()
     }
   
-    const user = usercollector ? usercollector : [];
+    const user = usercollectorz ? usercollectorz : [];
+    // const user = usercollector ? usercollector : [];
     // console.log(user)
   return (
     <BottomSheetModalProvider style={styles.container}>
@@ -134,6 +139,14 @@ const HomeScreen = (props) => {
             showsVerticalScrollIndicator={false}
             horizontal={false}
         >
+        <Appbar.Header>
+            { user.app_name == 'COLLECTION' &&
+                <Appbar.Content title={'GALENIUM COLLECTION'} />
+            }
+            { user.app_name == 'SHIPMENT' &&
+                <Appbar.Content title={'GALENIUM SHIPMENT'} />
+            }
+        </Appbar.Header>     
         <TouchableHighlight  onPress={handlePresentModalPress}  style={{padding: 10}}>
             <ImageBackground 
                 source={require('./../../assets/bgcard.jpg')} 
@@ -166,11 +179,11 @@ const HomeScreen = (props) => {
         </TouchableHighlight>
         
         <View flexDirection="row" style={{justifyContent: 'space-around', marginTop: 10, marginBottom: 10}}>
-            { user.app_name != 'SHIPMENT' &&
+            { user.app_name == 'SHIPMENT' &&
             <MenuHome item={{
                 text: 'Shipment',
                 image: require(`./../../assets/icon-shipment.png`),
-                onNavigation: () => props.navigation.navigate('ShipmentHeaderList')
+                onNavigation: () => props.navigation.navigate('ShipmentHeaderList', {onBackPage: () => onGoBack()})
             }} />
             }
             { user.app_name == 'COLLECTION' &&
@@ -276,10 +289,10 @@ const HomeScreen = (props) => {
                 <Button 
                     title="Konfirmasi" 
                     mode="contained" 
-                    disabled={loading} 
                     contentStyle={{ height: 50 }} 
                     style={{ width: '100%' }} 
                     onPress={handleSubmit(onSubmit)} 
+                    disabled={disButton}
                 />
             </View>
         </BottomSheetModal>
@@ -315,6 +328,7 @@ function mapStateToProps(state) {
         apiState: state.api,
         message: state.flash.message,
         usercollector: state.crud.usercollectors,
+        usercollectorz: state.crud.usercollectorzs,
 
     }
 }

@@ -9,8 +9,20 @@ const commons = {
     // UPDATE_COLLECTION_PAYMENT: 'paymentcollection',
     UPDATE_COLLECTION_PAYMENT: 'paymentcollectiontest',
     SUBMIT_HEADER_JOB: 'submitheaderjob',
-    USER_COLLECTOR_PROFILE: 'usercollector',
+    USER_COLLECTOR_PROFILE: 'usercollectorz',
+    // USER_COLLECTOR_PROFILE: 'usercollector',
     POST_SETOR_KEKASIR: 'setorkekasir',
+
+    
+    SHIPMENT_DATA: 'shipmentdata',
+    SHIPMENT_DRAFT: 'shipmentdraft',
+    SHIPMENT_DETAIL: 'shipmentdetail',
+    SHIPMENT_LIST_DETAIL: 'shipmentlistdetail',
+    SHIPMENT_HEADER_LIST: 'shipmentheader',
+    SHIPMENT_DETAIL_PRODUCT: 'shipmentproduct',
+    SUBMIT_SHIPMENT: 'submitshipment',
+    SHIPMENT_ABSEN_CAR: 'shipmentabsencar',
+    SUBMIT_ABSEN_CAR: 'submitabsencar',
 };
 
 export default commons
