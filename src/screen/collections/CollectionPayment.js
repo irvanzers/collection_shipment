@@ -20,7 +20,7 @@ import CurrencyFormat from 'react-currency-format';
 
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
-import _, { reduce } from 'lodash';
+import _, { pick, reduce } from 'lodash';
 import * as apiAction from './../../redux/actions/apiAction';
 import * as crudAction from '../../redux/actions/crudAction';
 import * as flashMessage from '../../redux/actions/flashMessage';
@@ -116,8 +116,8 @@ const CollectionPayment = ( props ) => {
       data['nominal_payment_transfer'] = totTransfer;
       data['nominal_payment_giro'] = totGiro;
       data['total_payment'] = total_pembayaran;
-      data['transfer_date'] = moment(input1.date).format('YYYY-MM-DD');
-      data['giro_date'] = moment(input2.date).format('YYYY-MM-DD');
+      data['transfer_date'] = moment(pickdate1).format('YYYY-MM-DD');
+      data['giro_date'] = moment(pickdate2).format('YYYY-MM-DD');
       // console.log(data)
       const updatePay = await props.actions.storeItem(Common.UPDATE_COLLECTION_PAYMENT, data);
       // console.log(updatePay.success);
@@ -149,8 +149,8 @@ const CollectionPayment = ( props ) => {
       data['nominal_payment_transfer'] = totTransfer;
       data['nominal_payment_giro'] = totGiro;
       data['total_payment'] = total_pembayaran;
-      data['transfer_date'] = moment(input1.date).format('YYYY-MM-DD');
-      data['giro_date'] = moment(input2.date).format('YYYY-MM-DD');
+      data['transfer_date'] = moment(pickdate1).format('YYYY-MM-DD');
+      data['giro_date'] = moment(pickdate2).format('YYYY-MM-DD');
       const updatePay = await props.actions.storeItem(Common.UPDATE_COLLECTION_PAYMENT, data);
       // console.log(updatePay.success);
       if(updatePay.success){
@@ -181,10 +181,12 @@ const CollectionPayment = ( props ) => {
 
   const trans = [totTunai+totTransfer+totGiro];
   total_pembayaran =  detailar?.total_payment == '0' ? trans : detailar?.total_payment;
-  const dateinput1 = input1.date != new Date(detailar.tgl_transfer) ? new Date(detailar.tgl_transfer) : input1.date;
-  const dateinput2 = input2.date != new Date(detailar.tgl_pencairan_giro) ? new Date(detailar.tgl_pencairan_giro) : input2.date;
-  // console.log(detailar.tgl_transfer)
-  // console.log(new Date())
+  const dateinput1 = detailar.tgl_transfer == null ? input1.date : new Date(detailar.tgl_transfer);
+  const dateinput2 = detailar.tgl_pencairan_giro == null? input2.date :new Date(detailar.tgl_pencairan_giro);
+  const pickdate1 = input1.date == input1.pickDate ? input1.pickDate : dateinput1;
+  const pickdate2 = input2.date == input2.pickDate ? input2.pickDate : dateinput2;
+  console.log(pickdate1)
+  console.log(pickdate2)
   return (
     <View style={{flex:1}}>
     <ScrollView
@@ -547,7 +549,7 @@ const CollectionPayment = ( props ) => {
                             {input1.show && (
                                 <DateTimePicker
                                     testID="dateTimePicker1"
-                                    value={new Date(dateinput1)}
+                                    value={new Date(pickdate1)}
                                     mode={'date'}
                                     format="YYYY-MM-DD"
                                     display="default"
@@ -556,7 +558,7 @@ const CollectionPayment = ( props ) => {
                             )}
                             <Text 
                               // title={moment(dateinput1).format('YYYY-MM-DD')}
-                              title={moment(input1.date == input1.pickDate ? input1.pickDate : dateinput1).format('YYYY-MM-DD')}
+                              title={moment(pickdate1).format('YYYY-MM-DD')}
                               style={{ paddingTop: '9%', paddingLeft: '35%', fontSize: 15 }}
                               onPress={input1.showDatepicker}
                             />
@@ -674,7 +676,7 @@ const CollectionPayment = ( props ) => {
                               {input2.show && (
                                   <DateTimePicker
                                       testID="dateTimePicker1"
-                                      value={new Date(dateinput2)}
+                                      value={new Date(pickdate2)}
                                       mode={'date'}
                                       format="YYYY-MM-DD"
                                       display="default"
@@ -682,7 +684,7 @@ const CollectionPayment = ( props ) => {
                                   />
                               )}
                               <Text 
-                                title={moment(input2.date == input2.pickDate ? input2.pickDate : dateinput2).format('YYYY-MM-DD')}
+                                title={moment(pickdate2).format('YYYY-MM-DD')}
                                 style={{ paddingTop: '9%', paddingLeft: '35%', fontSize: 15 }}
                                 onPress={input2.showDatepicker}
                               />

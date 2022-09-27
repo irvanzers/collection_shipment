@@ -376,15 +376,17 @@ const CollectionDetail = ( props ) => {
   const detaildata = collectiondetail ? collectiondetail.cust_detail : [];
   const listar = collectiondetail ? collectiondetail.list_ar : [];
   const statusar = collectiondetail ? collectiondetail.status_ar : [];
-  const dateinput1 = input1.date != new Date(detaildata.tgl_transfer) ? new Date(detaildata.tgl_transfer) : input1.date;
-  const dateinput2 = input2.date != new Date(detaildata.tgl_pencairan_giro) ? new Date(detaildata.tgl_pencairan_giro) : input2.date;
+  // const dateinput1 = new Date(detaildata.tgl_transfer) == null ? input1.date : new Date(detaildata.tgl_transfer);
+  const dateinput1 = detaildata.tgl_transfer == null ? input1.date : new Date(detaildata.tgl_transfer);
+  // const dateinput2 = input2.date != new Date(detaildata.tgl_pencairan_giro) ? new Date(detaildata.tgl_pencairan_giro) : input2.date;
+  const dateinput2 = detaildata.tgl_pencairan_giro == null ? input2.date :new Date(detaildata.tgl_pencairan_giro);
   const pickdate1 = input1.date == input1.pickDate ? input1.pickDate : dateinput1;
   const pickdate2 = input2.date == input2.pickDate ? input2.pickDate : dateinput2;
   // const trans = [mountTunai+mountTransfer+mountGiro];
   // console.log(input1.date == new Date(detaildata.tgl_transfer))
-  console.log (dateinput1);
-  console.log('-');
-  console.log(pickdate1);
+  // console.log (dateinput1);
+  // console.log('-');
+  // console.log(pickdate1);
   return (
     <View style={{flex:1}}>
     <Appbar.Header>

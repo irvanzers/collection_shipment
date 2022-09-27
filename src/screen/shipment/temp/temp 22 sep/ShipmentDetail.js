@@ -49,6 +49,9 @@ const ShipmentDetail = ( props ) => {
   const [expandedId, setExpandedId] = useState(-1);
   const [visitSelfie, setVisitSelfie] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [date, setDate] = useState(new Date());
+  const [mode, setMode] = useState('date');
+  const [show, setShow] = useState(false);
   const [error, setError] = useState('');
   const [statusPengiriman, setStatusPengiriman] = useState('');
   const [disButton, setDisButton] = useState(false);
@@ -57,6 +60,24 @@ const ShipmentDetail = ( props ) => {
       longitude: ''
   });
   const ROOT_URL = 'https://egis.galenium.com/v1/';
+
+
+  const onChangeDate = (event, selectedDate) => {
+      const currentDate = selectedDate || date;
+      setShow(Platform.OS === 'ios');
+      setDate(currentDate);
+      dispatch(fetchGetVisitHistory({
+          visit_date: Moment(currentDate).format('YYYY-MM-DD'),
+          user_id: selectCourier
+      }))
+  };
+  const showMode = (currentMode) => {
+      setShow(true);
+      setMode(currentMode);
+  };
+  const showDatepicker = () => {
+      showMode('date');
+  };
   
   const hasLocationPermission = async () => {
     if (Platform.OS === 'ios') {
@@ -198,6 +219,14 @@ const ShipmentDetail = ( props ) => {
     }
   }
 
+  const onShipConfirm = async(data) => {
+    try {
+      console.log(data);
+    } catch (error) {
+      alert(error)
+    }
+  }
+
   //GETTING PHOTO
   const renderAsset = (fotoSelfie) => {
       return (
@@ -269,6 +298,7 @@ const ShipmentDetail = ( props ) => {
 
   const keyExtractor = useCallback((item, index) => index.toString(), []);
   const detaildata = shipmentdetail ? shipmentdetail.cust_detail : [];
+  // const listproduct = shipmentdetail ? shipmentdetail.list_product : [];
   const listsj = shipmentdetail ? shipmentdetail.list_sj : [];
 
   return (
@@ -376,17 +406,16 @@ const ShipmentDetail = ( props ) => {
             <React.Fragment
               key={index.toString()}
             >
-            { detaildata.status_visit <= 1 &&
             <View style={{ paddingHorizontal: 10, paddingTop: 10 }}>     
               <Card>
                 <Card.Content>
-                  <View flexDirection="row" justifyContent="space-between" style={{paddingTop: 8, paddingBottom: 8}}>
+                <View flexDirection="row" justifyContent="space-between" style={{paddingTop: 8, paddingBottom: 8}}>
                     <Text
                       title="Rincian Produk" 
                       h5 bold style={{color: '#000000'}} 
                     />
                     <View style={{flexDirection:'row', flexWrap:'wrap', alignItems: 'flex-end'}}>
-                      <Text bold title={`No. Surat Jalan ${item.delivery_id}`} style={{ fontSize: 15, paddingTop: 4 }} />
+                      <Text bold title={`No. Surat Jalan ${item.surat_jalan}`} style={{ fontSize: 15, paddingTop: 4 }} />
                     </View>
                   </View>
                   <View style={{marginTop: 20}}>
@@ -418,52 +447,73 @@ const ShipmentDetail = ( props ) => {
                   })}
                   </>
                   }
+                  { detaildata.status_visit == 2 &&
+                  <>
+                    <View style={{ paddingTop: 10 }} />
+                <View style={{marginTop: 15}} />
+                <Text title="Tanggal Ship Confirm" bold h6 />
+                    <Controller
+                        // defaultValue={dateinput1}
+                        name="shipconfirm_date"
+                        control={control}
+                        // rules={{ required: { value: true, message: 'Tanggal kunjungan harus diisi' } }}
+                        render={({ field: {onChange, value, onBlur} }) => {
+                          return (
+                          <>                                 
+                            <View flexDirection="row" justifyContent="space-between" style={{ borderColor: 'grey', borderWidth: 0 }}>
+                              {/* {input2.show && (
+                                  <DateTimePicker
+                                      testID="dateTimePicker1"
+                                      value={new Date(pickdate2)}
+                                      mode={'date'}
+                                      format="YYYY-MM-DD"
+                                      display="default"
+                                      onChange={input2.onChangeDate}
+                                  />
+                              )} */}
+                              {show && (
+                                  <DateTimePicker
+                                      testID="dateTimePicker1"
+                                      value={date}
+                                      mode={mode}
+                                      format="YYYY-MM-DD"
+                                      display="default"
+                                      // onChange={input2.onChangeDate}
+                                      onChange={onChangeDate}
+                                  />
+                              )}
+                              <Text 
+                                // title={moment(pickdate2).format('YYYY-MM-DD')}
+                                title={moment(date).format('YYYY-MM-DD')}
+                                style={{ paddingTop: '9%', paddingLeft: '35%', fontSize: 15 }}
+                                // onPress={input2.showDatepicker}
+                                onPress={showDatepicker}
+                              />
+                              <IconButton
+                                icon="calendar-range"
+                                color={Colors.red400}
+                                size={35}
+                                // onPress={input2.showDatepicker}
+                                onPress={showDatepicker}
+                                style={{ paddingTop: 20, color: '#F3114B'}}
+                              />
+                            </View>
+                            <View style={{borderColor: theme.colors.primary, borderWidth: 1}} />  
+                          </>
+                        )}}
+                    />
+                    <View style={{ paddingTop: 15 }} />
+                    <Button
+                      mode="contained"
+                      onPress={handleSubmit(onShipConfirm)}
+                      disabled={disButton} 
+                    >SHIP CONFIRM
+                    </Button>
+                  </>
+                  }
                 </Card.Content>
               </Card>
             </View>
-            }
-            { detaildata.status_visit == 2 &&
-            <>
-              <View style={{ paddingHorizontal: 10, paddingTop: 10 }}>     
-                <Card>
-                  <Card.Content>
-                    <View flexDirection="row" justifyContent="space-between" style={{paddingTop: 10, marginBottom: 15}}>
-                        <Text title={[]} />
-                        <View style={{flexDirection:'row', flexWrap:'wrap', alignItems: 'flex-end'}}>
-                        {item.shipconfirm_status == 0 ?
-                            <Text 
-                            title={'BELUM SHIP CONFRIM'} bold style={{ color: 'grey' }}
-                            />
-                            :
-                            (
-                            <>
-                                <Text 
-                                title={'SUDAH SHIP CONFIRM'} bold style={{ color: 'green' }}
-                                />
-                            </>
-                            )
-                        }
-                        </View>
-                    </View>
-                    <View flexDirection="row" justifyContent="space-between" style={{paddingTop: 8, paddingBottom: 8}}>
-                        <Text bold title={`No. Surat Jalan ${item.delivery_id}`} style={{ fontSize: 20, paddingTop: 4 }} />
-                      <View style={{flexDirection:'row', flexWrap:'wrap', alignItems: 'flex-end'}}>
-                      </View>
-                    </View>
-                    {item.shipconfirm_status == 0 &&
-                      <Button
-                        mode="contained"
-                        onPress={() => navigation.push('ShipmentShipConfirm', {data: item, onBackDetail: () => onGoBack()})}
-                        disabled={disButton} 
-                      >
-                        SHIP CONFIRM
-                      </Button>
-                    }
-                  </Card.Content>
-                </Card>
-              </View>
-            </>
-            }
           </React.Fragment>
         )
       })

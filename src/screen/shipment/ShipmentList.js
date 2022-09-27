@@ -181,10 +181,10 @@ const ShipmentList = ( props ) => {
       <Appbar.Header>
           <Appbar.BackAction onPress={() => props.navigation.goBack()} />
           <Appbar.Content title={'LIST PENGIRIMAN'} />
-          {/* <Appbar.Action
+          <Appbar.Action
                 icon={'barcode-scan'} 
                 onPress={() => props.navigation.navigate('ScannerScreen')}
-          /> */}
+          />
           <Appbar.Action
                 icon={'briefcase-account-outline'} 
                 onPress={() => props.navigation.navigate('ShipmentAbsenCar', {data: listshipment ? listshipment[0] : null})}

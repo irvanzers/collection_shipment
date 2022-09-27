@@ -19,6 +19,7 @@ import CollectionPayment from '../screen/collections/CollectionPayment';
 import OthersIndex from '../screen/others/OthersIndex';
 import OthersProfile from '../screen/others/OthersProfile';
 import ShipmentAbsenCar from '../screen/shipment/ShipmentAbsenCar';
+import ShipmentShipConfirm from '../screen/shipment/ShipmentShipConfirm';
 
 const RootNavigator = (props) => {
   const auth = useSelector((state) => {
@@ -40,159 +41,167 @@ const RootNavigator = (props) => {
       />   
     ) : (
       <>
-      <Stack.Screen
-        name="Beranda"
-        component={HomeScreen}
-        options={{
-          headerShown: false,
-          cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
-        }}
-      /> 
-      {/* <Stack.Screen
-        name="Beranda"
-        component={HomeScreen}
-        options={{
-          headerLeft: () => <></>,
-          headerStyle: {
-            backgroundColor: '#4077c4',
-          },
-          headerTintColor: '#fff',
-          headerTitleStyle: {
-            fontWeight: 'bold',
-          },
-        }}
-      />    */}
-      <Stack.Screen
-        name="ScannerScreen"
-        component={ScannerScreen}
-        options={{
-          headerShown: false,
-          headerStyle: {
-            backgroundColor: '#4077c4',
-          },
-          headerTintColor: '#fff',
-          headerTitleStyle: {
-            fontWeight: 'bold',
-          },
-          cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
-        }}
-      />       
-      <Stack.Screen
-        name="ShipmentDetail"
-        component={ShipmentDetail}
-        options={{
-          headerShown: false,
-          cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
-        }}
-      /> 
-      <Stack.Screen
-        name="ShipmentHeaderList"
-        component={ShipmentHeaderList}
-        options={{
-          headerShown: false,
-          cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
-        }}
-      /> 
-      <Stack.Screen
-        name="ShipmentList"
-        component={ShipmentList}
-        options={{
-          headerShown: false,
-          cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
-        }}
-      /> 
-      <Stack.Screen
-        name="CollectionHeaderList"
-        component={CollectionHeaderList}
-        options={{
-          headerShown: false,
-          cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
-        }}
-      /> 
-      <Stack.Screen
-        name="CollectionList"
-        component={CollectionList}
-        options={{
-          headerShown: false,
-          cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
-        }}
-      /> 
-      <Stack.Screen
-        name="CollectionDetail"
-        component={CollectionDetail}
-        options={{
-          headerShown: false,
-          cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
-        }}
-      /> 
-      <Stack.Screen
-        name="CollectionPayment"
-        component={CollectionPayment}
-        options={{
-          title: 'PAYMENT COLLECTION',
-          headerStyle: {
-            backgroundColor: '#4077c4',
-          },
-          headerTintColor: '#fff',
-          headerTitleStyle: {
-            fontWeight: 'bold',
-          },
-          cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
-        }}
-      /> 
-      <Stack.Screen
-        name="CollectionPickPayment"
-        component={CollectionPickPayment}
-        options={{
-          title: 'PAYMENT LIST',
-          headerStyle: {
-            backgroundColor: '#4077c4',
-          },
-          headerTintColor: '#fff',
-          headerTitleStyle: {
-            fontWeight: 'bold',
-          },
-          cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
-        }}
-      /> 
-      <Stack.Screen
-        name="OthersIndex"
-        component={OthersIndex}
-        options={{
-          title: 'LAINNYA',
-          headerStyle: {
-            backgroundColor: '#4077c4',
-          },
-          headerTintColor: '#fff',
-          headerTitleStyle: {
-            fontWeight: 'bold',
-          },
-          cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
-        }}
-      /> 
-      <Stack.Screen
-        name="OthersProfile"
-        component={OthersProfile}
-        options={{
-          title: 'PROFILE',
-          headerStyle: {
-            backgroundColor: '#4077c4',
-          },
-          headerTintColor: '#fff',
-          headerTitleStyle: {
-            fontWeight: 'bold',
-          },
-          cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
-        }}
-      /> 
-      <Stack.Screen
-        name="ShipmentAbsenCar"
-        component={ShipmentAbsenCar}
-        options={{
-          headerShown: false,
-          cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
-        }}
-      /> 
+        <Stack.Screen
+          name="Beranda"
+          component={HomeScreen}
+          options={{
+            headerShown: false,
+            cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
+          }}
+        /> 
+        {/* <Stack.Screen
+          name="Beranda"
+          component={HomeScreen}
+          options={{
+            headerLeft: () => <></>,
+            headerStyle: {
+              backgroundColor: '#4077c4',
+            },
+            headerTintColor: '#fff',
+            headerTitleStyle: {
+              fontWeight: 'bold',
+            },
+          }}
+        />    */}
+        <Stack.Screen
+          name="ScannerScreen"
+          component={ScannerScreen}
+          options={{
+            headerShown: false,
+            headerStyle: {
+              backgroundColor: '#4077c4',
+            },
+            headerTintColor: '#fff',
+            headerTitleStyle: {
+              fontWeight: 'bold',
+            },
+            cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
+          }}
+        />       
+        <Stack.Screen
+          name="ShipmentDetail"
+          component={ShipmentDetail}
+          options={{
+            headerShown: false,
+            cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
+          }}
+        /> 
+        <Stack.Screen
+          name="ShipmentHeaderList"
+          component={ShipmentHeaderList}
+          options={{
+            headerShown: false,
+            cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
+          }}
+        /> 
+        <Stack.Screen
+          name="ShipmentList"
+          component={ShipmentList}
+          options={{
+            headerShown: false,
+            cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
+          }}
+        /> 
+        <Stack.Screen
+          name="CollectionHeaderList"
+          component={CollectionHeaderList}
+          options={{
+            headerShown: false,
+            cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
+          }}
+        /> 
+        <Stack.Screen
+          name="CollectionList"
+          component={CollectionList}
+          options={{
+            headerShown: false,
+            cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
+          }}
+        /> 
+        <Stack.Screen
+          name="CollectionDetail"
+          component={CollectionDetail}
+          options={{
+            headerShown: false,
+            cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
+          }}
+        /> 
+        <Stack.Screen
+          name="CollectionPayment"
+          component={CollectionPayment}
+          options={{
+            title: 'PAYMENT COLLECTION',
+            headerStyle: {
+              backgroundColor: '#4077c4',
+            },
+            headerTintColor: '#fff',
+            headerTitleStyle: {
+              fontWeight: 'bold',
+            },
+            cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
+          }}
+        /> 
+        <Stack.Screen
+          name="CollectionPickPayment"
+          component={CollectionPickPayment}
+          options={{
+            title: 'PAYMENT LIST',
+            headerStyle: {
+              backgroundColor: '#4077c4',
+            },
+            headerTintColor: '#fff',
+            headerTitleStyle: {
+              fontWeight: 'bold',
+            },
+            cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
+          }}
+        /> 
+        <Stack.Screen
+          name="OthersIndex"
+          component={OthersIndex}
+          options={{
+            title: 'LAINNYA',
+            headerStyle: {
+              backgroundColor: '#4077c4',
+            },
+            headerTintColor: '#fff',
+            headerTitleStyle: {
+              fontWeight: 'bold',
+            },
+            cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
+          }}
+        /> 
+        <Stack.Screen
+          name="OthersProfile"
+          component={OthersProfile}
+          options={{
+            title: 'PROFILE',
+            headerStyle: {
+              backgroundColor: '#4077c4',
+            },
+            headerTintColor: '#fff',
+            headerTitleStyle: {
+              fontWeight: 'bold',
+            },
+            cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
+          }}
+        /> 
+        <Stack.Screen
+          name="ShipmentAbsenCar"
+          component={ShipmentAbsenCar}
+          options={{
+            headerShown: false,
+            cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
+          }}
+        /> 
+        <Stack.Screen
+          name="ShipmentShipConfirm"
+          component={ShipmentShipConfirm}
+          options={{
+            headerShown: false,
+            cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
+          }}
+        /> 
       </>
     )}
     </Stack.Navigator>
