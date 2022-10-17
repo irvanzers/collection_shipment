@@ -137,15 +137,20 @@ const ShipmentList = ( props ) => {
                     </View>
                 </View>
             </View>
-            {/* { visithistory.visit_history == '' &&
-                <View style={{alignItems: 'center', marginTop: 10}}>
-                    <Text title={'DATA KUNJUNGAN TIDAK DITEMUKAN'} p style={{color: 'grey'}} />
+            {statusheader.status == '-' &&           
+                <View style={{ 
+                    paddingTop: 15,
+                    alignItems: 'center',
+                    paddingLeft: 15,
+                    paddingRight: 15,
+                }}>
+                    <Text title={'Status Belum Di Open!'} h6 />
+                    <Text title={'Mohon Upload Tanda Terima Surat Jalan & Foto KM Berangkat Terlebih Dahulu.'} style={{ textAlign: 'center' }} h6 />
                 </View>
-            } */}
+            }
             </View>
         )
     }
-
     
     const renderCategory = ({item, index}) => {
         return (
@@ -162,7 +167,7 @@ const ShipmentList = ( props ) => {
                     >
                         <>
                             <View style={styles.listSubMenu}>
-                                <MaterialComunityIcons color={item.status_visit <= 1 ? 'green' : 'grey'} name={"briefcase-check"} size={30} />
+                                <MaterialComunityIcons color={item.job_status <= 1 ? 'green' : 'grey'} name={"briefcase-check"} size={30} />
                                 <Text style={[styles.textMenu]} title={item.cust_name} p />
                             </View>
                             <View flexDirection="row" style={{ alignItems: 'center' }}>
@@ -175,19 +180,25 @@ const ShipmentList = ( props ) => {
         )
     }
 
+    const renderNonCategory = () => {
+        return(
+            <View title={[]} />
+        )
+    }
+
   return (
     <View style={{ flex: 1 }}>
       
       <Appbar.Header>
           <Appbar.BackAction onPress={() => props.navigation.goBack()} />
           <Appbar.Content title={'LIST PENGIRIMAN'} />
-          <Appbar.Action
+          {/* <Appbar.Action
                 icon={'barcode-scan'} 
                 onPress={() => props.navigation.navigate('ScannerScreen')}
-          />
+          /> */}
           <Appbar.Action
                 icon={'briefcase-account-outline'} 
-                onPress={() => props.navigation.navigate('ShipmentAbsenCar', {data: listshipment ? listshipment[0] : null})}
+                onPress={() => props.navigation.navigate('ShipmentAbsenCar', {data: listshipment ? listshipment[0] : null, onBackList: () => onGoBack()})}
           />
           {/* <Menu
               visible={visible}
@@ -215,7 +226,8 @@ const ShipmentList = ( props ) => {
             data={listshipment}
             ListHeaderComponent={renderTopItem}
             keyExtractor={keyExtractor}
-            renderItem={renderCategory}
+            renderItem={statusheader.status != '-' ? renderCategory : renderNonCategory}
+            // renderItem={{}}
         />
 
     </View>

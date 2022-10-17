@@ -103,9 +103,9 @@ const ShipmentDetail = ( props ) => {
   };
 
   const loadData = async () => {
-    setIsLoading(false);  
-    setDisButton(false);
       try {
+          setIsLoading(false);  
+          setDisButton(false);
           const datasubmit = {
               delivery_id: itemDet?.delivery_id,
               header_id: itemDet?.header_id,
@@ -128,7 +128,8 @@ const ShipmentDetail = ( props ) => {
           checkSelfie()
           return true;
       }
-      // setIsLoading(true)
+      setIsLoading(true);  
+      setDisButton(true);
       datasubmit['shipment_photos'] = true;
       datasubmit['header_id'] = detaildata.header_id;
       datasubmit['cust_id'] = detaildata.cust_id;
@@ -148,12 +149,12 @@ const ShipmentDetail = ( props ) => {
   
   const onSubmit = async(data) => {
     try {
-      let datasubmit = {};
       if(detaildata.image_visit == null){
           checkSelfie()
           return true;
       }
-      // setIsLoading(true)
+      setIsLoading(true);  
+      setDisButton(true);
       data['submit_shipment'] = true;
       data['header_id'] = detaildata.header_id;
       data['cust_id'] = detaildata.cust_id;
@@ -174,24 +175,24 @@ const ShipmentDetail = ( props ) => {
   
   const onSaveDraft = async(data) => {
     try {
-      let datasubmit = {};
       if(detaildata.image_visit == null){
           checkSelfie()
           return true;
       }
-      // setIsLoading(true)
+      setIsLoading(true);  
+      setDisButton(true);
       data['submit_shipment'] = true;
       data['header_id'] = detaildata.header_id;
-      data['delivery_id'] = detaildata.delivery_id;
+      data['cust_id'] = detaildata.cust_id;
       data['visit_lat'] = position.latitude;
       data['visit_long'] = position.longitude;
       data['job_status'] = '1';
-      // const updatePay = await props.actions.storeItem(Common.SUBMIT_SHIPMENT, data);
-      // if(updatePay.success){
-      //     // await props.actions.fetchAll(Common.USER_PROFILE);
-      //     Toast.show('Data berhasil disimpan');
-      //     loadData()
-      // }
+      const updatePay = await props.actions.storeItem(Common.SUBMIT_SHIPMENT, data);
+      if(updatePay.success){
+          // await props.actions.fetchAll(Common.USER_PROFILE);
+          Toast.show('Data berhasil disimpan');
+          loadData()
+      }
       console.log(data);
     } catch (error) {
       alert(error)
@@ -327,6 +328,11 @@ const ShipmentDetail = ( props ) => {
                       title={'TERKIRIM'} bold style={{ color: 'green' }}
                     />
                   }
+                  {detaildata.shipment_status == 'pending' &&
+                    <Text 
+                      title={'PENDING GOOD RECEIPT'} bold style={{ color: '#D5C805' }}
+                    />
+                  }
                   {detaildata.shipment_status == 'tidak_terkirim' &&
                     <Text 
                       title={'TIDAK TERKIRIM'} bold style={{ color: 'red' }}
@@ -363,6 +369,12 @@ const ShipmentDetail = ( props ) => {
               {detaildata.cust_name}
             </Title>
             <Paragraph>{detaildata.ship_to_address}</Paragraph>
+            {/* {detaildata.status_ship_confirm == 2 &&              
+              <View style={{ paddingTop: 10 }}>
+              <Text title={'Ship Confirm Berhasil'} bold />
+              <Text title={`Pada tanggal : ${detaildata.shipconfirm_date}`} bold />
+              </View>
+            } */}
             {detaildata.job_status == 2 &&
               <View style={{ paddingTop: 10 }}>
                 <Text title={`Catatan : ${detaildata.catatan_visit}`} />
@@ -376,7 +388,7 @@ const ShipmentDetail = ( props ) => {
             <React.Fragment
               key={index.toString()}
             >
-            { detaildata.status_visit <= 1 &&
+            { detaildata.job_status <= 1 &&
             <View style={{ paddingHorizontal: 10, paddingTop: 10 }}>     
               <Card>
                 <Card.Content>
@@ -391,7 +403,8 @@ const ShipmentDetail = ( props ) => {
                   </View>
                   <View style={{marginTop: 20}}>
                     <Button icon={expandedId !== index ? 'arrow-down-thick' : 'arrow-up-thick'} mode='text' onPress={ () => handleExpandClick(index) }>
-                      { expandedId !== index ? 'More Detail' : 'Less More'}
+                      {/* { expandedId !== index ? 'More Detail' : 'Less More'} */}
+                      { expandedId !== index ? 'Show Detail' : 'Hide Detail'}
                     </Button> 
                   </View>
                   { expandedId === index &&
@@ -422,7 +435,7 @@ const ShipmentDetail = ( props ) => {
               </Card>
             </View>
             }
-            { detaildata.status_visit == 2 &&
+            { detaildata.status_visit == 2 && detaildata.job_status == 2 && detaildata.shipment_status == 'terkirim' &&
             <>
               <View style={{ paddingHorizontal: 10, paddingTop: 10 }}>     
                 <Card>
@@ -430,19 +443,15 @@ const ShipmentDetail = ( props ) => {
                     <View flexDirection="row" justifyContent="space-between" style={{paddingTop: 10, marginBottom: 15}}>
                         <Text title={[]} />
                         <View style={{flexDirection:'row', flexWrap:'wrap', alignItems: 'flex-end'}}>
-                        {item.shipconfirm_status == 0 ?
-                            <Text 
-                            title={'BELUM SHIP CONFRIM'} bold style={{ color: 'grey' }}
-                            />
-                            :
-                            (
-                            <>
-                                <Text 
-                                title={'SUDAH SHIP CONFIRM'} bold style={{ color: 'green' }}
-                                />
-                            </>
-                            )
-                        }
+                          {item.shipconfirm_status == 0 &&
+                              <Text title={'BELUM SHIP CONFRIM'} bold style={{ color: 'grey' }} />
+                          }
+                          {item.shipconfirm_status == 1 &&
+                              <Text title={'GAGAL SHIP CONFIRM'} bold style={{ color: 'red' }} />
+                          }
+                          {item.shipconfirm_status == 2 &&
+                              <Text title={'SUDAH SHIP CONFIRM'} bold style={{ color: 'green' }} />
+                          }
                         </View>
                     </View>
                     <View flexDirection="row" justifyContent="space-between" style={{paddingTop: 8, paddingBottom: 8}}>
@@ -450,7 +459,14 @@ const ShipmentDetail = ( props ) => {
                       <View style={{flexDirection:'row', flexWrap:'wrap', alignItems: 'flex-end'}}>
                       </View>
                     </View>
-                    {item.shipconfirm_status == 0 &&
+                    {item.shipconfirm_status == 2 &&
+                      <>
+                        <View style={{ paddingTop: 10 }} />
+                        {/* <Text title={'Ship Confirm Berhasil'} bold /> */}
+                        <Text title={`Pada tanggal : ${item.shipconfirm_date}`} bold />
+                      </>
+                    }
+                    {item.shipconfirm_status <= 1 &&
                       <Button
                         mode="contained"
                         onPress={() => navigation.push('ShipmentShipConfirm', {data: item, onBackDetail: () => onGoBack()})}
@@ -487,6 +503,7 @@ const ShipmentDetail = ( props ) => {
                         <SelectPicker
                             items = {[
                                         { label: 'Terkirim', value: 'terkirim' },
+                                        { label: 'Pending Good Receipt', value: 'pending' },
                                         { label: 'Waktu Tidak Cukup', value: 'waktu_tidak_cukup' },
                                         { label: 'Toko Tutup', value: 'toko_tutup' },
                                         { label: 'Tidak Ada PIC', value: 'tidak_ada_pic' },

@@ -24,6 +24,7 @@ const commons = {
     SHIPMENT_ABSEN_CAR: 'shipmentabsencar',
     SUBMIT_ABSEN_CAR: 'submitabsencar',
     SHIPMENT_DETAIL_SJ: 'detailsj',
+    SHIPMENT_SHIPCONFIRM: 'shipconfirmsj',
 };
 
 export default commons

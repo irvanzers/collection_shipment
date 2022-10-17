@@ -102,52 +102,52 @@ const ShipmentAbsenCar = (props) => {
         }
     }
 
-    // const onSavePhotoGo = async(source) => {
-    //     try {
-    //     let datasubmit = {};
-    //     if(source == null){
-    //         checkSelfie()
-    //         return true;
-    //     }
-    //     // setIsLoading(true)
-    //     datasubmit['absen_go'] = true;
-    //     datasubmit['headers_id'] = dataabsen.headers_id;
-    //     datasubmit['users_id'] = dataabsen.users_id;
-    //     datasubmit['visit_selfie'] = source;
-    //     const updatePay = await props.actions.storeItem(Common.SUBMIT_ABSEN_CAR, datasubmit);
-    //     if(updatePay.success){
-    //         // await props.actions.fetchAll(Common.USER_PROFILE);
-    //         Toast.show('Foto berhasil disimpan');
-    //         loadData();
-    //     }
-    //     } catch (error) {
-    //     alert(error)
-    //     }
-    // }
+    const onSavePhotoGo = async(source) => {
+        try {
+        let datasubmit = {};
+        if(source == null){
+            checkSelfie()
+            return true;
+        }
+        // setIsLoading(true)
+        datasubmit['absen_go'] = true;
+        datasubmit['headers_id'] = dataabsen.headers_id;
+        datasubmit['users_id'] = dataabsen.users_id;
+        datasubmit['visit_selfie'] = source;
+        const updatePay = await props.actions.storeItem(Common.SUBMIT_ABSEN_CAR, datasubmit);
+        if(updatePay.success){
+            // await props.actions.fetchAll(Common.USER_PROFILE);
+            Toast.show('Foto berhasil disimpan');
+            loadData();
+        }
+        } catch (error) {
+        alert(error)
+        }
+    }
 
-    // const onSavePhotoBack = async(source) => {
-    //     try {
-    //     let datasubmit = {};
-    //     if(source == null){
-    //         checkSelfie()
-    //         return true;
-    //     }
-    //     // setIsLoading(true)
-    //     datasubmit['absen_back'] = true;
-    //     datasubmit['headers_id'] = dataabsen.headers_id;
-    //     datasubmit['users_id'] = dataabsen.users_id;
-    //     datasubmit['visit_selfie'] = source;
-    //     const updatePay = await props.actions.storeItem(Common.SUBMIT_ABSEN_CAR, datasubmit);
-    //     if(updatePay.success){
-    //         // await props.actions.fetchAll(Common.USER_PROFILE);
-    //         Toast.show('Foto berhasil disimpan');
-    //         loadData();
-    //     }
-    //     // console.log(datasubmit);
-    //     } catch (error) {
-    //     alert(error)
-    //     }
-    // }
+    const onSavePhotoBack = async(source) => {
+        try {
+        let datasubmit = {};
+        if(source == null){
+            checkSelfie()
+            return true;
+        }
+        // setIsLoading(true)
+        datasubmit['absen_back'] = true;
+        datasubmit['headers_id'] = dataabsen.headers_id;
+        datasubmit['users_id'] = dataabsen.users_id;
+        datasubmit['visit_selfie'] = source;
+        const updatePay = await props.actions.storeItem(Common.SUBMIT_ABSEN_CAR, datasubmit);
+        if(updatePay.success){
+            // await props.actions.fetchAll(Common.USER_PROFILE);
+            Toast.show('Foto berhasil disimpan');
+            loadData();
+        }
+        // console.log(datasubmit);
+        } catch (error) {
+        alert(error)
+        }
+    }
 
     const launchCameraSJ = () => {
         ImagePicker.openCamera({
@@ -163,33 +163,33 @@ const ShipmentAbsenCar = (props) => {
         }).catch(e => alert('ANDA BELUM MENGAMBIL GAMBAR'));
     }
 
-    // const launchCameraGo = () => {
-    //     ImagePicker.openCamera({
-    //         compressImageQuality: 0.1,
-    //         cropping: false,
-    //         includeBase64: true
-    //     }).then(response => {
-    //         if (!response.didCancel && !response.error) {
-    //             const source = 'data:image/jpeg;base64,' + response.data;
-    //             setImageGo(source)
-    //             onSavePhotoGo(source);
-    //         }
-    //     }).catch(e => alert('ANDA BELUM MENGAMBIL GAMBAR'));
-    // }
+    const launchCameraGo = () => {
+        ImagePicker.openCamera({
+            compressImageQuality: 0.1,
+            cropping: false,
+            includeBase64: true
+        }).then(response => {
+            if (!response.didCancel && !response.error) {
+                const source = 'data:image/jpeg;base64,' + response.data;
+                setImageGo(source)
+                onSavePhotoGo(source);
+            }
+        }).catch(e => alert('ANDA BELUM MENGAMBIL GAMBAR'));
+    }
   
-    // const launchCameraBack = () => {
-    //     ImagePicker.openCamera({
-    //         compressImageQuality: 0.1,
-    //         cropping: false,
-    //         includeBase64: true
-    //     }).then(response => {
-    //         if (!response.didCancel && !response.error) {
-    //             const source = 'data:image/jpeg;base64,' + response.data;
-    //             setImageBack(source)
-    //             onSavePhotoBack(source);
-    //         }
-    //     }).catch(e => alert('ANDA BELUM MENGAMBIL GAMBAR'));
-    // }
+    const launchCameraBack = () => {
+        ImagePicker.openCamera({
+            compressImageQuality: 0.1,
+            cropping: false,
+            includeBase64: true
+        }).then(response => {
+            if (!response.didCancel && !response.error) {
+                const source = 'data:image/jpeg;base64,' + response.data;
+                setImageBack(source)
+                onSavePhotoBack(source);
+            }
+        }).catch(e => alert('ANDA BELUM MENGAMBIL GAMBAR'));
+    }
 
     const onGoBack = () => {
       loadData();
@@ -206,26 +206,26 @@ const ShipmentAbsenCar = (props) => {
         );
     }
 
-    // const renderAssetGo = (fotoSelfieGo) => {
-    //     return (
-    //         <Card style={{ width: '100%' }}>
-    //             <Card.Cover source={{uri: `${ROOT_URL}${fotoSelfieGo}`}} style={{ height: 300 }} />
-    //             <Card.Actions style={{justifyContent: 'center'}}>
-    //             </Card.Actions>
-    //         </Card>
-    //     );
-    // }
+    const renderAssetGo = (fotoSelfieGo) => {
+        return (
+            <Card style={{ width: '100%' }}>
+                <Card.Cover source={{uri: `${ROOT_URL}${fotoSelfieGo}`}} style={{ height: 300 }} />
+                <Card.Actions style={{justifyContent: 'center'}}>
+                </Card.Actions>
+            </Card>
+        );
+    }
     
-    // const renderAssetBack = (fotoSelfieBack) => {
-    //     return (
-    //         <Card style={{ width: '100%' }}>
-    //             <Card.Cover source={{uri: `${ROOT_URL}${fotoSelfieBack}`}} style={{ height: 300 }} />
-    //             <Card.Actions style={{justifyContent: 'center'}}>
-    //                 {/* <Button mode="contained" onPress={()=> cleanupImages()}>REMOVE</Button> */}
-    //             </Card.Actions>
-    //         </Card>
-    //     );
-    // }
+    const renderAssetBack = (fotoSelfieBack) => {
+        return (
+            <Card style={{ width: '100%' }}>
+                <Card.Cover source={{uri: `${ROOT_URL}${fotoSelfieBack}`}} style={{ height: 300 }} />
+                <Card.Actions style={{justifyContent: 'center'}}>
+                    {/* <Button mode="contained" onPress={()=> cleanupImages()}>REMOVE</Button> */}
+                </Card.Actions>
+            </Card>
+        );
+    }
 
     const onSubmit = async (data) => {
         // try {
@@ -233,7 +233,7 @@ const ShipmentAbsenCar = (props) => {
         // } catch (error) {
         //     alert(error)
         // }
-        if(dataabsen.absen_go == null){
+        if(dataabsen.absen_back == null){
             handleSubmit(onSubmitAbsen(data));
         } else {
             Alert.alert(
@@ -259,11 +259,13 @@ const ShipmentAbsenCar = (props) => {
             // if(dataabsen.absen_go == null || dataabsen.absen_back == null){
             //     checkSelfie()
             //     return true;
-            // } 
+            // }
+            setIsLoading(true);  
+            setDisButton(true);
             data['submit_absen_km'] = true;
             data['headers_id'] = dataabsen.headers_id;
             data['users_id'] = dataabsen.users_id;
-            if(ImageGo == null || dataabsen.absen_go == null) {
+            if(ImageBack == null || dataabsen.absen_back == null) {
                 data['status_absen'] = '1';
             } else {
                 data['status_absen'] = '2';
@@ -279,6 +281,11 @@ const ShipmentAbsenCar = (props) => {
         alert(error)
         }
     }
+
+    const onBackPage = () => { 
+      props.navigation.goBack(); 
+      props.route.params.onBackList(); 
+    };
 
     useEffect(() => {
         const interactionPromise = InteractionManager.runAfterInteractions(() => { 
@@ -298,8 +305,9 @@ const ShipmentAbsenCar = (props) => {
             showsVerticalScrollIndicator={false}
             horizontal={false}
           >
+          <Loading loading={isLoading} /> 
           <Appbar.Header>
-              <Appbar.BackAction onPress={() => props.navigation.goBack()} />
+              <Appbar.BackAction onPress={() => onBackPage()} />
               <Appbar.Content title={'ABSEN KILOMETER'} />
               {/* <Appbar.Action icon={'calendar'} onPress={showDatepicker} /> */}
           </Appbar.Header>
@@ -432,7 +440,7 @@ const ShipmentAbsenCar = (props) => {
                 )
                 }  
             </View>
-            <Button contentStyle={{height: 50}} mode="contained" onPress={handleSubmit(onSubmit)}>
+            <Button contentStyle={{height: 50}} mode="contained" onPress={handleSubmit(onSubmit)} disabled={disButton}>
                 SUBMIT
             </Button>
             <View style={{ paddingBottom: 30 }} />

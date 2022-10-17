@@ -58,9 +58,37 @@ function useInput(){
     }
 }
 
+const alertSukses = () => {
+    Alert.alert(
+        "PERHATIAN",
+        "SHIP CONFIRM BERHASIL!",
+        [{
+            text: "YA",
+            onPress: () => {
+                console.log('Yes')
+            },
+            style: "cancel"
+        }],
+    );
+}
+
+const alertGagal = () => {
+    Alert.alert(
+        "PERHATIAN",
+        "SHIP CONFIRM GAGAL!",
+        [{
+            text: "YA",
+            onPress: () => {
+                console.log('Yes')
+            },
+            style: "cancel"
+        }],
+    );
+}
+
 const ShipmentShipConfirm = ( props ) => {
     const itemProd = props.route.params.data;
-    const {detailsj} = props;
+    const {detailsj, shipconfirmsj} = props;
     const { handleSubmit, control, formState: {errors}, setValue, getValues } = useForm(); // initialize the hook
     const [isLoading, setIsLoading] = useState(true);
     const [disButton, setDisButton] = useState(false);
@@ -68,20 +96,19 @@ const ShipmentShipConfirm = ( props ) => {
     const inputSJ = useInput(null);
 
     const loadData = async () => {
-        setIsLoading(false);  
-        setDisButton(false);
         try {
+            setIsLoading(false);  
+            setDisButton(false);
             const datasubmit = {
                 delivery_id: itemProd?.delivery_id,
                 header_id: itemProd?.header_id,
             }
-            // console.log(itemDet)
-            await props.actions.fetchAll(Common.SHIPMENT_DETAIL_SJ, datasubmit); 
+            await props.actions.fetchAll(Common.SHIPMENT_DETAIL_SJ, datasubmit);
         } catch (error) {
             alert(error)
         } finally {
         setIsLoading(false);  
-        setDisButton(false);  
+        setDisButton(false);
         }
     }
     
@@ -90,11 +117,24 @@ const ShipmentShipConfirm = ( props ) => {
         props.route.params.onBackDetail(); 
     };
 
-    const onShipConfirm = async(data) => {
+    const onShipConfirm = async(data) => { 
+        setIsLoading(true);  
+        setDisButton(true);
       try {
         data['shipconfirm_date'] = moment(pickdatesj).format('YYYY-MM-DD');
         data['delivery_id'] = datasj.delivery_id;
         data['user_id'] = datasj.user_id;
+        data['header_id'] = datasj.header_id;
+        const updateShip = await props.actions.storeItem(Common.SHIPMENT_SHIPCONFIRM, data);
+        console.log(updateShip);
+        if(updateShip.success){
+            // await props.actions.fetchAll(Common.USER_PROFILE);
+            alertSukses();
+            loadData();
+        } else {
+            alertGagal();
+            loadData();
+        }
         console.log(data);
       } catch (error) {
         alert(error)
@@ -133,27 +173,31 @@ const ShipmentShipConfirm = ( props ) => {
                         <View flexDirection="row" justifyContent="space-between" style={{paddingTop: 10, marginBottom: 15}}>
                             <Text title={`No. Surat Jalan ${datasj.delivery_name}`} bold />
                             <View style={{flexDirection:'row', flexWrap:'wrap', alignItems: 'flex-end', paddingLeft: '15%'}}>
-                            {datasj.status_ship_confirm == 1 ?
-                                <Text 
-                                    title={'SUDAH SHIP CONFRIM'} bold style={{ color: 'green' }}
-                                />
-                                :
-                                (
-                                <>
-                                    <Text 
-                                        title={'BELUM SHIP CONFIRM'} bold style={{ color: 'grey' }}
-                                    />
-                                </>
-                                )
-                            }
+                                {datasj.status_ship_confirm == 0 &&
+                                    <Text title={'BELUM SHIP CONFRIM'} bold style={{ color: 'grey' }} />
+                                }
+                                {datasj.status_ship_confirm == 1 &&
+                                    <Text title={'GAGAL SHIP CONFIRM'} bold style={{ color: 'red' }} />
+                                }
+                                {datasj.status_ship_confirm == 2 &&
+                                    <Text title={'SUDAH SHIP CONFIRM'} bold style={{ color: 'green' }} />
+                                }
                             </View>
                         </View>
                         <Title style={{color: '#000000', fontWeight: 'bold'}}>
                             {datasj.outlet_name}
                         </Title>
+                        { datasj.status_ship_confirm == 2 &&
+                        <>
+                            <View style={{ paddingTop: 10 }} />
+                            <Text title={'Ship Confirm Berhasil'} bold />
+                            <Text title={`Pada tanggal : ${datasj.shipconfirm_date}`} bold />
+                        </>
+                        }
                     </Card.Content>
                 </Card>
                 </View>
+                { datasj.status_ship_confirm <= 1 &&
                 <View style={{ paddingHorizontal: 10, paddingTop: 10 }}>     
                 <Card>
                     <Card.Content>
@@ -162,11 +206,6 @@ const ShipmentShipConfirm = ( props ) => {
                             title="Rincian Produk" 
                             h5 bold style={{color: '#000000'}} 
                         />
-                    </View>
-                    <View style={{marginTop: 15}}>
-                        <Button icon={expanded != 0 ? 'arrow-down-thick' : 'arrow-up-thick'} mode='text' onPress={ () => setExpanded(!expanded) }>
-                        { expanded != 0 ? 'More Detail' : 'Less More'}
-                        </Button> 
                     </View>
                     { expanded == 0 &&
                         <>
@@ -192,6 +231,11 @@ const ShipmentShipConfirm = ( props ) => {
                         })}
                         </>
                     }
+                    <View style={{marginTop: 15}}>
+                        <Button icon={expanded != 0 ? 'arrow-down-thick' : 'arrow-up-thick'} mode='text' onPress={ () => setExpanded(!expanded) }>
+                        { expanded != 0 ? 'Show Detail' : 'Hide Detail'}
+                        </Button> 
+                    </View>
                     <View style={{ paddingTop: 10 }} />
                     <View style={{marginTop: 15}} />
                     <Text title="Tanggal Ship Confirm" bold h6 />
@@ -199,7 +243,6 @@ const ShipmentShipConfirm = ( props ) => {
                             // defaultValue={dateinput1}
                             name="shipconfirm_date"
                             control={control}
-                            // rules={{ required: { value: true, message: 'Tanggal kunjungan harus diisi' } }}
                             render={({ field: {onChange, value, onBlur} }) => {
                             return (
                             <>
@@ -216,17 +259,14 @@ const ShipmentShipConfirm = ( props ) => {
                                 )}
                                 <Text 
                                     title={moment(pickdatesj).format('YYYY-MM-DD')}
-                                    // title={moment(date).format('YYYY-MM-DD')}
                                     style={{ paddingTop: '9%', paddingLeft: '35%', fontSize: 15 }}
                                     onPress={inputSJ.showDatepicker}
-                                    // onPress={showDatepicker}
                                 />
                                 <IconButton
                                     icon="calendar-range"
                                     color={Colors.red400}
                                     size={35}
                                     onPress={inputSJ.showDatepicker}
-                                    // onPress={showDatepicker}
                                     style={{ paddingTop: 20, color: '#F3114B'}}
                                 />
                                 </View>
@@ -244,6 +284,7 @@ const ShipmentShipConfirm = ( props ) => {
                     </Card.Content>
                 </Card>
                 </View>
+                }
 
             </ScrollView>
             </View>
@@ -289,6 +330,7 @@ function mapStateToProps(state) {
       apiState: state.api,
       message: state.flash.message,
       detailsj: state.crud.detailsjs,
+      shipconfirmsj: state.crud.shipconfirmsjs,
     }
   }
   
