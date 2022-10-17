@@ -328,6 +328,11 @@ const ShipmentDetail = ( props ) => {
                       title={'TERKIRIM'} bold style={{ color: 'green' }}
                     />
                   }
+                  {detaildata.shipment_status == 'cod_diterima' &&
+                    <Text 
+                      title={'COD DI TERIMA'} bold style={{ color: 'green' }}
+                    />
+                  }
                   {detaildata.shipment_status == 'pending' &&
                     <Text 
                       title={'PENDING GOOD RECEIPT'} bold style={{ color: '#D5C805' }}
@@ -353,6 +358,16 @@ const ShipmentDetail = ( props ) => {
                       title={'WAKTU TIDAK CUKUP'} bold style={{ color: 'red' }}
                     />
                   }
+                  {detaildata.shipment_status == 'barang_ditolak' &&
+                    <Text 
+                      title={'BARANG DI TOLAK'} bold style={{ color: 'red' }}
+                    />
+                  }
+                  {detaildata.shipment_status == 'cod_ditolak' &&
+                    <Text 
+                      title={'COD DI TOLAK'} bold style={{ color: 'red' }}
+                    />
+                  }
                   {detaildata.shipment_status == null &&
                     <Text 
                       title={'BELUM DI KUNJUNGI'} bold style={{ color: 'grey' }}
@@ -369,12 +384,6 @@ const ShipmentDetail = ( props ) => {
               {detaildata.cust_name}
             </Title>
             <Paragraph>{detaildata.ship_to_address}</Paragraph>
-            {/* {detaildata.status_ship_confirm == 2 &&              
-              <View style={{ paddingTop: 10 }}>
-              <Text title={'Ship Confirm Berhasil'} bold />
-              <Text title={`Pada tanggal : ${detaildata.shipconfirm_date}`} bold />
-              </View>
-            } */}
             {detaildata.job_status == 2 &&
               <View style={{ paddingTop: 10 }}>
                 <Text title={`Catatan : ${detaildata.catatan_visit}`} />
@@ -504,9 +513,12 @@ const ShipmentDetail = ( props ) => {
                             items = {[
                                         { label: 'Terkirim', value: 'terkirim' },
                                         { label: 'Pending Good Receipt', value: 'pending' },
-                                        { label: 'Waktu Tidak Cukup', value: 'waktu_tidak_cukup' },
+                                        { label: 'COD Di Terima', value: 'cod_diterima' },
+                                        { label: 'COD Di Tolak', value: 'cod_ditolak' },
+                                        { label: 'Barang Di Tolak', value: 'barang_ditolak' },
                                         { label: 'Toko Tutup', value: 'toko_tutup' },
                                         { label: 'Tidak Ada PIC', value: 'tidak_ada_pic' },
+                                        { label: 'Waktu Tidak Cukup', value: 'waktu_tidak_cukup' },
                                     ]}
                             onDataChange={(value) => {
                               onChange(value);
