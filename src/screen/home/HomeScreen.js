@@ -146,8 +146,12 @@ const HomeScreen = (props) => {
             { user.app_name == 'SHIPMENT' &&
                 <Appbar.Content title={'GALENIUM SHIPMENT'} />
             }
-        </Appbar.Header>     
-        <TouchableHighlight  onPress={handlePresentModalPress}  style={{padding: 10}}>
+        </Appbar.Header>
+        <TouchableHighlight  
+            onPress={handlePresentModalPress}
+            style={{padding: 10}}
+            disabled={user.app_name == 'SHIPMENT'}
+        >
             <ImageBackground 
                 source={require('./../../assets/bgcard.jpg')} 
                 resizeMode="cover" 
