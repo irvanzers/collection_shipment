@@ -253,14 +253,14 @@ const CollectionDetail = ( props ) => {
       if (statusTagihan == 'tukar_faktur' || detaildata.status_tukar_faktur == '1'){
         data['status_tukar_faktur'] = '1';
       }
-      // data['nominal_payment_tunai'] = totTunai;
-      // data['nominal_payment_transfer'] = totTransfer;
-      // data['nominal_payment_giro'] = totGiro;
+      data['nominal_payment_tunai'] = totTunai;
+      data['nominal_payment_transfer'] = totTransfer;
+      data['nominal_payment_giro'] = totGiro;
       data['total_payment'] = total_pembayaran;
       data['job_status'] = '1';
       data['transfer_date'] = moment(pickdate1).format('YYYY-MM-DD');
       data['giro_date'] = moment(pickdate2).format('YYYY-MM-DD');
-      console.log(data)
+      // console.log(data)
       const updatePay = await props.actions.storeItem(Common.UPDATE_COLLECTION_PAYMENT, data);
       if(updatePay.success){
       //  await props.actions.fetchAll(Common.USER_PROFILE);
