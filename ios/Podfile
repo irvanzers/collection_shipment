@@ -12,14 +12,6 @@ target 'QRGPL' do
     :hermes_enabled => false
   )
 
-  pod 'react-native-camera', :path => '../node_modules/react-native-camera'
-
-  pod 'RNPermissions', :path => '../node_modules/react-native-permissions'
-
-  pod 'RNVectorIcons', :path => '../node_modules/react-native-vector-icons'
-
-  pod 'RNTableView', :path => '../node_modules/react-native-tableview'
-
   target 'QRGPLTests' do
     inherit! :complete
     # Pods for testing

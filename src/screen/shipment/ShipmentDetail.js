@@ -110,6 +110,7 @@ const ShipmentDetail = ( props ) => {
               delivery_id: itemDet?.delivery_id,
               header_id: itemDet?.header_id,
               cust_id: itemDet?.cust_id,
+              ship_to_id: itemDet?.ship_to_id,
           }
           // console.log(itemDet)
           await props.actions.fetchAll(Common.SHIPMENT_DETAIL, datasubmit); 
@@ -132,7 +133,7 @@ const ShipmentDetail = ( props ) => {
       setDisButton(true);
       datasubmit['shipment_photos'] = true;
       datasubmit['header_id'] = detaildata.header_id;
-      datasubmit['cust_id'] = detaildata.cust_id;
+      datasubmit['ship_to_id'] = detaildata.ship_to_id;
       datasubmit['visit_date'] = moment(new Date()).format('YYYY-MM-DD');
       datasubmit['visit_selfie'] = source;
       const updatePay = await props.actions.storeItem(Common.SUBMIT_SHIPMENT, datasubmit);
@@ -157,7 +158,7 @@ const ShipmentDetail = ( props ) => {
       setDisButton(true);
       data['submit_shipment'] = true;
       data['header_id'] = detaildata.header_id;
-      data['cust_id'] = detaildata.cust_id;
+      data['ship_to_id'] = detaildata.ship_to_id;
       data['visit_lat'] = position.latitude;
       data['visit_long'] = position.longitude;
       data['job_status'] = '2';
@@ -183,7 +184,7 @@ const ShipmentDetail = ( props ) => {
       setDisButton(true);
       data['submit_shipment'] = true;
       data['header_id'] = detaildata.header_id;
-      data['cust_id'] = detaildata.cust_id;
+      data['ship_to_id'] = detaildata.ship_to_id;
       data['visit_lat'] = position.latitude;
       data['visit_long'] = position.longitude;
       data['job_status'] = '1';
@@ -271,6 +272,7 @@ const ShipmentDetail = ( props ) => {
   const keyExtractor = useCallback((item, index) => index.toString(), []);
   const detaildata = shipmentdetail ? shipmentdetail.cust_detail : [];
   const listsj = shipmentdetail ? shipmentdetail.list_sj : [];
+  // console.log(detaildata);
 
   return (
     <View style={{flex:1}}>
