@@ -43,7 +43,8 @@ const ShipmentDetail = ( props ) => {
   const itemDet = props.route.params.item;
   const {shipmentdetail} = props;
   const navigation = useNavigation();
-  const [text, setText] = React.useState("");
+  const [noSJ, setNoSJ] = useState('');
+  const [buttonSubmit, setButtonSubmit] = useState('');
   const { handleSubmit, control, formState: {errors}, setValue, getValues } = useForm(); // initialize the hook
   const [open, setOpen] = useState([]);
   const [expandedId, setExpandedId] = useState(-1);
@@ -147,7 +148,84 @@ const ShipmentDetail = ( props ) => {
       alert(error)
     }
   }
+
+  const onSubmitSJ = async(data) => {
+    try {
+      if(detaildata.image_visit == null){
+          checkSelfie()
+          return true;
+      }
+      setIsLoading(true);  
+      setDisButton(true);
+      data['submit_surat_jalan'] = true;
+      data['header_id'] = detaildata.header_id;
+      data['ship_to_id'] = detaildata.ship_to_id;
+      data['delivery_id'] = noSJ;
+      data['shipment_status'] = 'terkirim';
+      const updatePay = await props.actions.storeItem(Common.SUBMIT_SHIPMENT, data);
+      if(updatePay.success){
+          // await props.actions.fetchAll(Common.USER_PROFILE);
+          Toast.show('Data berhasil disimpan');
+          loadData()
+      }
+      console.log(data);
+    } catch (error) {
+      alert(error)
+    }
+  }
+
+  const onFailedSJ = async(data) => {
+    try {
+      if(detaildata.image_visit == null){
+          checkSelfie()
+          return true;
+      }
+      setIsLoading(true);  
+      setDisButton(true);
+      data['submit_surat_jalan'] = true;
+      data['header_id'] = detaildata.header_id;
+      data['ship_to_id'] = detaildata.ship_to_id;
+      data['delivery_id'] = detaildata.delivery_id;
+      data['shipment_status'] = 'tidak_terkirim';
+      data['delivery_id'] = noSJ;
+      const updatePay = await props.actions.storeItem(Common.SUBMIT_SHIPMENT, data);
+      if(updatePay.success){
+          // await props.actions.fetchAll(Common.USER_PROFILE);
+          Toast.show('Data berhasil disimpan');
+          loadData()
+      }
+      console.log(data);
+    } catch (error) {
+      alert(error)
+    }
+  }
   
+  const onSubmitAll = async(data) => {
+    try {
+      if(detaildata.image_visit == null){
+          checkSelfie()
+          return true;
+      }
+      setIsLoading(true);  
+      setDisButton(true);
+      data['submit_shipment_all'] = true;
+      data['header_id'] = detaildata.header_id;
+      data['ship_to_id'] = detaildata.ship_to_id;
+      data['visit_lat'] = position.latitude;
+      data['visit_long'] = position.longitude;
+      data['job_status'] = '2';
+      const updatePay = await props.actions.storeItem(Common.SUBMIT_SHIPMENT, data);
+      if(updatePay.success){
+          // await props.actions.fetchAll(Common.USER_PROFILE);
+          Toast.show('Data berhasil disimpan');
+          loadData()
+      }
+      console.log(data);
+    } catch (error) {
+      alert(error)
+    }
+  }
+
   const onSubmit = async(data) => {
     try {
       if(detaildata.image_visit == null){
@@ -188,12 +266,12 @@ const ShipmentDetail = ( props ) => {
       data['visit_lat'] = position.latitude;
       data['visit_long'] = position.longitude;
       data['job_status'] = '1';
-      const updatePay = await props.actions.storeItem(Common.SUBMIT_SHIPMENT, data);
-      if(updatePay.success){
-          // await props.actions.fetchAll(Common.USER_PROFILE);
-          Toast.show('Data berhasil disimpan');
-          loadData()
-      }
+      // const updatePay = await props.actions.storeItem(Common.SUBMIT_SHIPMENT, data);
+      // if(updatePay.success){
+      //     // await props.actions.fetchAll(Common.USER_PROFILE);
+      //     Toast.show('Data berhasil disimpan');
+      //     loadData()
+      // }
       console.log(data);
     } catch (error) {
       alert(error)
@@ -228,6 +306,43 @@ const ShipmentDetail = ( props ) => {
 
   const onGoBack = () => {
     loadData();
+  }
+
+  const submitSJ = async(data) => {
+    if(submitButton == 'terkirim') {
+      Alert.alert(
+          "PERHATIAN",
+          "Anda yakin submit terkirim surat jalan?",
+          [{
+              text: "BATAL",
+              onPress: () => console.log("No, continue editing")
+          }, {
+              text: "YA",
+              onPress: () => {
+                  console.log('Yes')
+                  handleSubmit(onSubmitSJ(data))
+              },
+              style: "cancel"
+          }],
+      );
+    }
+    if(submitButton == 'tidak_terkirim') {
+      Alert.alert(
+          "PERHATIAN",
+          "Anda yakin submit tidak terkirim surat jalan?",
+          [{
+              text: "BATAL",
+              onPress: () => console.log("No, continue editing")
+          }, {
+              text: "YA",
+              onPress: () => {
+                  console.log('Yes')
+                  handleSubmit(onFailedSJ(data))
+              },
+              style: "cancel"
+          }],
+      );
+    }
   }
 
   
@@ -272,7 +387,7 @@ const ShipmentDetail = ( props ) => {
   const keyExtractor = useCallback((item, index) => index.toString(), []);
   const detaildata = shipmentdetail ? shipmentdetail.cust_detail : [];
   const listsj = shipmentdetail ? shipmentdetail.list_sj : [];
-  // console.log(detaildata);
+  console.log(noSJ);
 
   return (
     <View style={{flex:1}}>
@@ -393,7 +508,44 @@ const ShipmentDetail = ( props ) => {
             }
           </Card.Content>
         </Card>
+      </View>      
+      {detaildata.job_status != 2 &&
+      <View style={{ paddingHorizontal: 10, paddingTop: 10 }}>
+        <Card>
+          <Card.Content>
+            <Text
+              title="Pilihan Pengiriman" 
+              h5 bold style={{color: '#000000'}} 
+            />            
+            <View style={{marginTop: 15}}>
+              <Controller
+                  defaultValue={detaildata?.pilihan_pengiriman}
+                  name="pilihan_pengiriman"
+                  control={control}
+                  rules={{ required: { value: true, message: 'Status harus di pilih' } }}
+                  render={({field: { onChange, value, onBlur }}) => (
+                      <SelectPicker
+                          items = {[
+                                      { label: 'Semua Pengiriman', value: 'all_shipment' },
+                                      { label: 'Surat Jalan Pengiriman', value: 'sj_shipment' },
+                                  ]}
+                          onDataChange={(value) => {
+                            onChange(value);
+                            setStatusPengiriman(value);
+                          }}
+                          placeholder="PILIHAN PENGIRIMAN"
+                          value={value}
+                          onBlur={onBlur}
+                          error={errors?.pilihan_pengiriman}
+                          errorText={errors?.pilihan_pengiriman?.message}
+                      />         
+                  )}
+            />
+          </View>
+          </Card.Content>
+        </Card>
       </View>
+      }
       { listsj?.map((item, index) => {
         return (
             <React.Fragment
@@ -414,9 +566,8 @@ const ShipmentDetail = ( props ) => {
                   </View>
                   <View style={{marginTop: 20}}>
                     <Button icon={expandedId !== index ? 'arrow-down-thick' : 'arrow-up-thick'} mode='text' onPress={ () => handleExpandClick(index) }>
-                      {/* { expandedId !== index ? 'More Detail' : 'Less More'} */}
                       { expandedId !== index ? 'Show Detail' : 'Hide Detail'}
-                    </Button> 
+                    </Button>
                   </View>
                   { expandedId === index &&
                   <>
@@ -441,6 +592,45 @@ const ShipmentDetail = ( props ) => {
                     )
                   })}
                   </>
+                  }
+                  { statusPengiriman == 'sj_shipment' &&
+                    <>
+                      {item.shipment_status == 'terkirim' &&          
+                        // <Text title="Terkirim!" h6 bold style={{ color:'green', alignItems:'center' }} />  
+                        <Button icon={'check'} mode='text' color='green'>
+                          Terkirim!
+                        </Button>
+                      }                        
+                      {item.shipment_status == 'tidak_terkirim' &&          
+                      // <Text title="Terkirim!" h6 bold style={{ color:'green', alignItems:'center' }} />  
+                      <Button icon={'close'} mode='text' color='red'>
+                        Tidak Terkirim!
+                      </Button>
+                      }
+                      {item.shipment_status == null &&  
+                      <>
+                          <Button 
+                            mode='contained'
+                            onPress={() => {
+                              handleSubmit(submitSJ)(setNoSJ(item.delivery_id))
+                            }}
+                            style={{ marginTop: 10 }}
+                          >
+                            Terkirim
+                          </Button>
+                          <Button 
+                            mode='contained'
+                            color='red'
+                            onPress={() => {
+                              handleSubmit(submitSJ)(setNoSJ(item.delivery_id))(setButtonSubmit('tidak_terkirim'))
+                            }}
+                            style={{ marginTop: 10 }}
+                          >
+                            Tidak Terkirim
+                          </Button>
+                      </>
+                      }
+                    </>
                   }
                 </Card.Content>
               </Card>
@@ -495,8 +685,10 @@ const ShipmentDetail = ( props ) => {
         )
       })
       }
-      {detaildata.job_status != 2 &&
       <React.Fragment>
+      { statusPengiriman == 'all_shipment' &&
+      <>     
+        {detaildata.job_status != 2 &&
         <View style={{ paddingHorizontal: 10, paddingTop: 10 }}>
           <Card>
             <Card.Content>
@@ -524,7 +716,7 @@ const ShipmentDetail = ( props ) => {
                                     ]}
                             onDataChange={(value) => {
                               onChange(value);
-                              setStatusPengiriman(value);
+                              // setStatusPengiriman(value);
                             }}
                             placeholder="STATUS PENGIRIMAN"
                             value={value}
@@ -538,7 +730,10 @@ const ShipmentDetail = ( props ) => {
             </Card.Content>
           </Card>
         </View>
-        <View style={{ paddingTop: 10 }} />
+        }
+        </>
+        }
+        {detaildata.job_status != 2 &&
         <View style={{ paddingHorizontal: 10, paddingTop: 10, paddingBottom: 20 }}>
           <Card>
             <Card.Content>             
@@ -563,25 +758,47 @@ const ShipmentDetail = ( props ) => {
                   )}
               /> 
               <View style={{width: '100%', paddingTop: '3%'}} />
-                  <Button
-                    mode="contained"
-                    onPress={handleSubmit(onSaveDraft)}
-                    disabled={disButton} 
-                  >SAVE DRAFT
-                  </Button>
                   <View style={{paddingTop: 10}} />
-                  <Button
-                    mode="contained"
-                    onPress={handleSubmit(onSubmit)}
-                    disabled={disButton} 
-                  >SUBMIT
-                  </Button>
+                  { statusPengiriman == 'sj_shipment' &&
+                  <>
+                    <Button
+                      mode="contained"
+                      onPress={handleSubmit(onSaveDraft)}
+                      disabled={disButton} 
+                    >SAVE DRAFT
+                    </Button>                    
+                    <View style={{ marginTop: 10 }} />     
+                    <Button
+                      mode="contained"
+                      onPress={handleSubmit(onSubmit)}
+                      disabled={disButton} 
+                    >SUBMIT
+                    </Button>
+                  </>
+                  }
+                  { statusPengiriman == 'all_shipment' && 
+                  <>
+                    <Button
+                      mode="contained"
+                      onPress={handleSubmit(onSaveDraft)}
+                      disabled={disButton}
+                    >SAVE DRAFT
+                    </Button>
+                    <View style={{ marginTop: 10 }} />
+                    <Button
+                      mode="contained"
+                      onPress={handleSubmit(onSubmitAll)}
+                      disabled={disButton}
+                    >SUBMIT
+                    </Button>
+                  </>
+                  }
                   <View style={{paddingTop: 10}} />
             </Card.Content> 
           </Card>
         </View>
-      </React.Fragment>
       }
+      </React.Fragment>
     <View style={{width: '100%', paddingBottom: '5%'}} />  
     </ScrollView>
     </View>

@@ -1032,7 +1032,7 @@ const CollectionDetail = ( props ) => {
             <Button
               mode="contained"
               onPress={handleSubmit(onSaveDraft)}
-              disabled={disButton} 
+              disabled={disButton}
             >SAVE DRAFT
             </Button>
             <View style={{paddingTop: 10}} />
