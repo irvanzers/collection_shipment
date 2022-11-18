@@ -44,9 +44,7 @@ const ShipmentDetail = ( props ) => {
   const {shipmentdetail} = props;
   const navigation = useNavigation();
   const [noSJ, setNoSJ] = useState('');
-  const [buttonSubmit, setButtonSubmit] = useState('');
   const { handleSubmit, control, formState: {errors}, setValue, getValues } = useForm(); // initialize the hook
-  const [open, setOpen] = useState([]);
   const [expandedId, setExpandedId] = useState(-1);
   const [visitSelfie, setVisitSelfie] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -57,6 +55,7 @@ const ShipmentDetail = ( props ) => {
       latitude: '',
       longitude: ''
   });
+  let number_sj = 0;
   const ROOT_URL = 'https://egis.galenium.com/v1/';
   
   const hasLocationPermission = async () => {
@@ -148,63 +147,6 @@ const ShipmentDetail = ( props ) => {
     }
   }
 
-  const onSubmitSJ = async(data) => {
-    try {
-      if(detaildata.image_visit == null){
-          checkSelfie()
-          return true;
-      }
-      setIsLoading(true);  
-      setDisButton(true);
-      data['submit_surat_jalan'] = true;
-      data['header_id'] = detaildata.header_id;
-      data['ship_to_id'] = detaildata.ship_to_id;
-      data['delivery_id'] = noSJ;
-      data['shipment_status'] = 'terkirim';
-      // const updatePay = await props.actions.storeItem(Common.SUBMIT_SHIPMENT, data);
-      // if(updatePay.success){
-      //     // await props.actions.fetchAll(Common.USER_PROFILE);
-      //     Toast.show('Data berhasil disimpan');
-      //     loadData();
-      //     // setNoSJ('');
-      // }
-      console.log(data);
-    } catch (error) {
-      alert(error)
-    } finally {
-      setIsLoading(false); 
-    }
-  }
-
-  const onFailedSJ = async(data) => {
-    try {
-      if(detaildata.image_visit == null){
-          checkSelfie()
-          return true;
-      }
-      setIsLoading(true);  
-      setDisButton(true);
-      data['submit_surat_jalan'] = true;
-      data['header_id'] = detaildata.header_id;
-      data['ship_to_id'] = detaildata.ship_to_id;
-      data['delivery_id'] = detaildata.delivery_id;
-      data['delivery_id'] = noSJ;
-      data['shipment_status'] = 'tidak_terkirim';
-      // const updatePay = await props.actions.storeItem(Common.SUBMIT_SHIPMENT, data);
-      // if(updatePay.success){
-      //     // await props.actions.fetchAll(Common.USER_PROFILE);
-      //     Toast.show('Data berhasil disimpan');
-      //     loadData();
-      //     // setNoSJ('');
-      // }
-      console.log(data);
-    } catch (error) {
-      alert(error)
-    } finally {
-      setIsLoading(false)
-    }
-  }
-  
   const onSubmitAll = async(data) => {
     try {
       if(detaildata.image_visit == null){
@@ -348,6 +290,63 @@ const ShipmentDetail = ( props ) => {
       );
   }
 
+  const onSubmitSJ = async(data) => {
+    try {
+      if(detaildata.image_visit == null){
+          checkSelfie()
+          return true;
+      }
+      setIsLoading(true);  
+      setDisButton(true);
+      data['submit_surat_jalan'] = true;
+      data['header_id'] = detaildata.header_id;
+      data['ship_to_id'] = detaildata.ship_to_id;
+      data['delivery_id'] = noSJ;
+      data['shipment_status'] = 'terkirim';
+      // const updatePay = await props.actions.storeItem(Common.SUBMIT_SHIPMENT, data);
+      // if(updatePay.success){
+      //     // await props.actions.fetchAll(Common.USER_PROFILE);
+      //     Toast.show('Data berhasil disimpan');
+      //     loadData();
+      //     // setNoSJ('');
+      // }
+      console.log(data);
+    } catch (error) {
+      alert(error)
+    } finally {
+      setIsLoading(false); 
+    }
+  }
+
+  const onFailedSJ = async(data) => {
+    try {
+      if(detaildata.image_visit == null){
+          checkSelfie()
+          return true;
+      }
+      setIsLoading(true);  
+      setDisButton(true);
+      data['submit_surat_jalan'] = true;
+      data['header_id'] = detaildata.header_id;
+      data['ship_to_id'] = detaildata.ship_to_id;
+      data['delivery_id'] = detaildata.delivery_id;
+      data['delivery_id'] = noSJ;
+      data['shipment_status'] = 'tidak_terkirim';
+      // const updatePay = await props.actions.storeItem(Common.SUBMIT_SHIPMENT, data);
+      // if(updatePay.success){
+      //     // await props.actions.fetchAll(Common.USER_PROFILE);
+      //     Toast.show('Data berhasil disimpan');
+      //     loadData();
+      //     // setNoSJ('');
+      // }
+      console.log(data);
+    } catch (error) {
+      alert(error)
+    } finally {
+      setIsLoading(false);
+      setDisButton(true);
+    }
+  }
   
   //GETTING POSITION LAT/LONG
   const getPosition = async() => {
@@ -366,17 +365,6 @@ const ShipmentDetail = ( props ) => {
       );
     }
   };
-  
-  const onMore = (value) => {
-    const currentIndex = open.indexOf(value);
-    const newChecked = [...open];
-    if (currentIndex === -1) {
-      newChecked.push(value);
-    } else {
-      newChecked.splice(currentIndex, 1);
-    }
-    setOpen(newChecked);
-  }
 
   useEffect(() => {
     getPosition()
@@ -385,12 +373,11 @@ const ShipmentDetail = ( props ) => {
     });
     setIsLoading(false)
     return () => interactionPromise.cancel();
-  },[])
+  },[]);
 
   const keyExtractor = useCallback((item, index) => index.toString(), []);
   const detaildata = shipmentdetail ? shipmentdetail.cust_detail : [];
   const listsj = shipmentdetail ? shipmentdetail.list_sj : [];
-  console.log(noSJ);
 
   return (
     <View style={{flex:1}}>
@@ -505,9 +492,25 @@ const ShipmentDetail = ( props ) => {
             </Title>
             <Paragraph>{detaildata.ship_to_address}</Paragraph>
             {detaildata.job_status == 2 &&
-              <View style={{ paddingTop: 10 }}>
-                <Text title={`Catatan : ${detaildata.catatan_visit}`} />
-              </View>
+              <>
+                <View style={{ paddingTop: 10 }}>
+                  <Text title={`Catatan : ${detaildata.catatan_visit == null ? '-' : detaildata.catatan_visit}`} />
+                </View>
+                <View style={{ paddingTop: 10 }}>
+                  <Text title={`List Surat Jalan:`} bold />
+                </View>
+                { listsj?.map((check, index) => {
+                  return(
+                    <React.Fragment
+                      key={index.toString()}
+                    >                      
+                      <View style={{ paddingTop: 5, paddingLeft: 5 }}>
+                        <Text title={`No. Surat Jalan ${check.delivery_id} ${check.shipstats}`} />
+                      </View>
+                    </React.Fragment>
+                  )
+                })}
+              </>
             }
           </Card.Content>
         </Card>
@@ -550,7 +553,8 @@ const ShipmentDetail = ( props ) => {
       </View>
       }
       { listsj?.map((item, index) => {
-        console.log(item.delivery_id)
+        number_sj = noSJ;
+        // console.log(number_sj)
         return (
             <React.Fragment
               key={index.toString()}
@@ -600,46 +604,45 @@ const ShipmentDetail = ( props ) => {
                   { statusPengiriman == 'sj_shipment' &&
                     <>
                       {item.shipment_status == 'terkirim' &&          
-                        // <Text title="Terkirim!" h6 bold style={{ color:'green', alignItems:'center' }} />  
                         <Button icon={'check'} mode='text' color='green'>
                           Terkirim!
                         </Button>
                       }                        
                       {item.shipment_status == 'tidak_terkirim' &&          
-                      // <Text title="Terkirim!" h6 bold style={{ color:'green', alignItems:'center' }} />  
                       <Button icon={'close'} mode='text' color='red'>
                         Tidak Terkirim!
                       </Button>
                       }
                       {item.shipment_status == null &&  
                       <>
-                      <Controller
-                        defaultValue={item.delivery_id}
-                        name="no_sj"
-                        control={control}
-                        rules={{ required: { value: false, message: 'Status harus di pilih' } }}
-                        render={({field: { onChange, value, onBlur }}) => null}
-                      />
-                          <Button 
-                            mode='contained'
-                            onPress={() => {
-                              
-                              handleSubmit(submitSJ)
-                            }}
-                            style={{ marginTop: 10 }}
-                          >
-                            Terkirim
-                          </Button>
-                          <Button 
-                            mode='contained'
-                            color='red'
-                            onPress={() => {
-                              handleSubmit(failedSJ)(setNoSJ(item.delivery_id))
-                            }}
-                            style={{ marginTop: 10 }}
-                          >
-                            Tidak Terkirim
-                          </Button>
+                        <Controller
+                          // defaultValue={item.delivery_id}                          
+                          defaultValue={`${number_sj}`}
+                          name="no_sj"
+                          control={control}
+                          rules={{ required: { value: false, message: 'Status harus di pilih' } }}
+                          render={({field: { onChange, value, onBlur }}) => null}
+                        />
+                            <Button 
+                              mode='contained'
+                              onPress={() => {
+                                
+                                handleSubmit(submitSJ)
+                              }}
+                              style={{ marginTop: 10 }}
+                            >
+                              Terkirim
+                            </Button>
+                            <Button 
+                              mode='contained'
+                              color='red'
+                              onPress={() => {
+                                handleSubmit(failedSJ)(setNoSJ(item.delivery_id))
+                              }}
+                              style={{ marginTop: 10 }}
+                            >
+                              Tidak Terkirim
+                            </Button>
                       </>
                       }
                     </>
@@ -648,7 +651,7 @@ const ShipmentDetail = ( props ) => {
               </Card>
             </View>
             }
-            { detaildata.status_visit == 2 && detaildata.job_status == 2 && detaildata.shipment_status == 'terkirim' &&
+            { item.status_visit == 2 && item.job_status == 2 && item.shipment_status == 'terkirim' &&
             <>
               <View style={{ paddingHorizontal: 10, paddingTop: 10 }}>     
                 <Card>

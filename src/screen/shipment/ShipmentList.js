@@ -160,7 +160,7 @@ const ShipmentList = ( props ) => {
                 <View style={styles.divider} />               
                     <TouchableHighlight
                         onPress={() => navigation.push('ShipmentDetail', {item: item ? item : {}, onBackList: () => onGoBack()})}
-                        style={{ backgroundColor: 'white' }}
+                        // style={{ backgroundColor: 'white' }}
                         activeOpacity={0.8}
                         underlayColor="#bbbcbd"
                         style={[styles.listMenu]}
@@ -200,21 +200,6 @@ const ShipmentList = ( props ) => {
                 icon={'briefcase-account-outline'} 
                 onPress={() => props.navigation.navigate('ShipmentAbsenCar', {data: listshipment ? listshipment[0] : null, onBackList: () => onGoBack()})}
           />
-          {/* <Menu
-              visible={visible}
-              onDismiss={closeMenu}
-              anchor={<Appbar.Action icon={'dots-vertical'} onPress={openMenu} color={'white'} />}>
-                  {visithistory != '' && visithistory.kowil.map((item, index) => {
-                      return(
-                          <Menu.Item 
-                              key={index.toString()} 
-                              onPress={() => onSelect(item)} 
-                              title={`${item.kowil_code}`} 
-                              subtitle={`${item.name}`} 
-                          />
-                      )
-                  })}
-          </Menu> */}
       </Appbar.Header>
       
       <Loading loading={isLoading} /> 
@@ -227,7 +212,6 @@ const ShipmentList = ( props ) => {
             ListHeaderComponent={renderTopItem}
             keyExtractor={keyExtractor}
             renderItem={statusheader.status != '-' ? renderCategory : renderNonCategory}
-            // renderItem={{}}
         />
 
     </View>
