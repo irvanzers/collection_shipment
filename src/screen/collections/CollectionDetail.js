@@ -150,6 +150,7 @@ const CollectionDetail = ( props ) => {
           const datasubmit = {
               cust_id: itemDet?.cust_id,
               header_id: itemDet?.collection_header_id,
+              ship_to_id: itemDet?.ship_to_id,
           }
           await props.actions.fetchAll(Common.COLLECTION_DETAIL, datasubmit); 
           // GAUSAH DI PAKE UDH FIX UNTUK FOTO   
@@ -178,6 +179,7 @@ const CollectionDetail = ( props ) => {
       // setIsLoading(true);  
       data['payment_all_ar'] = true;
       data['cust_id'] = detaildata.cust_id;
+      data['ship_to_id'] = detaildata.ship_to_id;
       data['header_id'] = detaildata.collection_header_id;
       data['visit_date'] = moment(new Date()).format('YYYY-MM-DD');
       data['visit_lat'] = position.latitude;
@@ -192,7 +194,6 @@ const CollectionDetail = ( props ) => {
       data['job_status'] = '3';
       data['transfer_date'] = moment(pickdate1).format('YYYY-MM-DD');
       data['giro_date'] = moment(pickdate2).format('YYYY-MM-DD');
-      console.log(data)
       const updatePay = await props.actions.storeItem(Common.UPDATE_COLLECTION_PAYMENT, data);
       if(updatePay.success){
           // await props.actions.fetchAll(Common.USER_PROFILE);
@@ -215,6 +216,7 @@ const CollectionDetail = ( props ) => {
       setIsLoading(true); 
       data['submit_all_ar'] = true;
       data['cust_id'] = detaildata.cust_id;
+      data['ship_to_id'] = detaildata.ship_to_id;
       data['header_id'] = detaildata.collection_header_id;
       data['visit_date'] = moment(new Date()).format('YYYY-MM-DD');
       data['visit_lat'] = position.latitude;
@@ -246,6 +248,7 @@ const CollectionDetail = ( props ) => {
       // setIsLoading(true); 
       data['payment_all_ar'] = true;
       data['cust_id'] = detaildata.cust_id;
+      data['ship_to_id'] = detaildata.ship_to_id;
       data['header_id'] = detaildata.collection_header_id;
       data['visit_date'] = moment(new Date()).format('YYYY-MM-DD');
       data['visit_lat'] = position.latitude;
@@ -285,6 +288,7 @@ const CollectionDetail = ( props ) => {
       // setIsLoading(true)
       datasubmit['payment_all_ar_photos'] = true;
       datasubmit['cust_id'] = detaildata.cust_id;
+      datasubmit['ship_to_id'] = detaildata.ship_to_id;
       datasubmit['header_id'] = detaildata.collection_header_id;
       datasubmit['visit_selfie'] = source;
       const updatePay = await props.actions.storeItem(Common.UPDATE_COLLECTION_PAYMENT, datasubmit);
@@ -383,10 +387,6 @@ const CollectionDetail = ( props ) => {
   const pickdate1 = input1.date == input1.pickDate ? input1.pickDate : dateinput1;
   const pickdate2 = input2.date == input2.pickDate ? input2.pickDate : dateinput2;
   // const trans = [mountTunai+mountTransfer+mountGiro];
-  // console.log(input1.date == new Date(detaildata.tgl_transfer))
-  // console.log (dateinput1);
-  // console.log('-');
-  // console.log(pickdate1);
   return (
     <View style={{flex:1}}>
     <Appbar.Header>
@@ -800,10 +800,6 @@ const CollectionDetail = ( props ) => {
                         control={control}
                         // rules={{ required: { value: true, message: 'Tanggal kunjungan harus diisi' } }}
                         render={({ field: {onChange, value, onBlur} }) => {
-                          // console.log(dateinput1)
-                          // console.log(new Date())
-                          // console.log('test')
-                          // console.log(input1.pickDate)
                           return (
                           <>                                 
                             <View flexDirection="row" justifyContent="space-between" style={{ borderColor: 'grey', borderWidth: 0 }}>

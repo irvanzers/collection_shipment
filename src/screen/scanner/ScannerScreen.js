@@ -10,7 +10,7 @@ import {
 } from 'react-native'
 
 import QRCodeScanner from 'react-native-qrcode-scanner';
-import { RNCamera } from 'react-native-camera';
+// import { RNCamera } from 'react-native-camera';
 import Icon from 'react-native-vector-icons/Ionicons';
 import * as Animatable from 'react-native-animatable';
 // import { useNavigation } from '@react-navigation/native';

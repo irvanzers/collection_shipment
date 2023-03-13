@@ -1,7 +1,6 @@
 import React, { useCallback, useState, useEffect }  from 'react'
-import { Button, View, StyleSheet, FlatList, InteractionManager, Alert, TouchableHighlight } from 'react-native'
+import { View, StyleSheet, FlatList, InteractionManager, RefreshControl, PermissionsAndroid, Platform, Alert, TouchableHighlight } from 'react-native'
 
-import DateTimePicker from '@react-native-community/datetimepicker';
 import { Card, Title, Colors, Appbar, Menu } from 'react-native-paper';
 import Moment from 'moment';
 import Loading from './../../components/Loading';
@@ -9,6 +8,7 @@ import Text from './../../components/Text';
 import MaterialComunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import Toast from 'react-native-simple-toast';
+import Geolocation from 'react-native-geolocation-service';
 
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
@@ -22,44 +22,75 @@ import { theme } from '../../redux/constants/theme';
 import {getUuid, setUuid} from './../../redux/utils/actionUtil';
 import { useNavigation } from '@react-navigation/core';
 import { API_URL, ROOT_URL } from './../../redux/constants/app';
+import haversineDistance from 'haversine-distance';
 
+const wait = (timeout) => {
+    return new Promise(resolve => {
+        setTimeout(resolve, timeout);
+    });
+}
 
 const ShipmentList = ( props ) => {
     const { shipmentdata, shipmentlistdetail }=props; 
     const navigation = useNavigation();
-    const [date, setDate] = useState(new Date());
-    const [mode, setMode] = useState('date');
-    const [show, setShow] = useState(false);
+    const [refreshing, setRefreshing] = useState(false)
     const [isLoading, setIsLoading] = useState(true);
-    const onChange = (event, selectedDate) => {
-        const currentDate = selectedDate || date;
-        setShow(Platform.OS === 'ios');
-        setDate(currentDate);
-        dispatch(fetchGetVisitHistory({
-            visit_date: Moment(currentDate).format('YYYY-MM-DD'),
-            user_id: selectKowil
-        }))
-    };
-    const showMode = (currentMode) => {
-        setShow(true);
-        setMode(currentMode);
-    };
-    const showDatepicker = () => {
-        showMode('date');
-    };
-
-        
+    const [position, setPosition] = useState({
+        latitude: '',
+        longitude: ''
+    });
+    const onRefresh = useCallback(() => {
+      setRefreshing(true)
+      loadData();
+      wait(2000).then(() => {
+        setRefreshing(false)
+      })
+    })
     const handlePress = () => setExpanded(!expanded);
     
     const onBacks = () => { props.navigation.goBack(); props.route.params.onBackp(); };
+  
+    const hasLocationPermission = async () => {
+      if (Platform.OS === 'ios') {
+        const hasPermission = await hasLocationPermissionIOS();
+        return hasPermission;
+      }
+      if (Platform.OS === 'android' && Platform.Version < 23) {
+        return true;
+      }
+      
+      const hasPermission = await PermissionsAndroid.check(
+        PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+      );
+      if (hasPermission) {
+        return true;
+      }
+      const status = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+      );
+      if (status === PermissionsAndroid.RESULTS.GRANTED) {
+        return true;
+      }
+      if (status === PermissionsAndroid.RESULTS.DENIED) {
+        Toast.show(
+          'Location permission denied by user.',
+          Toast.LONG,
+        );
+      } else if (status === PermissionsAndroid.RESULTS.NEVER_ASK_AGAIN) {
+        Toast.show(
+          'Location permission revoked by user.',
+          Toast.LONG,
+        );
+      }
+      return false;
+    };
     
     const loadData = async() => {  
         try {
             const datasubmit = {
                 header_id: props.route.params.data,
                 // user_id: props.route.params.data,
-            }
-            // await props.actions.fetchAll(Common.COLLECTION_DATA);    
+            }  
             await props.actions.fetchAll(Common.SHIPMENT_LIST_DETAIL, datasubmit);
             setIsLoading(false);  
         } catch (error) {
@@ -69,29 +100,30 @@ const ShipmentList = ( props ) => {
         }
     }
 
-    const onSubmitHeader = async(data) => {
-        try {
-            const datasubmit = {
-                shipment_header_id: props.route.params.data,
-            }
-        //   setIsLoading(true)
-        //   data['collection_header_id'] = props.route.params.data;
-        //   console.log(data)
-        const submitHeader = await props.actions.storeItem(Common.SUBMIT_HEADER_JOB, datasubmit);
-        if(submitHeader.success){
-            Toast.show('Header job berhasil disubmit');
-            props.navigation.goBack();
-        }
-        } catch (error) {
-        alert(error)
-        }
-    }
-
     const onGoBack = (data) => {
         loadData()
     }
 
+    //GETTING POSITION LAT/LONG
+    const getPosition = async() => {
+      const hasPermission = await hasLocationPermission();
+      if(hasPermission){
+        Geolocation.getCurrentPosition(
+          pos => {
+            setPosition({
+                latitude: pos.coords.latitude,
+                longitude: pos.coords.longitude
+            });
+          },
+          (e) => {
+            setError(e.message)
+          }
+        );
+      }
+    };
+    
     useEffect(() => {
+        getPosition()
         const interactionPromise = InteractionManager.runAfterInteractions(() => {
             loadData()
         });
@@ -103,6 +135,7 @@ const ShipmentList = ( props ) => {
     const statusheader = shipmentlistdetail ? shipmentlistdetail.header_status : [];
     const assignedcount = shipmentlistdetail ? shipmentlistdetail.assigned_count : [];
     const assignedsjcount = shipmentlistdetail ? shipmentlistdetail.assigned_sj_count : [];
+    // const longlat_device = 'longitude: '+position.longitude +', '+ 'latitude: '+position.latitude;
     
     const renderTopItem = ({}) => {
         return(   
@@ -153,6 +186,10 @@ const ShipmentList = ( props ) => {
     }
     
     const renderCategory = ({item, index}) => {
+        const longlat = { latitude: item.visit_lat, longitude: item.visit_long };
+        const longlat_device = { longitude: position.longitude, latitude: position.latitude };
+        const jarak = Math.round(haversineDistance(longlat_device, longlat))/1000;
+        // console.log(ceklonglat)
         return (
             <>
             <View flexDirection="row" style={{marginVertical: 5}}>                
@@ -160,15 +197,28 @@ const ShipmentList = ( props ) => {
                 <View style={styles.divider} />               
                     <TouchableHighlight
                         onPress={() => navigation.push('ShipmentDetail', {item: item ? item : {}, onBackList: () => onGoBack()})}
-                        // style={{ backgroundColor: 'white' }}
                         activeOpacity={0.8}
                         underlayColor="#bbbcbd"
                         style={[styles.listMenu]}
                     >
                         <>
-                            <View style={styles.listSubMenu}>
-                                <MaterialComunityIcons color={item.job_status <= 1 ? 'green' : 'grey'} name={"briefcase-check"} size={30} />
-                                <Text style={[styles.textMenu]} title={item.cust_name} p />
+                            <View style={{alignContent: 'center', flexDirection: 'column'}}>
+                                <View style={styles.listSubMenu}>
+                                    <MaterialComunityIcons color={item.job_status <= 1 ? 'green' : 'grey'} name={"briefcase-check"} size={30} />
+                                    <Text style={[styles.textMenu]} title={item.cust_name} p />
+                                </View>
+                                { jarak <= '10.000' &&
+                                    <Text style={[styles.textSubMenuDekat]} title={jarak+' KM'} p />
+                                }
+                                { jarak >= '10.000' && jarak <= '30.000' &&
+                                    <Text style={[styles.textSubMenuSedang]} title={jarak+' KM'} p />
+                                }
+                                { jarak >= '30.000' &&
+                                    <Text style={[styles.textSubMenuJauh]} title={jarak+' KM'} p />
+                                }
+                                { item.visit_lat == null &&
+                                    <Text style={[styles.textSubMenuJauh]} title={'Belum Tercatat'} p />                                    
+                                }
                             </View>
                             <View flexDirection="row" style={{ alignItems: 'center' }}>
                                     <Icon name="keyboard-arrow-right" color="#aeaeae" size={28} />
@@ -206,6 +256,9 @@ const ShipmentList = ( props ) => {
     
         <FlatList style={styles.list}
             showsVerticalScrollIndicator={false}
+            refreshControl={
+              <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+            }
             horizontal={false}
             initialNumToRender={3}
             data={listshipment}
@@ -250,7 +303,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         padding: 10,
         width: '100%',
-        height: 50,
+        height: 60,
         justifyContent: 'space-between',
         alignItems: 'center',
         backgroundColor: 'white'
@@ -263,6 +316,24 @@ const styles = StyleSheet.create({
         paddingLeft: 10,
         letterSpacing: .5,
         fontSize: 16
+    },
+    textSubMenuDekat: {
+        paddingLeft: 40,
+        letterSpacing: .5,
+        fontSize: 12,
+        color: 'green',
+    },
+    textSubMenuSedang: {
+        paddingLeft: 40,
+        letterSpacing: .5,
+        fontSize: 12,
+        color: '#D0CD2A',
+    },
+    textSubMenuJauh: {
+        paddingLeft: 40,
+        letterSpacing: .5,
+        fontSize: 12,
+        color: 'red',
     },
   })
 

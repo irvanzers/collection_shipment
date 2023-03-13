@@ -1,14 +1,11 @@
 import React, { useCallback, useState, useEffect }  from 'react'
 import { Button, View, StyleSheet, FlatList, InteractionManager, Alert, TouchableHighlight } from 'react-native'
 
-import DateTimePicker from '@react-native-community/datetimepicker';
 import Loading from './../../components/Loading';
 import Text from './../../components/Text';
 import MaterialComunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { Card, Title, Colors, Appbar, Menu } from 'react-native-paper';
-import Moment from 'moment';
-import List from './../../components/MenuList/List';
 import Toast from 'react-native-simple-toast';
 
 import { connect } from 'react-redux';
@@ -19,18 +16,12 @@ import * as crudAction from '../../redux/actions/crudAction';
 import * as flashMessage from '../../redux/actions/flashMessage';
 import * as authService from './../../redux/services/authService';
 import Common from './../../redux/constants/common';
-import { theme } from '../../redux/constants/theme';
-import {getUuid, setUuid} from './../../redux/utils/actionUtil';
 import { useNavigation } from '@react-navigation/core';
 import { API_URL, ROOT_URL } from './../../redux/constants/app';
-import CollectionDetail from './CollectionDetail';
 
 const CollectionList = ( props ) => {
   const { collectiondata, collectionlistdetail }=props; 
   const navigation = useNavigation();
-  const [date, setDate] = useState(new Date());
-  const [mode, setMode] = useState('date');
-  const [show, setShow] = useState(false);
   const [expanded, setExpanded] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
   const [visible, setVisible] = useState(false);
@@ -80,9 +71,6 @@ const onSubmitHeader = async(data) => {
         const datasubmit = {
             collection_header_id: props.route.params.data,
         }
-    //   setIsLoading(true)
-    //   data['collection_header_id'] = props.route.params.data;
-    //   console.log(data)
       const submitHeader = await props.actions.storeItem(Common.SUBMIT_HEADER_JOB, datasubmit);
       if(submitHeader.success){
           Toast.show('Header job berhasil disubmit');
@@ -206,35 +194,6 @@ const transferlist = collectionlistdetail ? collectionlistdetail.transfer_list :
                                 </>
                             </TouchableHighlight>
                         </View>
-
-                    
-{/* <View flexDirection="row" style={{marginVertical: 5}}>                
-// <View style={[styles.viewLine, { paddingTop: 0 }]} />
-// <View style={styles.divider} />
-// <List
-//     nav="CollectionDetail"  
-//     item={item}
-//     iconList="briefcase-check"
-//     color={'green'}
-//     title={item.cust_name}
-//     sizeIcon={30}
-// />
-// </View> 
-// : (
-                    // <View flexDirection="row" style={{marginVertical: 5}}>                
-                    //     <View style={[styles.viewLine, { paddingTop: 0 }]} />
-                    //     <View style={styles.divider} />
-                    //     <List
-                    //         style={{backgroundColor: '#C8C8C8'}}
-                    //         // nav="CollectionDetail"
-                    //         item={item}
-                    //         iconList={"briefcase-check"}
-                    //         color={'grey'}
-                    //         title={item.cust_name}
-                    //         sizeIcon={30}
-                    //     />
-                    // </View>
-                    // )} */}
             </>
         )
     }

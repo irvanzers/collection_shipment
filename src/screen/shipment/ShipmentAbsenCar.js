@@ -228,11 +228,6 @@ const ShipmentAbsenCar = (props) => {
     }
 
     const onSubmit = async (data) => {
-        // try {
-        //     console.log(data)
-        // } catch (error) {
-        //     alert(error)
-        // }
         if(dataabsen.absen_back == null){
             handleSubmit(onSubmitAbsen(data));
         } else {
@@ -276,7 +271,6 @@ const ShipmentAbsenCar = (props) => {
                 Toast.show('Data berhasil disimpan');
                 loadData();
             }
-        // console.log(data);
         } catch (error) {
         alert(error)
         }
@@ -296,7 +290,7 @@ const ShipmentAbsenCar = (props) => {
     }, [])
 
     const dataabsen = shipmentabsencar ? shipmentabsencar[0] : [];
-    // console.log(dataabsen)
+    console.log(dataabsen)
 
     return (
         <View style={{flex: 1}}>

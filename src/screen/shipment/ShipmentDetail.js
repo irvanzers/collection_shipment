@@ -255,24 +255,7 @@ const ShipmentDetail = ( props ) => {
   const onGoBack = () => {
     loadData();
   }
-
-  const submitSJ = async(data) => {
-    console.log(data)
-      Alert.alert(
-          "PERHATIAN",
-          "Anda yakin submit terkirim surat jalan?",
-          [{
-              text: "BATAL",
-              onPress: () => console.log("No, continue editing")
-          }, {
-              text: "YA",
-              onPress: () => {
-                  handleSubmit(onSubmitSJ(data))
-              },
-              style: "cancel"
-          }],
-      );
-  }  
+  
   const failedSJ = async(delivery) => {
       Alert.alert(
           "PERHATIAN",
@@ -290,34 +273,6 @@ const ShipmentDetail = ( props ) => {
           }],
       );
   }
-
-  // const onSubmitSJ = async(data) => {
-  //   try {
-  //     if(detaildata.image_visit == null){
-  //         checkSelfie()
-  //         return true;
-  //     }
-  //     setIsLoading(true);  
-  //     setDisButton(true);
-  //     data['submit_surat_jalan'] = true;
-  //     data['header_id'] = detaildata.header_id;
-  //     data['ship_to_id'] = detaildata.ship_to_id;
-  //     data['delivery_id'] = noSJ;
-  //     data['shipment_status'] = 'terkirim';
-  //     // const updatePay = await props.actions.storeItem(Common.SUBMIT_SHIPMENT, data);
-  //     // if(updatePay.success){
-  //     //     // await props.actions.fetchAll(Common.USER_PROFILE);
-  //     //     Toast.show('Data berhasil disimpan');
-  //     //     loadData();
-  //     //     // setNoSJ('');
-  //     // }
-  //     console.log(data);
-  //   } catch (error) {
-  //     alert(error)
-  //   } finally {
-  //     setIsLoading(false); 
-  //   }
-  // }
 
   const onFailedSendSJ = async(delivery) => {
     try {
