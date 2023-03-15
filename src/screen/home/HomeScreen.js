@@ -160,7 +160,25 @@ const HomeScreen = (props) => {
                 <View style={{ paddingLeft: 10, marginTop: 10 }}>
                     <Text title={`Selamat Datang, ${user.name}`} h6 style={{color: '#FFFF'}} />
                 </View>
-                { user.app_name == 'COLLECTION' || user.app_name == 'COLLECTION & SHIPMENT' &&
+                { user.app_name == 'COLLECTION' &&
+                <View style={{marginTop: 80, paddingLeft: 10}}>
+                    <Text title=" " h6 style={{color: '#0000'}} />
+                    <NumberFormat 
+                        value={user.wallet} 
+                        displayType={'text'} 
+                        prefix={`Total Saldo Rp. `} 
+                        thousandSeparator={true}
+                        renderText={(value) =>  {
+                            return (
+                                <View style={{flexDirection:'row', flexWrap:'wrap', alignItems: 'flex-end'}}>
+                                    <Text title={value} h6 style={{color: '#ffff'}} />
+                                </View>
+                            )
+                        }}
+                    />
+                </View>
+                }
+                { user.app_name == 'COLLECTION & SHIPMENT' &&
                 <View style={{marginTop: 80, paddingLeft: 10}}>
                     <Text title=" " h6 style={{color: '#0000'}} />
                     <NumberFormat 
@@ -182,14 +200,28 @@ const HomeScreen = (props) => {
         </TouchableHighlight>
         
         <View flexDirection="row" style={{justifyContent: 'space-around', marginTop: 10, marginBottom: 10}}>
-            { user.app_name == 'COLLECTION' || user.app_name == 'COLLECTION & SHIPMENT' &&
+            { user.app_name == 'COLLECTION & SHIPMENT' &&
+            <>
+                <MenuHome item={{
+                    text: 'Collections',
+                    image: require(`./../../assets/icon-collection.png`),
+                    onNavigation: () => props.navigation.navigate('CollectionHeaderList', {onBackPage: () => onGoBack()})
+                }} />
+                <MenuHome item={{
+                    text: 'Shipment',
+                    image: require(`./../../assets/icon-shipment.png`),
+                    onNavigation: () => props.navigation.navigate('ShipmentHeaderList', {onBackPage: () => onGoBack()})
+                }} />
+            </>
+            }
+            { user.app_name == 'COLLECTION' &&
             <MenuHome item={{
                 text: 'Collections',
                 image: require(`./../../assets/icon-collection.png`),
                 onNavigation: () => props.navigation.navigate('CollectionHeaderList', {onBackPage: () => onGoBack()})
             }} />
             }
-            { user.app_name == 'SHIPMENT' || user.app_name == 'COLLECTION & SHIPMENT' &&
+            { user.app_name == 'SHIPMENT' &&
             <MenuHome item={{
                 text: 'Shipment',
                 image: require(`./../../assets/icon-shipment.png`),
