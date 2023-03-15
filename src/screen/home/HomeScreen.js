@@ -64,9 +64,7 @@ const HomeScreen = (props) => {
             
             const updateSetor = await props.actions.storeItem(Common.POST_SETOR_KEKASIR, data);
             if(updateSetor.success){
-                // await props.actions.fetchAll(Common.USER_PROFILE);
                 Toast.show('Setor saldo berhasil disubmit');
-                //   props.navigation.goBack();
                 loadData();
                 bottomSheetModalRef.current?.close();
             }
@@ -128,8 +126,6 @@ const HomeScreen = (props) => {
     }
   
     const user = usercollectorz ? usercollectorz : [];
-    // const user = usercollector ? usercollector : [];
-    // console.log(user)
   return (
     <BottomSheetModalProvider style={styles.container}>
         <View style={{flex:1}}>      
@@ -146,6 +142,9 @@ const HomeScreen = (props) => {
             { user.app_name == 'SHIPMENT' &&
                 <Appbar.Content title={'GALENIUM SHIPMENT'} />
             }
+            { user.app_name == 'COLLECTION & SHIPMENT' &&
+                <Appbar.Content title={'GALENIUM COLLECTION & SHIPMENT'} />
+            }
         </Appbar.Header>
         <TouchableHighlight  
             onPress={handlePresentModalPress}
@@ -161,7 +160,7 @@ const HomeScreen = (props) => {
                 <View style={{ paddingLeft: 10, marginTop: 10 }}>
                     <Text title={`Selamat Datang, ${user.name}`} h6 style={{color: '#FFFF'}} />
                 </View>
-                { user.app_name == 'COLLECTION' &&
+                { user.app_name == 'COLLECTION' || user.app_name == 'COLLECTION & SHIPMENT' &&
                 <View style={{marginTop: 80, paddingLeft: 10}}>
                     <Text title=" " h6 style={{color: '#0000'}} />
                     <NumberFormat 
@@ -183,33 +182,37 @@ const HomeScreen = (props) => {
         </TouchableHighlight>
         
         <View flexDirection="row" style={{justifyContent: 'space-around', marginTop: 10, marginBottom: 10}}>
-            { user.app_name == 'SHIPMENT' &&
-            <MenuHome item={{
-                text: 'Shipment',
-                image: require(`./../../assets/icon-shipment.png`),
-                onNavigation: () => props.navigation.navigate('ShipmentHeaderList', {onBackPage: () => onGoBack()})
-            }} />
-            }
-            { user.app_name == 'COLLECTION' &&
+            { user.app_name == 'COLLECTION' || user.app_name == 'COLLECTION & SHIPMENT' &&
             <MenuHome item={{
                 text: 'Collections',
                 image: require(`./../../assets/icon-collection.png`),
                 onNavigation: () => props.navigation.navigate('CollectionHeaderList', {onBackPage: () => onGoBack()})
             }} />
             }
+            { user.app_name == 'SHIPMENT' || user.app_name == 'COLLECTION & SHIPMENT' &&
             <MenuHome item={{
-                text: 'Lainnya',
-                image: require(`./../../assets/icon-others.png`),
-                onNavigation: () => props.navigation.navigate('OthersIndex', {onBackPage: () => onGoBack()})
+                text: 'Shipment',
+                image: require(`./../../assets/icon-shipment.png`),
+                onNavigation: () => props.navigation.navigate('ShipmentHeaderList', {onBackPage: () => onGoBack()})
             }} />
+            }
+            { user.app_name != 'COLLECTION & SHIPMENT' &&
+                <MenuHome item={{
+                    text: 'Lainnya',
+                    image: require(`./../../assets/icon-others.png`),
+                    onNavigation: () => props.navigation.navigate('OthersIndex', {onBackPage: () => onGoBack()})
+                }} />
+            }
         </View>
 
         <View flexDirection="row" style={{justifyContent: 'space-around', marginTop: 10, marginBottom: 10}}>
-            {/* <MenuHome item={{
-                text: 'Lainnya',
-                image: require(`./../../assets/icon-others.png`),
-                onNavigation: () => props.navigation.navigate('OthersIndex', {onBackPage: () => onGoBack()})
-            }} /> */}
+            { user.app_name == 'COLLECTION & SHIPMENT' &&
+                <MenuHome item={{
+                    text: 'Lainnya',
+                    image: require(`./../../assets/icon-others.png`),
+                    onNavigation: () => props.navigation.navigate('OthersIndex', {onBackPage: () => onGoBack()})
+                }} />
+            }
             <MenuHome item={{
                 text: 'Logout',
                 image: require(`./../../assets/icon-logout.png`),

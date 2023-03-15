@@ -189,7 +189,6 @@ const ShipmentList = ( props ) => {
         const longlat = { latitude: item.visit_lat, longitude: item.visit_long };
         const longlat_device = { longitude: position.longitude, latitude: position.latitude };
         const jarak = Math.round(haversineDistance(longlat_device, longlat))/1000;
-        // console.log(ceklonglat)
         return (
             <>
             <View flexDirection="row" style={{marginVertical: 5}}>                
