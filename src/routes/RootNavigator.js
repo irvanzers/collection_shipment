@@ -49,20 +49,6 @@ const RootNavigator = (props) => {
             cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
           }}
         /> 
-        {/* <Stack.Screen
-          name="Beranda"
-          component={HomeScreen}
-          options={{
-            headerLeft: () => <></>,
-            headerStyle: {
-              backgroundColor: '#4077c4',
-            },
-            headerTintColor: '#fff',
-            headerTitleStyle: {
-              fontWeight: 'bold',
-            },
-          }}
-        />    */}
         <Stack.Screen
           name="ScannerScreen"
           component={ScannerScreen}

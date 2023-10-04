@@ -7,12 +7,9 @@ const commons = {
     COLLECTION_HEADER_LIST: 'collectionheader',
     COLLECTION_DETAIL_PRODUCT: 'collectionproduct',
     UPDATE_COLLECTION_PAYMENT: 'paymentcollection',
-    // UPDATE_COLLECTION_PAYMENT: 'paymentcollectiontest',
     SUBMIT_HEADER_JOB: 'submitheaderjob',
-    USER_COLLECTOR_PROFILE: 'usercollectorz',
     // USER_COLLECTOR_PROFILE: 'usercollector',
     POST_SETOR_KEKASIR: 'setorkekasir',
-
     
     SHIPMENT_DATA: 'shipmentdata',
     SHIPMENT_DRAFT: 'shipmentdraft',
@@ -25,6 +22,9 @@ const commons = {
     SUBMIT_ABSEN_CAR: 'submitabsencar',
     SHIPMENT_DETAIL_SJ: 'detailsj',
     SHIPMENT_SHIPCONFIRM: 'shipconfirmsj',
+
+    
+    USER_COLLSHIP_PROFILE: 'usercollship',
 };
 
 export default commons

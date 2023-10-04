@@ -20,12 +20,12 @@ import Common from './../../redux/constants/common';
 const SCREEN_WIDTH = Dimensions.get('window').width;
 
 const UbahProfile = (props) => {
-    const { usercollector } = props;
+    const { usercollship } = props;
     const [isLoading, setIsLoading] = useState(true);
 
     const loadData = async() => {  
       try { 
-          await props.actions.fetchAll(Common.USER_COLLECTOR_PROFILE);
+          await props.actions.fetchAll(Common.USER_COLLSHIP_PROFILE);
           setIsLoading(true);  
       } catch (error) {
           alert(error)
@@ -53,7 +53,7 @@ const UbahProfile = (props) => {
                 showsVerticalScrollIndicator={false}
             >
                 <View style={{ flex: 1 }}>
-                    <View style={styles.viewLine, { paddingTop: 10 }} />
+                    <View style={[styles.viewLine, { paddingTop: 10 }]} />
                     <TouchableRipple 
                         style={{ backgroundColor: 'white' }} 
                         rippleColor="rgba(0, 0, 0, .32)" 
@@ -63,7 +63,7 @@ const UbahProfile = (props) => {
                                 <Text style={styles.textMenu} title={'Nama Lengkap'} p />
                             </View>
                             <View style={styles.listSubMenu}>
-                                <Text style={styles.textMenu} title={usercollector.name} p />
+                                <Text style={styles.textMenu} title={usercollship.name} p />
                                 {/* <Icon name="keyboard-arrow-right" size={30} color='grey' /> */}
                             </View>
                         </View>
@@ -78,7 +78,7 @@ const UbahProfile = (props) => {
                                 <Text style={styles.textMenu} title={'Username'} p />
                             </View>
                             <View style={styles.listSubMenu}>
-                                <Text style={styles.textMenu} title={usercollector.username} p />
+                                <Text style={styles.textMenu} title={usercollship.username} p />
                                 {/* <Icon name="keyboard-arrow-right" size={30} color='grey' /> */}
                             </View>
                         </View>
@@ -93,7 +93,7 @@ const UbahProfile = (props) => {
                                 <Text style={styles.textMenu} title={'Email'} p />
                             </View>
                             <View style={styles.listSubMenu}>
-                                <Text style={styles.textMenu} title={usercollector.email} p />
+                                <Text style={styles.textMenu} title={usercollship.email} p />
                                 {/* <Icon name="keyboard-arrow-right" size={30} color='grey' /> */}
                             </View>
                         </View>
@@ -108,7 +108,7 @@ const UbahProfile = (props) => {
                                 <Text style={styles.textMenu} title={'NIK'} p />
                             </View>
                             <View style={styles.listSubMenu}>
-                                <Text style={styles.textMenu} title={usercollector.nik} p />
+                                <Text style={styles.textMenu} title={usercollship.nik} p />
                                 {/* <Icon name="keyboard-arrow-right" size={30} color='grey' /> */}
                             </View>
                         </View>
@@ -154,7 +154,7 @@ function mapStateToProps(state) {
         isAuthenticated: state.auth.isAuthenticated,
         apiState: state.api,
         message: state.flash.message,
-        usercollector: state.crud.usercollectors,
+        usercollship: state.crud.usercollships,
 
     }
 }

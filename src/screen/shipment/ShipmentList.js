@@ -1,7 +1,7 @@
 import React, { useCallback, useState, useEffect }  from 'react'
-import { View, StyleSheet, FlatList, InteractionManager, RefreshControl, PermissionsAndroid, Platform, Alert, TouchableHighlight } from 'react-native'
+import { View, StyleSheet, FlatList, InteractionManager, RefreshControl, PermissionsAndroid, Platform, TouchableHighlight } from 'react-native'
 
-import { Card, Title, Colors, Appbar, Menu } from 'react-native-paper';
+import { Appbar } from 'react-native-paper';
 import Moment from 'moment';
 import Loading from './../../components/Loading';
 import Text from './../../components/Text';
@@ -18,10 +18,7 @@ import * as crudAction from '../../redux/actions/crudAction';
 import * as flashMessage from '../../redux/actions/flashMessage';
 import * as authService from './../../redux/services/authService';
 import Common from './../../redux/constants/common';
-import { theme } from '../../redux/constants/theme';
-import {getUuid, setUuid} from './../../redux/utils/actionUtil';
 import { useNavigation } from '@react-navigation/core';
-import { API_URL, ROOT_URL } from './../../redux/constants/app';
 import haversineDistance from 'haversine-distance';
 
 const wait = (timeout) => {
@@ -135,7 +132,6 @@ const ShipmentList = ( props ) => {
     const statusheader = shipmentlistdetail ? shipmentlistdetail.header_status : [];
     const assignedcount = shipmentlistdetail ? shipmentlistdetail.assigned_count : [];
     const assignedsjcount = shipmentlistdetail ? shipmentlistdetail.assigned_sj_count : [];
-    // const longlat_device = 'longitude: '+position.longitude +', '+ 'latitude: '+position.latitude;
     
     const renderTopItem = ({}) => {
         return(   
@@ -234,7 +230,6 @@ const ShipmentList = ( props ) => {
             <View title={[]} />
         )
     }
-
   return (
     <View style={{ flex: 1 }}>
       

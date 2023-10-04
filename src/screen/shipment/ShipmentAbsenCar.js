@@ -42,14 +42,13 @@ const ShipmentAbsenCar = (props) => {
     const navigation = useNavigation();
     const { handleSubmit, control, formState: {errors}, setValue, getValues } = useForm(); // initialize the hook
     const [loading, setLoading] = useState(true);
-    const [activity, setActivity] = useState(null);
     const [ImageGo, setImageGo] = useState(null);
     const [ImageBack, setImageBack] = useState(null);
     const [ImageSJ, setImageSJ] = useState(null);
     const [disButton, setDisButton] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
     const ROOT_URL = 'https://egis.galenium.com/v1/';
-    
+
     const loadData = async () => {
     setIsLoading(false);  
     setDisButton(false);
@@ -93,7 +92,6 @@ const ShipmentAbsenCar = (props) => {
         datasubmit['visit_selfie'] = source;
         const updatePay = await props.actions.storeItem(Common.SUBMIT_ABSEN_CAR, datasubmit);
         if(updatePay.success){
-            // await props.actions.fetchAll(Common.USER_PROFILE);
             Toast.show('Foto berhasil disimpan');
             loadData();
         }
@@ -116,7 +114,6 @@ const ShipmentAbsenCar = (props) => {
         datasubmit['visit_selfie'] = source;
         const updatePay = await props.actions.storeItem(Common.SUBMIT_ABSEN_CAR, datasubmit);
         if(updatePay.success){
-            // await props.actions.fetchAll(Common.USER_PROFILE);
             Toast.show('Foto berhasil disimpan');
             loadData();
         }
@@ -139,11 +136,9 @@ const ShipmentAbsenCar = (props) => {
         datasubmit['visit_selfie'] = source;
         const updatePay = await props.actions.storeItem(Common.SUBMIT_ABSEN_CAR, datasubmit);
         if(updatePay.success){
-            // await props.actions.fetchAll(Common.USER_PROFILE);
             Toast.show('Foto berhasil disimpan');
             loadData();
         }
-        // console.log(datasubmit);
         } catch (error) {
         alert(error)
         }
@@ -267,7 +262,6 @@ const ShipmentAbsenCar = (props) => {
             }
             const updatePay = await props.actions.storeItem(Common.SUBMIT_ABSEN_CAR, data);
             if(updatePay.success){
-                // await props.actions.fetchAll(Common.USER_PROFILE);
                 Toast.show('Data berhasil disimpan');
                 loadData();
             }
@@ -290,7 +284,6 @@ const ShipmentAbsenCar = (props) => {
     }, [])
 
     const dataabsen = shipmentabsencar ? shipmentabsencar[0] : [];
-    console.log(dataabsen)
 
     return (
         <View style={{flex: 1}}>
@@ -303,7 +296,6 @@ const ShipmentAbsenCar = (props) => {
           <Appbar.Header>
               <Appbar.BackAction onPress={() => onBackPage()} />
               <Appbar.Content title={'ABSEN KILOMETER'} />
-              {/* <Appbar.Action icon={'calendar'} onPress={showDatepicker} /> */}
           </Appbar.Header>
           <View style={{backgroundColor: '#ffff', paddingLeft: 15, paddingRight: 15}}>
             <View style={{marginTop: 25}} flexDirection="row">
@@ -364,7 +356,6 @@ const ShipmentAbsenCar = (props) => {
                     defaultValue={dataabsen.catatan_absen_go}
                     name="catatan_absen_go"
                     control={control}
-                    // rules={{ required: { value: true, message: 'Catatan kilometer harus diisi' } }}
                     render={({field: { onChange, value, onBlur }}) => (
                         <Input
                             error={errors?.catatan_absen_go}
@@ -416,7 +407,6 @@ const ShipmentAbsenCar = (props) => {
                     defaultValue={dataabsen.catatan_absen_back}
                     name="catatan_absen_back"
                     control={control}
-                    // rules={{ required: { value: true, message: 'Catatan kilometer harus diisi' } }}
                     render={({field: { onChange, value, onBlur }}) => (
                         <Input
                             error={errors?.catatan_absen_back}

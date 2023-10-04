@@ -31,10 +31,8 @@ const LoginScreen = (props) => {
   
   const onSubmit = async (data) => {
     setLoading(false)
-    // let login;
     try {
       const login = await props.actions.login({email: data.email, password: data.password})
-      console.log(login);
       if(login.success) {
         await props.actions.removeFlashMessage();
         await props.actions.apiClearState();

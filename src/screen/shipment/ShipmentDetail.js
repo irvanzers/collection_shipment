@@ -133,15 +133,16 @@ const ShipmentDetail = ( props ) => {
       datasubmit['shipment_photos'] = true;
       datasubmit['header_id'] = detaildata.header_id;
       datasubmit['ship_to_id'] = detaildata.ship_to_id;
+      datasubmit['visit_lat'] = position.latitude;
+      datasubmit['visit_long'] = position.longitude;
       datasubmit['visit_date'] = moment(new Date()).format('YYYY-MM-DD');
       datasubmit['visit_selfie'] = source;
-      const updatePay = await props.actions.storeItem(Common.SUBMIT_SHIPMENT, datasubmit);
-      if(updatePay.success){
-          // await props.actions.fetchAll(Common.USER_PROFILE);
+      const updatePhoto = await props.actions.storeItem(Common.SUBMIT_SHIPMENT, datasubmit);
+      if(updatePhoto.success){
           Toast.show('Foto berhasil disimpan');
           loadData()
       }
-      // console.log(datasubmit);
+      console.log(datasubmit)
     } catch (error) {
       alert(error)
     }
@@ -158,16 +159,14 @@ const ShipmentDetail = ( props ) => {
       data['submit_shipment_all'] = true;
       data['header_id'] = detaildata.header_id;
       data['ship_to_id'] = detaildata.ship_to_id;
-      data['visit_lat'] = position.latitude;
-      data['visit_long'] = position.longitude;
+      // data['visit_lat'] = position.latitude;
+      // data['visit_long'] = position.longitude;
       data['job_status'] = '2';
-      const updatePay = await props.actions.storeItem(Common.SUBMIT_SHIPMENT, data);
-      if(updatePay.success){
-          // await props.actions.fetchAll(Common.USER_PROFILE);
+      const updateSendAll = await props.actions.storeItem(Common.SUBMIT_SHIPMENT, data);
+      if(updateSendAll.success){
           Toast.show('Data berhasil disimpan');
           loadData()
       }
-      console.log(data);
     } catch (error) {
       alert(error)
     }
@@ -184,17 +183,15 @@ const ShipmentDetail = ( props ) => {
       data['submit_shipment'] = true;
       data['header_id'] = detaildata.header_id;
       data['ship_to_id'] = detaildata.ship_to_id;
-      data['visit_lat'] = position.latitude;
-      data['visit_long'] = position.longitude;
+      // data['visit_lat'] = position.latitude;
+      // data['visit_long'] = position.longitude;
       data['job_status'] = '2';
       data['shipment_status'] = 'terkirim';
-      const updatePay = await props.actions.storeItem(Common.SUBMIT_SHIPMENT, data);
-      if(updatePay.success){
-          // await props.actions.fetchAll(Common.USER_PROFILE);
+      const updateSend = await props.actions.storeItem(Common.SUBMIT_SHIPMENT, data);
+      if(updateSend.success){
           Toast.show('Data berhasil disimpan');
           loadData()
       }
-      console.log(data);
     } catch (error) {
       alert(error)
     }
@@ -211,16 +208,14 @@ const ShipmentDetail = ( props ) => {
       data['submit_shipment'] = true;
       data['header_id'] = detaildata.header_id;
       data['ship_to_id'] = detaildata.ship_to_id;
-      data['visit_lat'] = position.latitude;
-      data['visit_long'] = position.longitude;
+      // data['visit_lat'] = position.latitude;
+      // data['visit_long'] = position.longitude;
       data['job_status'] = '1';
-      const updatePay = await props.actions.storeItem(Common.SUBMIT_SHIPMENT, data);
-      if(updatePay.success){
-          // await props.actions.fetchAll(Common.USER_PROFILE);
+      const updateDraft = await props.actions.storeItem(Common.SUBMIT_SHIPMENT, data);
+      if(updateDraft.success){
           Toast.show('Data berhasil disimpan');
           loadData()
       }
-      console.log(data);
     } catch (error) {
       alert(error)
     }
@@ -290,12 +285,9 @@ const ShipmentDetail = ( props ) => {
       data['shipment_status'] = 'tidak_terkirim';
       const updatePay = await props.actions.storeItem(Common.SUBMIT_SHIPMENT, data);
       if(updatePay.success){
-          // await props.actions.fetchAll(Common.USER_PROFILE);
           Toast.show('Data berhasil disimpan');
           loadData();
-          // setNoSJ('');
       }
-      console.log(data);
     } catch (error) {
       alert(error)
     } finally {
@@ -376,7 +368,6 @@ const ShipmentDetail = ( props ) => {
             }}
           >            
           <View flexDirection="row" justifyContent="space-between" style={{paddingTop: 8, paddingBottom: 8}}>
-              {/* <Text bold title={`No. Surat Jalan ${detaildata.delivery_id}`} /> */}
               <Text title={[]} />
             <View style={{flexDirection:'row', flexWrap:'wrap', alignItems: 'flex-end'}}>
               {detaildata.job_status == 1 ?
@@ -545,8 +536,6 @@ const ShipmentDetail = ( props ) => {
                                         props =>
                                         <>
                                           <Text {...props} title={`Qty: ${listprod.product_qty}`} style={{ paddingTop: 6, color: '#797A7B' }} />
-                                          {/* <Text {...props} title={`Kg: 0${item.kg}`} style={{ paddingTop: 6, color: '#797A7B' }} />
-                                          <Text {...props} title={`m3: 0${item.m3}`} style={{ paddingTop: 6, color: '#797A7B' }} /> */}
                                         </>
                                       }
                           left={props => <List.Icon {...props} icon="chevron-double-right" />}
@@ -624,7 +613,6 @@ const ShipmentDetail = ( props ) => {
                     {item.shipconfirm_status == 2 &&
                       <>
                         <View style={{ paddingTop: 10 }} />
-                        {/* <Text title={'Ship Confirm Berhasil'} bold /> */}
                         <Text title={`Pada tanggal : ${item.shipconfirm_date}`} bold />
                       </>
                     }
@@ -677,7 +665,6 @@ const ShipmentDetail = ( props ) => {
                                     ]}
                             onDataChange={(value) => {
                               onChange(value);
-                              // setStatusPengiriman(value);
                             }}
                             placeholder="STATUS PENGIRIMAN"
                             value={value}
@@ -709,7 +696,6 @@ const ShipmentDetail = ( props ) => {
                   rules={{ required: { value: true, message: 'Catatan pengiriman harus diisi' } }}
                   render={({field: { onChange, value, onBlur }}) => (
                       <Input
-                          // error={errors.visit_catatan}
                           errorText={errors?.visit_catatan?.message}
                           onChangeText={(text) => {onChange(text)}}
                           value={value}
@@ -776,16 +762,14 @@ const styles = StyleSheet.create({
       height: '90%', 
       paddingTop: 30,
       backgroundColor: '#ffff', 
-      display: 'flex', 
-      // justifyContent: 'center', 
+      display: 'flex',
       paddingLeft: 20,
       fontSize: 14,
       fontWeight: 'bold',
   },
   textCamera: {
       height: '90%', 
-      backgroundColor: 'black', 
-      // display: 'flex', 
+      backgroundColor: 'black',
       justifyContent: 'center', 
       paddingLeft: 10,
       fontSize: 14,

@@ -12,7 +12,7 @@ import Loading from './../../components/Loading';
 import NumberFormat from 'react-number-format';
 import Toast from 'react-native-simple-toast';
 
-import { connect } from 'react-redux';
+import { connect, useDispatch } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import _, { reduce, update } from 'lodash';
 import * as apiAction from './../../redux/actions/apiAction';
@@ -20,10 +20,11 @@ import * as crudAction from '../../redux/actions/crudAction';
 import * as flashMessage from '../../redux/actions/flashMessage';
 import * as authService from './../../redux/services/authService';
 import Common from './../../redux/constants/common';
+import { logout } from './../../redux/services/authService';
 import { TouchableHighlight } from 'react-native-gesture-handler';
 
 const HomeScreen = (props) => {
-  const { usercollectorz, usercollector } = props;
+  const { usercollship } = props;
   const { handleSubmit, control, formState: {errors}, setValue } = useForm();
   const [loading, setLoading] = useState(false);
   const [jenisSetor, setJenisSetor] = useState(1);
@@ -33,7 +34,7 @@ const HomeScreen = (props) => {
 
   const loadData = async() => {  
     try { 
-        await props.actions.fetchAll(Common.USER_COLLECTOR_PROFILE);
+        await props.actions.fetchAll(Common.USER_COLLSHIP_PROFILE);
         setIsLoading(false);  
         setDisButton(false);
     } catch (error) {
@@ -44,13 +45,13 @@ const HomeScreen = (props) => {
     }
   }
 
-  const mustLogin = () => {
-    if(props.isAuthenticated){
-        props.navigation.navigate('LoginScreen')
-    } else {
-        props.navigation.navigate('ScannerScreen')
-    }
-  }
+//   const mustLogin = () => {
+//     if(props.isAuthenticated){
+//         props.navigation.navigate('LoginScreen')
+//     } else {
+//         props.navigation.navigate('ScannerScreen')
+//     }
+//   }
   
   const onSubmit = async (data) => {
       try {  
@@ -75,13 +76,28 @@ const HomeScreen = (props) => {
         setIsLoading(false)
       }
   }
+  
+  const dispatch = useDispatch();
 
-  const Logout = () => {
-    // if(props.isAuthenticated){
-    //     props.navigation.navigate('ScannerScreen')
-    // } else {
-        props.navigation.navigate('LoginScreen')
-    // }
+  const submitLogout = async () => {
+    try {
+        //   await dispatch(logout())    
+        const logout = await props.actions.logout();
+        if(logout.success) {
+            await props.actions.removeFlashMessage();
+            await props.actions.apiClearState();
+            props.navigation.reset({
+            index: 0,
+            routes: [{ name: 'Home' }],
+            })
+        } else {
+            Toast.show(logout?.data?.message, Toast.LONG);
+            await props.actions.removeFlashMessage();
+            await props.actions.apiClearState();
+        }
+    } catch (error) {
+      alert(error)
+    }
   }
 
   const toggleBottomNavigationView = () => {
@@ -125,7 +141,7 @@ const HomeScreen = (props) => {
         loadData()
     }
   
-    const user = usercollectorz ? usercollectorz : [];
+    const user = usercollship ? usercollship : [];
   return (
     <BottomSheetModalProvider style={styles.container}>
         <View style={{flex:1}}>      
@@ -248,7 +264,7 @@ const HomeScreen = (props) => {
             <MenuHome item={{
                 text: 'Logout',
                 image: require(`./../../assets/icon-logout.png`),
-                onNavigation: () => Logout()
+                onNavigation: () => submitLogout()
             }} />
         </View>
         </ScrollView>
@@ -366,8 +382,7 @@ function mapStateToProps(state) {
         isAuthenticated: state.auth.isAuthenticated,
         apiState: state.api,
         message: state.flash.message,
-        usercollector: state.crud.usercollectors,
-        usercollectorz: state.crud.usercollectorzs,
+        usercollship: state.crud.usercollships,
 
     }
 }

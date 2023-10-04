@@ -182,8 +182,8 @@ const CollectionDetail = ( props ) => {
       data['ship_to_id'] = detaildata.ship_to_id;
       data['header_id'] = detaildata.collection_header_id;
       data['visit_date'] = moment(new Date()).format('YYYY-MM-DD');
-      data['visit_lat'] = position.latitude;
-      data['visit_long'] = position.longitude;
+      // data['visit_lat'] = position.latitude;
+      // data['visit_long'] = position.longitude;
       if (statusTagihan == 'tukar_faktur'){
         data['status_tukar_faktur'] = '1';
       }
@@ -194,9 +194,8 @@ const CollectionDetail = ( props ) => {
       data['job_status'] = '3';
       data['transfer_date'] = moment(pickdate1).format('YYYY-MM-DD');
       data['giro_date'] = moment(pickdate2).format('YYYY-MM-DD');
-      const updatePay = await props.actions.storeItem(Common.UPDATE_COLLECTION_PAYMENT, data);
-      if(updatePay.success){
-          // await props.actions.fetchAll(Common.USER_PROFILE);
+      const updatePayAll = await props.actions.storeItem(Common.UPDATE_COLLECTION_PAYMENT, data);
+      if(updatePayAll.success){
           props.route.params.onBackList();
           Toast.show('Pembayaran berhasil disimpan');
           props.navigation.goBack();
@@ -219,16 +218,14 @@ const CollectionDetail = ( props ) => {
       data['ship_to_id'] = detaildata.ship_to_id;
       data['header_id'] = detaildata.collection_header_id;
       data['visit_date'] = moment(new Date()).format('YYYY-MM-DD');
-      data['visit_lat'] = position.latitude;
-      data['visit_long'] = position.longitude;
+      // data['visit_lat'] = position.latitude;
+      // data['visit_long'] = position.longitude;
       if (statusTagihan == 'tukar_faktur'){
         data['status_tukar_faktur'] = '1';
       }
       data['job_status'] = '3';
-      // console.log(data)
       const updatePay = await props.actions.storeItem(Common.UPDATE_COLLECTION_PAYMENT, data);
       if(updatePay.success){
-          // await props.actions.fetchAll(Common.USER_PROFILE);
           props.route.params.onBackList();
           Toast.show('Pembayaran berhasil disimpan');
           props.navigation.goBack();
@@ -244,15 +241,13 @@ const CollectionDetail = ( props ) => {
           checkSelfie()
           return true;
       } 
-      // setDisButton(true);
-      // setIsLoading(true); 
       data['payment_all_ar'] = true;
       data['cust_id'] = detaildata.cust_id;
       data['ship_to_id'] = detaildata.ship_to_id;
       data['header_id'] = detaildata.collection_header_id;
       data['visit_date'] = moment(new Date()).format('YYYY-MM-DD');
-      data['visit_lat'] = position.latitude;
-      data['visit_long'] = position.longitude;
+      // data['visit_lat'] = position.latitude;
+      // data['visit_long'] = position.longitude;
       if (statusTagihan == 'tukar_faktur' || detaildata.status_tukar_faktur == '1'){
         data['status_tukar_faktur'] = '1';
       }
@@ -263,10 +258,8 @@ const CollectionDetail = ( props ) => {
       data['job_status'] = '1';
       data['transfer_date'] = moment(pickdate1).format('YYYY-MM-DD');
       data['giro_date'] = moment(pickdate2).format('YYYY-MM-DD');
-      // console.log(data)
-      const updatePay = await props.actions.storeItem(Common.UPDATE_COLLECTION_PAYMENT, data);
-      if(updatePay.success){
-      //  await props.actions.fetchAll(Common.USER_PROFILE);
+      const updateDraft = await props.actions.storeItem(Common.UPDATE_COLLECTION_PAYMENT, data);
+      if(updateDraft.success){
           props.route.params.onBackList();
           Toast.show('Pembayaran berhasil disimpan');
           props.navigation.goBack();
@@ -285,15 +278,16 @@ const CollectionDetail = ( props ) => {
           checkSelfie()
           return true;
       }
-      // setIsLoading(true)
       datasubmit['payment_all_ar_photos'] = true;
       datasubmit['cust_id'] = detaildata.cust_id;
       datasubmit['ship_to_id'] = detaildata.ship_to_id;
       datasubmit['header_id'] = detaildata.collection_header_id;
       datasubmit['visit_selfie'] = source;
-      const updatePay = await props.actions.storeItem(Common.UPDATE_COLLECTION_PAYMENT, datasubmit);
-      if(updatePay.success){
-          // await props.actions.fetchAll(Common.USER_PROFILE);
+      datasubmit['visit_lat'] = position.latitude;
+      datasubmit['visit_long'] = position.longitude;
+      datasubmit['visit_date'] = moment(new Date()).format('YYYY-MM-DD');
+      const updatePhotoPay = await props.actions.storeItem(Common.UPDATE_COLLECTION_PAYMENT, datasubmit);
+      if(updatePhotoPay.success){
           Toast.show('Foto berhasil disimpan');
           loadData()
       }
@@ -380,13 +374,10 @@ const CollectionDetail = ( props ) => {
   const detaildata = collectiondetail ? collectiondetail.cust_detail : [];
   const listar = collectiondetail ? collectiondetail.list_ar : [];
   const statusar = collectiondetail ? collectiondetail.status_ar : [];
-  // const dateinput1 = new Date(detaildata.tgl_transfer) == null ? input1.date : new Date(detaildata.tgl_transfer);
   const dateinput1 = detaildata.tgl_transfer == null ? input1.date : new Date(detaildata.tgl_transfer);
-  // const dateinput2 = input2.date != new Date(detaildata.tgl_pencairan_giro) ? new Date(detaildata.tgl_pencairan_giro) : input2.date;
   const dateinput2 = detaildata.tgl_pencairan_giro == null ? input2.date :new Date(detaildata.tgl_pencairan_giro);
   const pickdate1 = input1.date == input1.pickDate ? input1.pickDate : dateinput1;
   const pickdate2 = input2.date == input2.pickDate ? input2.pickDate : dateinput2;
-  // const trans = [mountTunai+mountTransfer+mountGiro];
   return (
     <View style={{flex:1}}>
     <Appbar.Header>
@@ -769,7 +760,6 @@ const CollectionDetail = ( props ) => {
                     defaultValue={`${totTunai}`}
                     name="nominal_payment_tunai"
                     control={control}
-                    // rules={{ required: { value: true, message: 'Nominal Pembayaran Harus Di isi' } }}
                     render={({field: { onChange, value, onBlur }}) => ( 
                       <Input
                           error={errors?.nominal_payment_tunai}
@@ -795,10 +785,8 @@ const CollectionDetail = ( props ) => {
                 <View style={{marginTop: 15}} />
                 <Text title="Tanggal Transfer" />
                     <Controller
-                        // defaultValue={dateinput1}
                         name="transfer_date"
                         control={control}
-                        // rules={{ required: { value: true, message: 'Tanggal kunjungan harus diisi' } }}
                         render={({ field: {onChange, value, onBlur} }) => {
                           return (
                           <>                                 
@@ -830,42 +818,12 @@ const CollectionDetail = ( props ) => {
                           </>
                         )}}
                     />
-                    {/* <Controller
-                        defaultValue={moment(new Date()).format('YYYY-MM-DD')}
-                        name="transfer_date"
-                        control={control}
-                        rules={{ required: { value: true, message: 'Tanggal transfer harus diisi' } }}                          
-                        render={({ field: {onChange, value, onBlur} }) => (
-                            // <DatePicker
-                            //     style={styles.datePickerStyle}
-                            //     date={value} // Initial date from state
-                            //     mode="date" // The enum of date, datetime and time
-                            //     format="YYYY-MM-DD"
-                            //     value={date}
-                            //     error={errors.transfer_date}
-                            //     errorText={errors?.transfer_date?.message}
-                            //     onDateChange={(data) => { onChange(data) }}
-                            // />
-                            <Input
-                              error={errors?.transfer_date}
-                              errorText={errors?.transfer_date?.message}
-                              onChangeText={(text) => {
-                                // setMountTransfer(parseInt(text));
-                                onChange(text);
-                                // setMountTransfer(text);
-                              }}
-                              value={value}
-                              placeholder="TANGGAL PEMBAYARAN CTH: 2022-07-28"
-                          />
-                        )}
-                    /> */}
                 <View style={{marginTop: 15}} />  
                 <Text title="Nominal Pembayaran Transfer" />
                   <Controller
                       defaultValue={`${total_transfer}`}
                       name="nominal_payment_transfer"
                       control={control}
-                      // rules={{ required: { value: true, message: 'Nominal Pembayaran Harus Di isi' } }}
                       render={({field: { onChange, value }}) => ( 
                         <Input
                             error={errors?.nominal_payment_transfer}
@@ -892,7 +850,6 @@ const CollectionDetail = ( props ) => {
                       defaultValue={detaildata?.giro_number}
                       name="no_giro"
                       control={control}
-                      // rules={{ required: { value: true, message: 'Nomor Giro Harus Di isi' } }}
                       render={({field: { onChange, value, onBlur }}) => (
                       <Input
                           onChangeText={(text) => {onChange(text)}}
@@ -906,10 +863,8 @@ const CollectionDetail = ( props ) => {
                 <View style={{marginTop: 15}} />
                 <Text title="Tanggal Pencairan Giro" />
                     <Controller
-                        // defaultValue={dateinput1}
                         name="giro_date"
                         control={control}
-                        // rules={{ required: { value: true, message: 'Tanggal kunjungan harus diisi' } }}
                         render={({ field: {onChange, value, onBlur} }) => {
                           return (
                           <>                                 
@@ -947,7 +902,6 @@ const CollectionDetail = ( props ) => {
                         defaultValue={`${total_giro}`}
                         name="nominal_payment_giro"
                         control={control}
-                        // rules={{ required: { value: true, message: 'Nominal Pembayaran Harus Di isi' } }}
                         render={({field: { onChange, value }}) => (
                           <Input
                               onChangeText={(text) => {
@@ -979,7 +933,6 @@ const CollectionDetail = ( props ) => {
                 defaultValue={`${total_pembayaran}`}
                 name="total_payment"
                 control={control}
-                // rules={{ required: { value: true, message: 'Total pembayaran harus diisi' } }}
                 render={({field: {onChange, value}}) => (
                   <Input
                       error={errors?.total_payment}
@@ -1068,16 +1021,14 @@ const styles = StyleSheet.create({
       height: '90%', 
       paddingTop: 30,
       backgroundColor: '#ffff', 
-      display: 'flex', 
-      // justifyContent: 'center', 
+      display: 'flex',
       paddingLeft: 20,
       fontSize: 14,
       fontWeight: 'bold',
   },
   textCamera: {
       height: '90%', 
-      backgroundColor: 'black', 
-      // display: 'flex', 
+      backgroundColor: 'black',
       justifyContent: 'center', 
       paddingLeft: 10,
       fontSize: 14,

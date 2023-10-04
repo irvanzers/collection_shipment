@@ -94,7 +94,7 @@ export const logout = (data) => (dispatch) => {
         }
         
         dispatch(apiAction.apiRequest());
-        axios.get(AppConstant.API_URL + 'logout', header)
+        axios.post('https://egis.galenium.com/v1/api/logoutcollection', data, headers)
         .then((response) => {
             if(response.data.success){
                 clearToken();
